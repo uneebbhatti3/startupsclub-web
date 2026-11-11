@@ -53,6 +53,15 @@ Use this format:
 - Questions for the owner:
 ```
 
+### 2026-11-12 — Claude — Site-wide SEO foundation
+
+- Did: `src/config/{env,site}.ts`, `src/lib/seo.ts` (`createPageMetadata`, JSON-LD); root metadata and viewport; moved home page to `(marketing)` (metadata only, body unchanged); `(marketing)/layout.tsx` with Organization and WebSite JSON-LD; `robots.ts`, `sitemap.ts`, `not-found.tsx`, `llms.txt/route.ts`, `opengraph-image.alt.txt`; `format`, `format:check` and `typecheck` scripts; `playwright.config.ts` and `e2e/marketing/seo.spec.ts`; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in `.env.example`. Decisions D1–D17 in `docs/DECISIONS.md`.
+- Verified: typecheck passes; ESLint clean on `src`, `e2e` and the Playwright config; Prettier clean on the changed files; `next build` succeeds with every route static; e2e 4/4 passed. Fetched robots.txt, sitemap.xml and llms.txt on the production build; unknown URL returns 404. The production variant (`VERCEL_ENV=production`) shows index/follow, googlebot directives, Allow/Disallow, Host and Sitemap, and a consistent noindex on the 404 page. Home head checked: canonical, Open Graph, Twitter and JSON-LD URLs are all absolute on the site origin. Not-found page viewed in light and dark at 1440 and 390 (dark by adding the `.dark` class, since there is no theme provider yet).
+- Not verified / known issues: link previews on LinkedIn, WhatsApp and X (needs a deployed site); Google Rich Results test; the local `.env` lacks `NEXT_PUBLIC_SITE_URL`, so builds fail until it is added. `globals.css` still has shadcn's default neutral tokens, not `docs/DESIGN_SYSTEM.md` (the 404 button renders near-black, not `#0076DE`). Repository-wide `format:check` and `lint` fail on pre-existing files (D17). The Geist fonts in the root layout trigger unused-preload console warnings. The home page body is still the Create Next App template, with broken `/next.svg` and `/vercel.svg` images.
+- Next: add icons, then `manifest.ts` (D16); add `(app)`/`(auth)` layouts with noindex per D4 when those groups are built; add each new marketing page to `marketingRoutes`.
+- Questions for the owner: D15–D18; restore the lost C/O decision entries.
+- Update (same day): production URL https://startupsclub.vercel.app recorded (D14) and deployment notes updated; a production build with that URL verified locally. The live site still serves the old template until this work reaches `main`.
+
 ### 2026-11-12 — Claude (feature-based architecture)
 
 - Did: rewrote `docs/ARCHITECTURE.md` sections 3–6 and 8, `docs/STATE_AND_DATA.md`, and updated `AGENTS.md`, `FRONTEND_GUIDELINES`, `TRD`, `DESIGN_SYSTEM`, `LANDING_PAGE`, `MONITORING`, `TEAM_GUIDE` and `DECISIONS` to the owner's structure.

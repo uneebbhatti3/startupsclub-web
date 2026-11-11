@@ -105,16 +105,16 @@ conventions in `docs/STATE_AND_DATA.md`.
 
 ## 6. Cross-cutting concerns
 
-| Concern          | Where                                                                                                              | Rule                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Theme            | `providers/theme-provider.tsx` + shadcn toggle                                                                     | Class strategy; no flash on load; default is system (TO CONFIRM).                  |
-| Server state     | `providers/query-provider.tsx`                                                                                     | One `QueryClient` per browser session.                                             |
-| Auth guard       | `(app)/layout.tsx` and a session hook in `features/auth`                                                           | Redirect rules in `docs/APP_FLOW.md`.                                              |
-| Errors           | `error.tsx` per route group, plus per-query error UI                                                               | Never a blank screen.                                                              |
-| Smooth scroll    | `providers/smooth-scroll-provider.tsx`, used only in `(marketing)/layout.tsx`                                      | One instance; destroyed on unmount; disabled for reduced motion.                   |
-| Animations       | `components/marketing/animations/`                                                                                 | GSAP inside `useGSAP` or effect with cleanup.                                      |
-| Metadata and SEO | `config/site.ts`, `generateMetadata`                                                                               | Marketing pages only need full SEO.                                                |
-| Monitoring       | `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts`, `global-error.tsx`, `error.tsx` per group | Sentry. Report unexpected errors only, no personal data. See `docs/MONITORING.md`. |
+| Concern          | Where                                                                                                                              | Rule                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Theme            | `providers/theme-provider.tsx` + shadcn toggle                                                                                     | Class strategy; no flash on load; default is system (TO CONFIRM).                     |
+| Server state     | `providers/query-provider.tsx`                                                                                                     | One `QueryClient` per browser session.                                                |
+| Auth guard       | `(app)/layout.tsx` and a session hook in `features/auth`                                                                           | Redirect rules in `docs/APP_FLOW.md`.                                                 |
+| Errors           | `error.tsx` per route group, plus per-query error UI                                                                               | Never a blank screen.                                                                 |
+| Smooth scroll    | `providers/smooth-scroll-provider.tsx`, used only in `(marketing)/layout.tsx`                                                      | One instance; destroyed on unmount; disabled for reduced motion.                      |
+| Animations       | `components/marketing/animations/`                                                                                                 | GSAP inside `useGSAP` or effect with cleanup.                                         |
+| Metadata and SEO | `config/site.ts`, `config/env.ts`, `lib/seo.ts` (`createPageMetadata`), `app/robots.ts`, `app/sitemap.ts`, `app/llms.txt/route.ts` | Marketing pages only need full SEO. Sitemap and llms.txt come from `marketingRoutes`. |
+| Monitoring       | `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts`, `global-error.tsx`, `error.tsx` per group                 | Sentry. Report unexpected errors only, no personal data. See `docs/MONITORING.md`.    |
 
 ## 7. Decisions recorded
 
