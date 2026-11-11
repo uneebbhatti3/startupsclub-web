@@ -1,125 +1,37 @@
-# Team Guide — Working on the frontend (plain language)
+# Decisions — StartupsClub Web
 
-For Hadia and Ahtisham, and anyone new to Git or to this project. The formal rules are in
-`CONTRIBUTING.md`; this is the same thing, step by step.
+The log of owner decisions and open questions. Agents must ask before using anything marked
+**OPEN** or **TO CONFIRM**.
 
-## The big idea
+> **Note (12 Nov 2026):** this file previously contained an exact copy of `docs/TEAM_GUIDE.md`
+> (also in its only Git commit), so the earlier entries referenced elsewhere (C17–C31, O13–O16 in
+> `docs/MONITORING.md`, `docs/PROGRESS.md` and others) are **missing**. The owner should restore
+> them from wherever they were drafted. New entries below use the `D` prefix to avoid clashing.
 
-Nobody edits the real project directly. Everyone works on **their own copy line** (a "branch"),
-then asks Uneeb to merge it. This keeps the project safe, so one mistake cannot break it for
-everyone.
+## Decided
 
-```
-Your branch: dev/hadia   ──►  integration (shared testing line)  ──►  main (the real product)
-```
+| ID  | Date        | Decision                                                                                                                                                                                                                                                                                                                                     |
+| --- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | 12 Nov 2026 | Site origin comes only from `NEXT_PUBLIC_SITE_URL`, validated in `src/config/env.ts` (absolute http(s) origin, no trailing slash). A missing value fails the build. No domain is hard-coded.                                                                                                                                                 |
+| D2  | 12 Nov 2026 | `isProduction` = `VERCEL_ENV === "production"`. Non-production builds (preview, staging, local, CI) emit `noindex, nofollow` and a robots.txt that disallows `/`.                                                                                                                                                                            |
+| D3  | 12 Nov 2026 | All crawlers, AI crawlers included (training and answer bots), may crawl public pages in production. No per-bot rules.                                                                                                                                                                                                                       |
+| D4  | 12 Nov 2026 | `/login` and `/signup` are indexable; every other `(auth)` route and all `(app)` routes are `noindex` through layout or page metadata, never through robots.txt `Disallow`. Apply when those route groups are built.                                                                                                                         |
+| D5  | 12 Nov 2026 | Google Search Console verification is read from `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (public by design) and only rendered when set.                                                                                                                                                                                                        |
+| D6  | 12 Nov 2026 | Default title "StartupsClub: Accountability Club for Founders & Developers"; default description "StartupsClub helps founders and developers build consistently: post a daily standup, log what you ship, and stay accountable in a small club. Free to start."                                                                              |
+| D7  | 12 Nov 2026 | Metadata `authors` and `creator`: Uneeb Bhatti. `publisher`: StartupsClub. `category`: "productivity, business, technology".                                                                                                                                                                                                                 |
+| D8  | 12 Nov 2026 | Site config lives in `src/config/site.ts` and `src/config/env.ts` (per `docs/ARCHITECTURE.md`); SEO helpers in `src/lib/seo.ts`. `marketingRoutes` in `site.ts` is the single source for the sitemap and llms.txt.                                                                                                                           |
+| D9  | 12 Nov 2026 | **Approved `dangerouslySetInnerHTML` exception:** the Organization and WebSite JSON-LD `<script>` in `src/app/(marketing)/layout.tsx`. Data is a typed object built on the server; `serializeJsonLd` escapes `<` as `<`. No other use is approved.                                                                                           |
+| D10 | 12 Nov 2026 | No Product, Offer, AggregateRating, Review or FAQPage structured data until real prices, reviews and on-page FAQ content exist.                                                                                                                                                                                                              |
+| D11 | 12 Nov 2026 | Pages that set `openGraph`/`twitter` replace the inherited file-based image, so `createPageMetadata` sets `images` explicitly from `siteConfig.ogImage` (the `src/app/opengraph-image.png` route). No separate `twitter-image.png`. The alt text in `site.ts` must equal `opengraph-image.alt.txt` (checked by `e2e/marketing/seo.spec.ts`). |
+| D12 | 12 Nov 2026 | `/llms.txt` is a GET route handler with no `dynamic = "force-static"` export: with Cache Components enabled that option is replaced, and a handler that reads no request data is prerendered (build output shows it as static).                                                                                                              |
+| D13 | 12 Nov 2026 | Scripts added: `format`, `format:check` (Prettier), `typecheck` (`next typegen && tsc --noEmit`). Playwright config runs tests against a production build; `PLAYWRIGHT_PORT` overrides port 3000.                                                                                                                                            |
+| D14 | 12 Nov 2026 | Production URL is `https://startupsclub.vercel.app` (Vercel subdomain, no www). It is set as `NEXT_PUBLIC_SITE_URL` in Vercel's Production environment; no code hard-codes it. When a custom domain is added, change only that variable and redeploy.                                                                                        |
 
-- Your branch is always named `dev/` and your name in lowercase: `dev/hadia`, `dev/ahtisham`.
-- You can only send your work into `integration`, and only by a **pull request** (a request that
-  says "please review and merge my work").
-- Only Uneeb sends `integration` into `main`.
+## Open
 
-## One-time setup
-
-1. Install **Node.js 22**, **Git**, and **VS Code**.
-2. Clone the project: `git clone <repository-url>` and open the folder.
-3. Run `npm install`. This also sets up the automatic checks (Husky).
-4. Copy `.env.example` to `.env.local` and ask Uneeb for any missing values.
-5. Run `npm run dev` and open `http://localhost:3000`.
-
-## Your daily routine
-
-1. **Get the latest work**
-   ```
-   git switch integration
-   git pull
-   ```
-2. **Go to your branch** (first time: create it)
-   ```
-   git switch -c dev/your-name        # first time only
-   git switch dev/your-name           # every other time
-   git merge integration              # bring in everyone's latest work
-   ```
-3. **Do your task.** Read the page spec in `docs/` first (for example `docs/APP_FLOW.md`).
-4. **Check your work before saving it**
-   ```
-   npm run format
-   npm run lint
-   npm run typecheck
-   ```
-5. **Save it (commit)**
-   ```
-   git add .
-   git commit -m "Add standup form"
-   ```
-6. **Send it to GitHub**
-   ```
-   git push -u origin dev/your-name
-   ```
-7. **Open a pull request** on GitHub: from `dev/your-name` into `integration`. Fill in the
-   template. Add screenshots (light and dark mode).
-8. **Wait for the green ticks.** If a check is red, click it, read the message, fix it, commit and
-   push again. The pull request updates by itself.
-9. Uneeb reviews and merges. Then start again from step 1.
-
-## Rules you must follow
-
-- Never work on `main` or `integration` directly. The computer will stop you; do not try to get around it.
-- **Never use the type `any`** in TypeScript. Ask if you do not know the right type.
-- Put the short description comment at the top of every file, right after the imports.
-- Use colours from the design system. Never type colours by hand, and never use pure black.
-- Do not install new packages without asking.
-- Never open, copy or share `.env` files.
-- Errors are tracked automatically in Sentry. Never remove the error-reporting code, and never put
-  real user data (names, emails, standup text) into an error message.
-- If you are not sure about anything, **ask Uneeb before you build it**. Guessing causes rework.
-
-## When something goes wrong
-
-| Problem                                 | What to do                                                                                                                            |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| "Commit blocked: do not commit to main" | You are on the wrong branch. Run `git switch dev/your-name`. If you already changed files, `git stash`, switch, then `git stash pop`. |
-| "Branch does not match dev/<name>"      | Rename it: `git branch -m dev/your-name`.                                                                                             |
-| Prettier or ESLint failed on commit     | Read the message, fix the lines, run `npm run format`, commit again.                                                                  |
-| Type check failed on push               | Run `npm run typecheck`, fix the errors, commit, push again.                                                                          |
-| A pull request check is red             | Open it on GitHub, read the error, fix it locally, push again.                                                                        |
-| Merge conflict                          | Do not guess. Ask Uneeb to sit with you for the first one.                                                                            |
-| I committed a secret                    | Tell Uneeb immediately. The secret must be replaced.                                                                                  |
-
-## Working with the AI assistant (Claude Code)
-
-The assistant reads `AGENTS.md` and `CLAUDE.md` automatically. It will **stop and ask you
-questions** when something is unclear. Answer them; do not tell it to "just decide". It looks at
-the running site in a browser to check its work. It will not touch `.env` files.
-
-## Where do I put my code?
-
-We use a **feature-based** layout: everything for one feature (for example the daily standup)
-lives together in `src/features/standup/`.
-
-```
-src/features/standup/
-  components/   the screens and widgets
-  hooks/        code that asks for data (TanStack Query)
-  services/     the calls to the API (hard-coded data for now)
-  types/        TypeScript types
-  lib/          small helpers for this feature only
-```
-
-- Pages in `src/app/` are thin: they only put feature components together.
-- Components never call the API. They use a hook; the hook uses a service.
-- Start inside your feature. Move code to the shared folders (`src/components/shared`,
-  `src/lib`, `src/hooks`, `src/types`) only when a **second** feature needs it. Ask first.
-- Do not import another feature's `services/` or `lib/` folder.
-- Landing-site code goes in `src/features/marketing/`.
-- The full table "Where does this code go?" is in `docs/ARCHITECTURE.md` section 5.
-
-## Where to find things
-
-| I want to know...             | Open                                       |
-| ----------------------------- | ------------------------------------------ |
-| What we are building          | `docs/PRD.md`                              |
-| What screens exist            | `docs/APP_FLOW.md`, `docs/LANDING_PAGE.md` |
-| How to style things           | `docs/DESIGN_SYSTEM.md`                    |
-| Where files go                | `docs/ARCHITECTURE.md`                     |
-| How data works for now        | `docs/STATE_AND_DATA.md`                   |
-| What is done and what is next | `docs/PROGRESS.md`                         |
+| ID  | Question                                                                                                                                                                                                                                                                                                                                                                                |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D18 | Custom domain. The site is live on the Vercel subdomain (D14). `vercel.app` is on the Public Suffix List, so a cookie cannot be shared between `*.vercel.app` and the API; the shared-parent-domain plan in `docs/DEPLOYMENT.md` needs a custom domain before authentication works across both.                                                                                         |
+| D15 | Social profiles (X, LinkedIn, GitHub, Instagram). None exist; `Organization.sameAs` and Twitter `site`/`creator` handles stay empty until real URLs exist.                                                                                                                                                                                                                              |
+| D16 | Icons: `icon.svg`, `apple-icon.png` (Next.js 16.4 file name; not `apple-touch-icon.png`), and 192, 512 and maskable 512 PNGs. `manifest.ts` is deferred until they exist.                                                                                                                                                                                                               |
+| D17 | Repository-wide `format:check` and `lint` fail on files outside this task: the vendored `.agents/` skill folder (all 15 lint errors), several `docs/*.md`, `.mcp.json`, `globals.css`, `utils.ts`, and CRLF line endings from `core.autocrlf=true`. Decide whether to add `.agents/` to `.prettierignore` and the ESLint ignores, and add a `.gitattributes` with `* text=auto eol=lf`. |
