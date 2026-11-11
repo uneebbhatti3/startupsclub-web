@@ -1,0 +1,54 @@
+name: Branch policy
+
+# Enforces the branch flow:  dev/<name>  ->  integration  ->  main
+# Direct pushes are blocked by the repository ruleset (see docs/DEPLOYMENT.md). This workflow
+# adds the naming and routing rules, which a ruleset cannot express on every plan.
+
+on:
+  pull_request:
+    branches: [integration, main]
+    types: [opened, reopened, synchronize, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-policy:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source and target branches
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          THIS_REPO: ${{ github.repository }}
+        run: |
+          set -eu
+
+          if [ "$HEAD_REPO" != "$THIS_REPO" ]; then
+            echo "::error::Pull requests from forks are not accepted. Branch from this repository."
+            exit 1
+          fi
+
+          case "$BASE_REF" in
+            integration)
+              if ! echo "$HEAD_REF" | grep -Eq '^dev/[a-z0-9]+(-[a-z0-9]+)*$'; then
+                echo "::error::Only branches named dev/<name> may target integration. Got '$HEAD_REF'."
+                echo "Use lowercase letters, digits and hyphens, for example dev/uneeb."
+                exit 1
+              fi
+              ;;
+            main)
+              if [ "$HEAD_REF" != "integration" ]; then
+                echo "::error::Only the integration branch may be merged into main. Got '$HEAD_REF'."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Unexpected target branch '$BASE_REF'."
+              exit 1
+              ;;
+          esac
+
+          echo "Branch policy OK: $HEAD_REF -> $BASE_REF"
