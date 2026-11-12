@@ -23,8 +23,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Vendored third-party skill (tracked by skills-lock.json), not project code.
+    // Vendored third-party skill (tracked by skills-lock.json), not project code. The skill is
+    // also committed as real files under .claude/skills (locally a junction to .agents, which
+    // ESLint does not follow, so only CI sees that copy).
     ".agents/**",
+    ".claude/**",
   ]),
 ]);
 
