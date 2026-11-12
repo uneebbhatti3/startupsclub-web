@@ -12,3 +12,5 @@ public/google*.html
 
 # Skill templates are filled by exact string replacement (scripts/effects.mjs); reformatting breaks them.
 .agents/**/*.template.html
+# Same templates: a symlink locally, but committed as real files (core.symlinks=false), so CI sees them here.
+.claude/**/*.template.html
