@@ -2,21 +2,21 @@
 // colours. The light sits across the frame from the calm area, near the edge, and drifts slowly; the
 // field under the dither is kept smooth so the pattern bands read clean (solid core, checker, sparse
 // dots, nothing) instead of turning into speckle.
-import { shader, color, grainCSS, paletteKind } from '../fx.js';
+import { shader, color, grainCSS, paletteKind } from "../fx.js";
 
 const params = {
-  speed:     { default: 0.4,  min: 0,   max: 2,   step: 0.01 }, // drift speed
-  pixel:     { default: 2,    min: 1,   max: 8,   step: 1 },    // dither pixel size in CSS px
-  tones:     { default: 3,    min: 2,   max: 3,   step: 1 },    // colours used: bg, (mid), top
-  intensity: { default: 0.9,  min: 0,   max: 1.5, step: 0.01 }, // overall strength of the light
-  spread:    { default: 0.6,  min: 0.1, max: 1,   step: 0.01 }, // size of the light
-  ramp:      { default: 0.15, min: 0,   max: 1,   step: 0.01 }, // share of a straight ramp from the calm side
-  detail:    { default: 0.4,  min: 0,   max: 1,   step: 0.01 }, // slow organic bending of the light
-  scale:     { default: 0.4,  min: 0,   max: 1,   step: 0.01 }, // size of that bending
-  ink:       { default: 0,    min: 0,   max: 1,   step: 1 },    // 1 uses the ink colour instead of the accent
-  calm:      { default: 0.55, min: 0,   max: 1,   step: 0.01 }, // empty area where text sits
-  calmX:     { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:     { default: 0.7,  min: 0,   max: 1,   step: 0.01 },
+  speed: { default: 0.4, min: 0, max: 2, step: 0.01 }, // drift speed
+  pixel: { default: 2, min: 1, max: 8, step: 1 }, // dither pixel size in CSS px
+  tones: { default: 3, min: 2, max: 3, step: 1 }, // colours used: bg, (mid), top
+  intensity: { default: 0.9, min: 0, max: 1.5, step: 0.01 }, // overall strength of the light
+  spread: { default: 0.6, min: 0.1, max: 1, step: 0.01 }, // size of the light
+  ramp: { default: 0.15, min: 0, max: 1, step: 0.01 }, // share of a straight ramp from the calm side
+  detail: { default: 0.4, min: 0, max: 1, step: 0.01 }, // slow organic bending of the light
+  scale: { default: 0.4, min: 0, max: 1, step: 0.01 }, // size of that bending
+  ink: { default: 0, min: 0, max: 1, step: 1 }, // 1 uses the ink colour instead of the accent
+  calm: { default: 0.55, min: 0, max: 1, step: 0.01 }, // empty area where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -72,13 +72,15 @@ function tones(P, prm) {
   const { bg, ink, accent } = P;
   // on a coloured ground an accent of a far hue (yellow on cobalt) buzzes as a checker; the light
   // there is drawn in the ink with a touch of the accent instead
-  const clash = paletteKind(P) === 'colour' && color.hueDistance(bg, accent) > 90;
+  const clash = paletteKind(P) === "colour" && color.hueDistance(bg, accent) > 90;
   const top = prm.ink >= 0.5 ? ink : clash ? color.mix(ink, accent, 0.22) : accent;
   const neutral = color.chroma(bg) < 0.035;
   const fits = neutral || color.chroma(top) < 0.035 || color.hueDistance(bg, top) < 55;
   // the middle tone: a perceptual mix, or a lighter or darker step of the background when the
   // two hues would turn muddy together
-  const mid = fits ? color.mix(bg, top, 0.42) : color.withLightness(bg, (color.lab(bg)[0] * 3 + color.lab(top)[0] * 2) / 5);
+  const mid = fits
+    ? color.mix(bg, top, 0.42)
+    : color.withLightness(bg, (color.lab(bg)[0] * 3 + color.lab(top)[0] * 2) / 5);
   return [bg, mid, top];
 }
 
@@ -87,12 +89,17 @@ function uniforms({ palette, params, rng, dpr, width, height }) {
   const [t0, t1, t2] = tones(palette, params);
   const asp = width && height ? width / height : 1.6;
   // calm area in centred height units (y up)
-  const cx = (params.calmX - 0.5) * asp, cy = 0.5 - params.calmY;
+  const cx = (params.calmX - 0.5) * asp,
+    cy = 0.5 - params.calmY;
   // the light sits across the frame from the calm area, between two thirds of the way and the edge
   let ang = Math.hypot(cx, cy) < 0.06 ? r() * Math.PI * 2 : Math.atan2(-cy, -cx);
   ang += (r() - 0.5) * 0.6;
-  const dx = Math.cos(ang), dy = Math.sin(ang);
-  const edge = Math.min(Math.abs(dx) > 1e-3 ? asp / 2 / Math.abs(dx) : 1e9, Math.abs(dy) > 1e-3 ? 0.5 / Math.abs(dy) : 1e9);
+  const dx = Math.cos(ang),
+    dy = Math.sin(ang);
+  const edge = Math.min(
+    Math.abs(dx) > 1e-3 ? asp / 2 / Math.abs(dx) : 1e9,
+    Math.abs(dy) > 1e-3 ? 0.5 / Math.abs(dy) : 1e9,
+  );
   const k = 0.62 + 0.36 * r();
   const rot = r() * Math.PI;
   return {
@@ -108,9 +115,9 @@ function uniforms({ palette, params, rng, dpr, width, height }) {
 }
 
 export default {
-  id: 'bayer-dither',
-  name: 'Bayer dither',
-  family: 'dither',
+  id: "bayer-dither",
+  name: "Bayer dither",
+  family: "dither",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

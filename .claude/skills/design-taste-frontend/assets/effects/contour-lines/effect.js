@@ -4,22 +4,22 @@
 // (the page ground lifting toward the accent on high ground), and a faint hillshade gives relief.
 // Tiny closed loops at summits and pits are faded, so the map has no specks. The terrain breathes
 // through a very slow domain warp.
-import { shader, color, rng as makeRng } from '../fx.js';
+import { shader, color, rng as makeRng } from "../fx.js";
 
 const params = {
-  levels:     { default: 24,   min: 6,    max: 60,  step: 1 },     // contour levels over the terrain's height
-  scale:      { default: 1.6,  min: 0.4,  max: 5,   step: 0.05 },  // size of the hills (higher: smaller)
-  lineWidth:  { default: 1,    min: 0.5,  max: 3,   step: 0.1 },   // line width in CSS px
-  indexEvery: { default: 5,    min: 0,    max: 10,  step: 1 },     // every n-th line heavier, 0 for none
-  opacity:    { default: 0.35, min: 0.05, max: 1,   step: 0.01 },  // ink strength of the lines
-  speed:      { default: 0.02, min: 0,    max: 0.2, step: 0.005 }, // breathing of the terrain
-  octaves:    { default: 3,    min: 1,    max: 4,   step: 1 },     // detail of the terrain
-  tint:       { default: 0.6,  min: 0,    max: 1,   step: 0.01 },  // elevation tints and accent index lines
-  shade:      { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // hillshade of the ground (1 is about 0.05 lightness)
-  edge:       { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // fade of the lines toward the edges
-  calm:       { default: 0.75, min: 0,    max: 1,   step: 0.01 },  // fade the lines where text sits
-  calmX:      { default: 0.25, min: 0,    max: 1,   step: 0.01 },
-  calmY:      { default: 0.7,  min: 0,    max: 1,   step: 0.01 },
+  levels: { default: 24, min: 6, max: 60, step: 1 }, // contour levels over the terrain's height
+  scale: { default: 1.6, min: 0.4, max: 5, step: 0.05 }, // size of the hills (higher: smaller)
+  lineWidth: { default: 1, min: 0.5, max: 3, step: 0.1 }, // line width in CSS px
+  indexEvery: { default: 5, min: 0, max: 10, step: 1 }, // every n-th line heavier, 0 for none
+  opacity: { default: 0.35, min: 0.05, max: 1, step: 0.01 }, // ink strength of the lines
+  speed: { default: 0.02, min: 0, max: 0.2, step: 0.005 }, // breathing of the terrain
+  octaves: { default: 3, min: 1, max: 4, step: 1 }, // detail of the terrain
+  tint: { default: 0.6, min: 0, max: 1, step: 0.01 }, // elevation tints and accent index lines
+  shade: { default: 0.5, min: 0, max: 1, step: 0.01 }, // hillshade of the ground (1 is about 0.05 lightness)
+  edge: { default: 0.5, min: 0, max: 1, step: 0.01 }, // fade of the lines toward the edges
+  calm: { default: 0.75, min: 0, max: 1, step: 0.01 }, // fade the lines where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -134,8 +134,10 @@ function uniforms({ palette, seed }) {
 function fallback({ palette: P, params: prm, seed }) {
   const k = tones(P);
   const r = makeRng(`contour-fb:${seed}`);
-  const W = 1000, H = 625;
-  const cx = W * (0.55 + r() * 0.25), cy = H * (0.25 + r() * 0.3);
+  const W = 1000,
+    H = 625;
+  const cx = W * (0.55 + r() * 0.25),
+    cy = H * (0.25 + r() * 0.3);
   const ph = [r() * 6.28, r() * 6.28, r() * 6.28];
   const line = color.mix(P.bg, P.ink, Math.min(0.9, prm.opacity * 0.9));
   const idx = color.mix(P.bg, k.idx, Math.min(1, prm.opacity * 1.3));
@@ -145,30 +147,49 @@ function fallback({ palette: P, params: prm, seed }) {
     const pts = [];
     for (let i = 0; i < 28; i++) {
       const a = (i / 28) * Math.PI * 2;
-      const q = 1 + 0.2 * Math.sin(2 * a + ph[0] + n * 0.11) + 0.09 * Math.sin(3 * a + ph[1] - n * 0.17) + 0.05 * Math.sin(5 * a + ph[2] + n * 0.3);
+      const q =
+        1 +
+        0.2 * Math.sin(2 * a + ph[0] + n * 0.11) +
+        0.09 * Math.sin(3 * a + ph[1] - n * 0.17) +
+        0.05 * Math.sin(5 * a + ph[2] + n * 0.3);
       pts.push([cx + Math.cos(a) * R * q * 1.25, cy + Math.sin(a) * R * q]);
     }
     // closed Catmull-Rom curve as cubic Beziers
     let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
     for (let i = 0; i < pts.length; i++) {
-      const p0 = pts[(i - 1 + pts.length) % pts.length], p1 = pts[i], p2 = pts[(i + 1) % pts.length], p3 = pts[(i + 2) % pts.length];
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      const p0 = pts[(i - 1 + pts.length) % pts.length],
+        p1 = pts[i],
+        p2 = pts[(i + 1) % pts.length],
+        p3 = pts[(i + 2) % pts.length];
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+        c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
       d += `C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
     }
     const heavy = prm.indexEvery > 0 && (n + 1) % prm.indexEvery === 0;
-    paths.push(`<path d='${d}' stroke='${heavy ? idx : line}' stroke-width='${heavy ? 1.7 : 1}' vector-effect='non-scaling-stroke'/>`);
+    paths.push(
+      `<path d='${d}' stroke='${heavy ? idx : line}' stroke-width='${heavy ? 1.7 : 1}' vector-effect='non-scaling-stroke'/>`,
+    );
   }
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' preserveAspectRatio='xMidYMid slice'><g fill='none'>${paths.join('')}</g></svg>`;
-  const url = `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, '%27')}")`;
-  return `${url} center / cover no-repeat, radial-gradient(60% 70% at ${(cx / W * 100).toFixed(0)}% ${(cy / H * 100).toFixed(0)}%, ${k.high}, ${P.bg} 70%), ${P.bg}`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' preserveAspectRatio='xMidYMid slice'><g fill='none'>${paths.join("")}</g></svg>`;
+  const url = `url("data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, "%27")}")`;
+  return `${url} center / cover no-repeat, radial-gradient(60% 70% at ${((cx / W) * 100).toFixed(0)}% ${((cy / H) * 100).toFixed(0)}%, ${k.high}, ${P.bg} 70%), ${P.bg}`;
 }
 
 export default {
-  id: 'contour-lines',
-  name: 'Topographic contours',
-  family: 'pattern',
+  id: "contour-lines",
+  name: "Topographic contours",
+  family: "pattern",
   params,
   mount(el, { palette, params: given, seed }) {
-    return shader(el, { frag, schema: params, params: given, palette, seed, uniforms, still: 5, fallback });
+    return shader(el, {
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      seed,
+      uniforms,
+      still: 5,
+      fallback,
+    });
   },
 };

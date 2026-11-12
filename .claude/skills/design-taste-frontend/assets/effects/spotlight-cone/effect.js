@@ -2,21 +2,21 @@
 // drifting haze, its edge going softer the further the light travels, lands as a soft pool on the
 // floor that spills a little light around it. On light pages the room stays at the page's own
 // lightness and only the corners away from the light dim slightly. The cone keeps away from text.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  x:         { default: 0.5,  min: 0,    max: 1,    step: 0.01 },  // where the pool lands, 0 left .. 1 right
-  lean:      { default: 0.3,  min: 0,    max: 0.8,  step: 0.01 },  // how far the lamp sits to the side (height units)
-  width:     { default: 0.22, min: 0.08, max: 0.5,  step: 0.01 },  // half width of the light at the floor (height units)
-  poolY:     { default: 0.8,  min: 0.5,  max: 0.95, step: 0.01 },  // the floor where the pool lands, 0 top .. 1 bottom
-  haze:      { default: 0.45, min: 0,    max: 1,    step: 0.01 },  // light seen in the air
-  edge:      { default: 0.5,  min: 0.1,  max: 1,    step: 0.01 },  // softness of the cone edge (grows with distance)
-  intensity: { default: 1,    min: 0,    max: 1.5,  step: 0.01 },
-  breathe:   { default: 0,    min: 0,    max: 1,    step: 0.01 },  // slow rise and fall of the light
-  speed:     { default: 0.12, min: 0,    max: 1,    step: 0.01 },  // drift of the haze
-  calm:      { default: 0.4,  min: 0,    max: 1,    step: 0.01 },  // keep the light off the text and dim it there
-  calmX:     { default: 0.2,  min: 0,    max: 1,    step: 0.01 },
-  calmY:     { default: 0.3,  min: 0,    max: 1,    step: 0.01 },
+  x: { default: 0.5, min: 0, max: 1, step: 0.01 }, // where the pool lands, 0 left .. 1 right
+  lean: { default: 0.3, min: 0, max: 0.8, step: 0.01 }, // how far the lamp sits to the side (height units)
+  width: { default: 0.22, min: 0.08, max: 0.5, step: 0.01 }, // half width of the light at the floor (height units)
+  poolY: { default: 0.8, min: 0.5, max: 0.95, step: 0.01 }, // the floor where the pool lands, 0 top .. 1 bottom
+  haze: { default: 0.45, min: 0, max: 1, step: 0.01 }, // light seen in the air
+  edge: { default: 0.5, min: 0.1, max: 1, step: 0.01 }, // softness of the cone edge (grows with distance)
+  intensity: { default: 1, min: 0, max: 1.5, step: 0.01 },
+  breathe: { default: 0, min: 0, max: 1, step: 0.01 }, // slow rise and fall of the light
+  speed: { default: 0.12, min: 0, max: 1, step: 0.01 }, // drift of the haze
+  calm: { default: 0.4, min: 0, max: 1, step: 0.01 }, // keep the light off the text and dim it there
+  calmX: { default: 0.2, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.3, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -93,7 +93,10 @@ void main() {
 export function tones(P) {
   const { bg, ink, accent } = P;
   const [Lb] = color.lab(bg);
-  const tinted = color.chroma(bg) < 0.035 && color.chroma(accent) > 0.035 && !(color.lch(accent)[2] >= 262 && color.lch(accent)[2] <= 338);
+  const tinted =
+    color.chroma(bg) < 0.035 &&
+    color.chroma(accent) > 0.035 &&
+    !(color.lch(accent)[2] >= 262 && color.lch(accent)[2] <= 338);
   if (Lb < 0.6) {
     // dark: the light is a white tinted by the palette
     const base = color.adjust(bg, { l: 0.9 - Lb, c: 0.3 });
@@ -102,7 +105,8 @@ export function tones(P) {
       ground: color.darken(bg, Math.min(0.03, Lb * 0.1)),
       light,
       hot: color.mix(light, color.withLightness(ink, 0.99), 0.6),
-      floor: 0.012, vig: 0.04,
+      floor: 0.012,
+      vig: 0.04,
     };
   }
   // light page: the room stays within a few points of the page lightness (no added colour), only
@@ -111,14 +115,16 @@ export function tones(P) {
     ground: color.darken(bg, Math.min(0.03, Lb * 0.03)),
     light: color.fromLch([Math.min(0.995, Lb + 0.09), color.chroma(bg) * 0.6, color.lch(bg)[2]]),
     hot: color.fromLch([Math.min(0.998, Lb + 0.1), color.chroma(bg) * 0.35, color.lch(bg)[2]]),
-    floor: 0.008, vig: 0.025,
+    floor: 0.008,
+    vig: 0.025,
   };
 }
 
 // where the pool lands: the asked x, moved to the far side of the text (calm) when the two would meet
 export function poolX(prm) {
   let x = prm.x;
-  if (prm.calm > 0.05 && Math.abs(x - prm.calmX) < 0.34) x = prm.calmX < 0.5 ? prm.calmX + 0.42 : prm.calmX - 0.42;
+  if (prm.calm > 0.05 && Math.abs(x - prm.calmX) < 0.34)
+    x = prm.calmX < 0.5 ? prm.calmX + 0.42 : prm.calmX - 0.42;
   return Math.min(0.78, Math.max(0.22, x));
 }
 
@@ -127,13 +133,21 @@ function uniforms({ palette, params: prm, width, height }) {
   const x = poolX(prm);
   // the lamp leans in from the side with more room
   const lean = (x < 0.5 ? 1 : -1) * prm.lean;
-  return { u_ground: color.labVec(k.ground), u_light: color.labVec(k.light), u_hot: color.labVec(k.hot), u_floor: k.floor, u_vig: k.vig, u_cx: x, u_leanS: lean };
+  return {
+    u_ground: color.labVec(k.ground),
+    u_light: color.labVec(k.light),
+    u_hot: color.labVec(k.hot),
+    u_floor: k.floor,
+    u_vig: k.vig,
+    u_cx: x,
+    u_leanS: lean,
+  };
 }
 
 export default {
-  id: 'spotlight-cone',
-  name: 'Stage spotlight',
-  family: 'light',
+  id: "spotlight-cone",
+  name: "Stage spotlight",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -146,9 +160,12 @@ export default {
       still: 2,
       fallback: ({ palette: P, params: prm }) => {
         const k = tones(P);
-        const x = poolX(prm) * 100, y = prm.poolY * 100;
-        return `radial-gradient(${prm.width * 110}% ${prm.width * 40}% at ${x}% ${y}%, ${color.mix(k.ground, k.hot, 0.75)}, transparent 100%), `
-          + `radial-gradient(${prm.width * 90}% ${y}% at ${x}% 0%, ${color.mix(k.ground, k.light, 0.3)}, transparent 80%), ${k.ground}`;
+        const x = poolX(prm) * 100,
+          y = prm.poolY * 100;
+        return (
+          `radial-gradient(${prm.width * 110}% ${prm.width * 40}% at ${x}% ${y}%, ${color.mix(k.ground, k.hot, 0.75)}, transparent 100%), ` +
+          `radial-gradient(${prm.width * 90}% ${y}% at ${x}% 0%, ${color.mix(k.ground, k.light, 0.3)}, transparent 80%), ${k.ground}`
+        );
       },
     });
   },

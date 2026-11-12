@@ -1,23 +1,23 @@
 // line-engraving: tone carried by dense parallel lines that swell in the shadows and thin to hairlines
 // in the light, bending around the form, like a banknote or an etched plate. One ink on paper.
 // Drawn once; it only moves when drift is above 0.
-import { shader, color, rng, resolveParams } from '../fx.js';
+import { shader, color, rng, resolveParams } from "../fx.js";
 
 const params = {
-  pitch:     { default: 6,    min: 4,   max: 14,  step: 0.5 },  // line spacing, CSS px
-  minWidth:  { default: 0.1,  min: 0,   max: 0.5, step: 0.01 }, // hairline in the light, share of the pitch
-  maxWidth:  { default: 0.9,  min: 0.3, max: 1,   step: 0.01 }, // line in the deepest shadow
-  angle:     { default: 20,   min: 0,   max: 180, step: 1 },    // line direction, degrees
-  bend:      { default: 0.6,  min: 0,   max: 1.5, step: 0.01 }, // how far the lines follow the form
-  source:    { default: 1,    min: -1,  max: 1,   step: 1 },    // 1 rolling hills (the default, a quiet ground), 0 a big sphere (focal), -1 the seed picks
-  cross:     { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // cross-hatching in the darkest part
-  guilloche: { default: 0,    min: 0,   max: 1,   step: 0.01 }, // a faint rosette of fine curves around the form
-  size:      { default: 1,    min: 0.5, max: 1.6, step: 0.01 }, // size of the form
-  accent:    { default: 0,    min: 0,   max: 1,   step: 1 },    // 1 prints in the accent instead of the ink
-  drift:     { default: 0,    min: 0,   max: 0.2, step: 0.005 },// 0 is a still plate; above 0 the light wanders
-  calm:      { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // empties the text area
-  calmX:     { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:     { default: 0.6,  min: 0,   max: 1,   step: 0.01 },
+  pitch: { default: 6, min: 4, max: 14, step: 0.5 }, // line spacing, CSS px
+  minWidth: { default: 0.1, min: 0, max: 0.5, step: 0.01 }, // hairline in the light, share of the pitch
+  maxWidth: { default: 0.9, min: 0.3, max: 1, step: 0.01 }, // line in the deepest shadow
+  angle: { default: 20, min: 0, max: 180, step: 1 }, // line direction, degrees
+  bend: { default: 0.6, min: 0, max: 1.5, step: 0.01 }, // how far the lines follow the form
+  source: { default: 1, min: -1, max: 1, step: 1 }, // 1 rolling hills (the default, a quiet ground), 0 a big sphere (focal), -1 the seed picks
+  cross: { default: 0.5, min: 0, max: 1, step: 0.01 }, // cross-hatching in the darkest part
+  guilloche: { default: 0, min: 0, max: 1, step: 0.01 }, // a faint rosette of fine curves around the form
+  size: { default: 1, min: 0.5, max: 1.6, step: 0.01 }, // size of the form
+  accent: { default: 0, min: 0, max: 1, step: 1 }, // 1 prints in the accent instead of the ink
+  drift: { default: 0, min: 0, max: 0.2, step: 0.005 }, // 0 is a still plate; above 0 the light wanders
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // empties the text area
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.6, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -137,7 +137,8 @@ void main() {
 `;
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const lin = c => color.rgb(c).map(v => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+const lin = (c) =>
+  color.rgb(c).map((v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
 
 function inkOf(P, prm) {
   const { bg } = P;
@@ -158,13 +159,21 @@ function layout(params, r, asp, seed) {
   const C = [(params.calmX - 0.5) * asp, 0.5 - params.calmY];
   // the sphere is big and sits across the frame from the calm area, running off the far edge
   const R = clamp(0.46 * params.size * (0.92 + 0.16 * r()), 0.2, 0.75);
-  const sx = C[0] > 0.08 * asp ? -1 : C[0] < -0.08 * asp ? 1 : (r() < 0.5 ? -1 : 1);
+  const sx = C[0] > 0.08 * asp ? -1 : C[0] < -0.08 * asp ? 1 : r() < 0.5 ? -1 : 1;
   const fx = sx * (asp / 2 - R * (0.5 + 0.25 * r()));
-  const fy = Math.abs(C[1]) > 0.12 ? -Math.sign(C[1]) * (0.5 - R * (0.55 + 0.25 * r())) : (r() - 0.5) * 0.3;
+  const fy =
+    Math.abs(C[1]) > 0.12 ? -Math.sign(C[1]) * (0.5 - R * (0.55 + 0.25 * r())) : (r() - 0.5) * 0.3;
   const lightA = Math.atan2(C[1] - fy + 0.35, C[0] - fx) + (r() - 0.5) * 0.3;
   // the hills rise from the calm area toward its far corner
-  const corners = [[-asp / 2, -0.5], [asp / 2, -0.5], [-asp / 2, 0.5], [asp / 2, 0.5]];
-  const far = corners.reduce((a, b) => (Math.hypot(b[0] - C[0], b[1] - C[1]) > Math.hypot(a[0] - C[0], a[1] - C[1]) ? b : a));
+  const corners = [
+    [-asp / 2, -0.5],
+    [asp / 2, -0.5],
+    [-asp / 2, 0.5],
+    [asp / 2, 0.5],
+  ];
+  const far = corners.reduce((a, b) =>
+    Math.hypot(b[0] - C[0], b[1] - C[1]) > Math.hypot(a[0] - C[0], a[1] - C[1]) ? b : a,
+  );
   const span = Math.max(0.3, Math.hypot(far[0] - C[0], far[1] - C[1]));
   return { mode, C, R, fx, fy, lightA, far, span };
 }
@@ -172,22 +181,32 @@ function layout(params, r, asp, seed) {
 function uniforms({ palette, params, seed, rng: r, width, height }) {
   const k = inkOf(palette, params);
   const P = lin(palette.bg);
-  const base = k.sub ? P : P.map(v => 1 - v);
-  const T = lin(k.ink).map((v, i) => (k.sub ? clamp(v / Math.max(P[i], 1e-4), 0, 1) : clamp((1 - v) / Math.max(1 - P[i], 1e-4), 0, 1)));
+  const base = k.sub ? P : P.map((v) => 1 - v);
+  const T = lin(k.ink).map((v, i) =>
+    k.sub ? clamp(v / Math.max(P[i], 1e-4), 0, 1) : clamp((1 - v) / Math.max(1 - P[i], 1e-4), 0, 1),
+  );
   const L = layout(params, r, width && height ? width / height : 4 / 3, seed);
   return {
-    u_base: base, u_sub: k.sub ? 1 : 0, u_T: T, u_mode: L.mode,
-    u_form: [L.fx, L.fy, L.R], u_lightA: L.lightA, u_angR: (params.angle + 90) * Math.PI / 180, // the lines' normal
-    u_calmP: L.C, u_dir: [(L.far[0] - L.C[0]) / L.span, (L.far[1] - L.C[1]) / L.span], u_span: L.span,
+    u_base: base,
+    u_sub: k.sub ? 1 : 0,
+    u_T: T,
+    u_mode: L.mode,
+    u_form: [L.fx, L.fy, L.R],
+    u_lightA: L.lightA,
+    u_angR: ((params.angle + 90) * Math.PI) / 180, // the lines' normal
+    u_calmP: L.C,
+    u_dir: [(L.far[0] - L.C[0]) / L.span, (L.far[1] - L.C[1]) / L.span],
+    u_span: L.span,
   };
 }
 
 // CSS fallback: an SVG of line screens whose width steps with the tone, laid out like the shader (the
 // sphere across from the calm area, or the hills rising away from it)
-const svgUrl = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
-const f1 = v => +v.toFixed(1);
+const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+const f1 = (v) => +v.toFixed(1);
 function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
-  const W = Math.max(40, Math.round(width || 800)), H = Math.max(40, Math.round(height || 600));
+  const W = Math.max(40, Math.round(width || 800)),
+    H = Math.max(40, Math.round(height || 600));
   const { sub, ink } = inkOf(P, prm);
   const L = layout(prm, r, W / H, seed);
   const px = (x, y) => [f1(W / 2 + x * H), f1(H / 2 - y * H)];
@@ -196,21 +215,34 @@ function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
   let grad;
   if (L.mode === 0) {
     const [cx, cy] = px(L.fx, L.fy);
-    const [hx, hy] = px(L.fx + Math.cos(L.lightA) * L.R * 0.45, L.fy + Math.sin(L.lightA) * L.R * 0.45);
-    grad = (id, stops) => `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${f1(L.R * H)}" fx="${hx}" fy="${hy}">${stops}</radialGradient>`;
+    const [hx, hy] = px(
+      L.fx + Math.cos(L.lightA) * L.R * 0.45,
+      L.fy + Math.sin(L.lightA) * L.R * 0.45,
+    );
+    grad = (id, stops) =>
+      `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${f1(L.R * H)}" fx="${hx}" fy="${hy}">${stops}</radialGradient>`;
   } else {
     const [x1, y1] = px(L.C[0], L.C[1]);
     const [x2, y2] = px(L.far[0], L.far[1]);
-    grad = (id, stops) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops}</linearGradient>`;
+    grad = (id, stops) =>
+      `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops}</linearGradient>`;
   }
-  let defs = '', body = '';
+  let defs = "",
+    body = "";
   for (let i = 0; i < N; i++) {
     const t = (i + 0.5) / N;
-    let a = L.mode === 0 ? (sub ? 0.1 + 0.85 * t : 0.85 - 0.6 * t) : Math.max(0, (t - 0.15) / 0.85) * (sub ? 0.9 : 0.75);
+    let a =
+      L.mode === 0
+        ? sub
+          ? 0.1 + 0.85 * t
+          : 0.85 - 0.6 * t
+        : Math.max(0, (t - 0.15) / 0.85) * (sub ? 0.9 : 0.75);
     if (a < 0.04) continue;
     const w = f1(Math.max(0.6, pitch * (prm.minWidth + (prm.maxWidth - prm.minWidth) * a) * 0.9));
-    const s = i / N, e = (i + 1) / N;
-    const stop = (o, v) => `<stop offset="${Math.min(1, Math.max(0, o)).toFixed(3)}" stop-color="${v ? '#fff' : '#000'}"/>`;
+    const s = i / N,
+      e = (i + 1) / N;
+    const stop = (o, v) =>
+      `<stop offset="${Math.min(1, Math.max(0, o)).toFixed(3)}" stop-color="${v ? "#fff" : "#000"}"/>`;
     defs += `<pattern id="p${i}" width="${pitch}" height="${pitch}" patternUnits="userSpaceOnUse" patternTransform="rotate(${-prm.angle})"><rect y="${f1((pitch - w) / 2)}" width="${pitch}" height="${w}" fill="${ink}"/></pattern>`;
     defs += grad(`g${i}`, stop(s - 0.002, 0) + stop(s, 1) + stop(e, 1) + stop(e + 0.002, 0));
     defs += `<mask id="m${i}"><rect width="${W}" height="${H}" fill="url(#g${i})"/></mask>`;
@@ -221,25 +253,40 @@ function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
 
 // a still plate draws once; with drift above 0 it runs, slowly
 function holdStill(c, read) {
-  let user = false, cur = read();
-  const sync = () => ((user || cur.drift <= 0) ? c.pause() : c.resume());
+  let user = false,
+    cur = read();
+  const sync = () => (user || cur.drift <= 0 ? c.pause() : c.resume());
   sync();
   return {
-    pause() { user = true; sync(); },
-    resume() { user = false; sync(); },
-    set(next) { cur = c.set(next); sync(); return cur; },
-    setPalette: p => c.setPalette(p),
+    pause() {
+      user = true;
+      sync();
+    },
+    resume() {
+      user = false;
+      sync();
+    },
+    set(next) {
+      cur = c.set(next);
+      sync();
+      return cur;
+    },
+    setPalette: (p) => c.setPalette(p),
     redraw: () => c.redraw(),
     destroy: () => c.destroy(),
-    get canvas() { return c.canvas; },
-    get info() { return { ...c.info, still: user || cur.drift <= 0 }; },
+    get canvas() {
+      return c.canvas;
+    },
+    get info() {
+      return { ...c.info, still: user || cur.drift <= 0 };
+    },
   };
 }
 
 export default {
-  id: 'line-engraving',
-  name: 'Line engraving',
-  family: 'dither',
+  id: "line-engraving",
+  name: "Line engraving",
+  family: "dither",
   params,
   mount(el, { palette, params: given, seed }) {
     const c = shader(el, {

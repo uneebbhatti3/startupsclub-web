@@ -15,15 +15,65 @@
   fit ('cover' or 'contain': the whole photograph on the page's paper), autoplay (0 holds the first
   frame until hovered), drift (1 lets each frame drift slowly), alt.
 */
-import { stage, tones, setTones, GLSL_PRINT, photoURL, loadImage, levels, cover, fallbackImage, clamp, color, paletteOf, MONO } from '../_scenes/kit.js';
+import {
+  stage,
+  tones,
+  setTones,
+  GLSL_PRINT,
+  photoURL,
+  loadImage,
+  levels,
+  cover,
+  fallbackImage,
+  clamp,
+  color,
+  paletteOf,
+  MONO,
+} from "../_scenes/kit.js";
 
 // test pictures that belong together (four buildings, looking up), never shipped as a client's
-const UNSPLASH = 'https://unsplash.com/license';
+const UNSPLASH = "https://unsplash.com/license";
 export const DEFAULT_SEQUENCE = [
-  { id: 315, ratio: 1.4, focus: [0.5, 0.45], alt: 'Looking straight up a dark lightwell to a square of bright sky', by: 'Liam Andrew', licence: 'Unsplash licence', licenceUrl: UNSPLASH, page: 'https://unsplash.com/photos/W7CopGaHkEM' },
-  { id: 951, ratio: 1.6, focus: [0.5, 0.5], alt: 'A building facade of red, yellow and white panels', by: 'Sérgio Rola', licence: 'Unsplash licence', licenceUrl: UNSPLASH, page: 'https://unsplash.com/photos/4aQY2CrXsa8' },
-  { id: 942, ratio: 1.5, focus: [0.5, 0.6], alt: 'A white angular concrete building against a black sky', by: 'Carl Nenzen Loven', licence: 'Unsplash licence', licenceUrl: UNSPLASH, page: 'https://unsplash.com/photos/busqfOj6i80' },
-  { id: 1081, ratio: 1.49, focus: [0.62, 0.5], alt: 'A stepped white building corner rising into a pale blue sky', by: 'Julien Moreau', licence: 'Unsplash licence', licenceUrl: UNSPLASH, page: 'https://unsplash.com/photos/688Fna1pwOQ' },
+  {
+    id: 315,
+    ratio: 1.4,
+    focus: [0.5, 0.45],
+    alt: "Looking straight up a dark lightwell to a square of bright sky",
+    by: "Liam Andrew",
+    licence: "Unsplash licence",
+    licenceUrl: UNSPLASH,
+    page: "https://unsplash.com/photos/W7CopGaHkEM",
+  },
+  {
+    id: 951,
+    ratio: 1.6,
+    focus: [0.5, 0.5],
+    alt: "A building facade of red, yellow and white panels",
+    by: "Sérgio Rola",
+    licence: "Unsplash licence",
+    licenceUrl: UNSPLASH,
+    page: "https://unsplash.com/photos/4aQY2CrXsa8",
+  },
+  {
+    id: 942,
+    ratio: 1.5,
+    focus: [0.5, 0.6],
+    alt: "A white angular concrete building against a black sky",
+    by: "Carl Nenzen Loven",
+    licence: "Unsplash licence",
+    licenceUrl: UNSPLASH,
+    page: "https://unsplash.com/photos/busqfOj6i80",
+  },
+  {
+    id: 1081,
+    ratio: 1.49,
+    focus: [0.62, 0.5],
+    alt: "A stepped white building corner rising into a pale blue sky",
+    by: "Julien Moreau",
+    licence: "Unsplash licence",
+    licenceUrl: UNSPLASH,
+    page: "https://unsplash.com/photos/688Fna1pwOQ",
+  },
 ];
 
 const frag = /* glsl */ `
@@ -81,91 +131,151 @@ void main() {
 `;
 
 export default {
-  id: 'dither-sequence',
-  name: 'Dither sequence',
-  kind: 'scene',
+  id: "dither-sequence",
+  name: "Dither sequence",
+  kind: "scene",
   mount(el, { palette, src, params = {} } = {}) {
-    const list = (Array.isArray(src) ? (src.length ? src : DEFAULT_SEQUENCE) : src ? [src] : DEFAULT_SEQUENCE).slice(0, 6);
+    const list = (
+      Array.isArray(src) ? (src.length ? src : DEFAULT_SEQUENCE) : src ? [src] : DEFAULT_SEQUENCE
+    ).slice(0, 6);
     const autoplay = params.autoplay !== 0;
     let given = palette || null;
     let T = tones(paletteOf(el, given));
     let prog = null;
-    const imgs = new Array(list.length).fill(null), lvs = new Array(list.length).fill([0, 1]);
+    const imgs = new Array(list.length).fill(null),
+      lvs = new Array(list.length).fill([0, 1]);
     let texes = new Array(list.length).fill(null);
     // the frames that loaded, in order (a failed photograph is left out, with its caption)
     let order = [];
-    let pos = 0, target = 0, clock = 0, scrubbing = false, last = '';
-    const hold = params.hold ?? 2.2, move = 1.5;
-    const captionOf = k => (params.captions ? params.captions[k] || '' : null);
+    let pos = 0,
+      target = 0,
+      clock = 0,
+      scrubbing = false,
+      last = "";
+    const hold = params.hold ?? 2.2,
+      move = 1.5;
+    const captionOf = (k) => (params.captions ? params.captions[k] || "" : null);
 
     // a small player pill: the caption of the frame and a timeline with one segment per photograph
-    const ctl = document.createElement('div');
-    ctl.className = 'scene-label';
-    ctl.setAttribute('aria-hidden', 'true');
-    Object.assign(ctl.style, { position: 'absolute', left: '14px', bottom: '14px', zIndex: '2', height: '28px', padding: '0 12px', display: 'none', alignItems: 'center', gap: '12px',
-      borderRadius: '999px', pointerEvents: 'none', font: `500 11px/1 ${MONO}`, letterSpacing: '0.06em', textTransform: 'uppercase' });
-    const cap = document.createElement('span');
-    const bar = document.createElement('span');
-    Object.assign(bar.style, { display: 'flex', gap: '4px', height: '2px' });
+    const ctl = document.createElement("div");
+    ctl.className = "scene-label";
+    ctl.setAttribute("aria-hidden", "true");
+    Object.assign(ctl.style, {
+      position: "absolute",
+      left: "14px",
+      bottom: "14px",
+      zIndex: "2",
+      height: "28px",
+      padding: "0 12px",
+      display: "none",
+      alignItems: "center",
+      gap: "12px",
+      borderRadius: "999px",
+      pointerEvents: "none",
+      font: `500 11px/1 ${MONO}`,
+      letterSpacing: "0.06em",
+      textTransform: "uppercase",
+    });
+    const cap = document.createElement("span");
+    const bar = document.createElement("span");
+    Object.assign(bar.style, { display: "flex", gap: "4px", height: "2px" });
     ctl.append(cap, bar);
     el.append(ctl);
     let segs = [];
     const layoutPill = () => {
-      bar.innerHTML = '';
+      bar.innerHTML = "";
       bar.style.width = `${Math.min(140, 30 * order.length)}px`;
       segs = order.map(() => {
-        const sg = document.createElement('span');
-        Object.assign(sg.style, { flex: '1', position: 'relative', borderRadius: '2px', overflow: 'hidden' });
-        const f = document.createElement('i');
-        Object.assign(f.style, { position: 'absolute', inset: '0', transformOrigin: 'left', transform: 'scaleX(0)' });
-        sg.append(f); bar.append(sg);
+        const sg = document.createElement("span");
+        Object.assign(sg.style, {
+          flex: "1",
+          position: "relative",
+          borderRadius: "2px",
+          overflow: "hidden",
+        });
+        const f = document.createElement("i");
+        Object.assign(f.style, {
+          position: "absolute",
+          inset: "0",
+          transformOrigin: "left",
+          transform: "scaleX(0)",
+        });
+        sg.append(f);
+        bar.append(sg);
         return [sg, f];
       });
-      ctl.style.display = order.length > 1 && !s?.fallen ? 'flex' : 'none';
+      ctl.style.display = order.length > 1 && !s?.fallen ? "flex" : "none";
       style();
     };
     const style = () => {
-      for (const [sg, f] of segs) { sg.style.background = color.mix(T.hex.bg, T.hex.ink, 0.2); f.style.background = T.hex.ink; }
-      Object.assign(ctl.style, { color: T.hex.ink, background: T.hex.bg, boxShadow: '0 0 0 1px ' + color.mix(T.hex.bg, T.hex.ink, 0.12) });
+      for (const [sg, f] of segs) {
+        sg.style.background = color.mix(T.hex.bg, T.hex.ink, 0.2);
+        f.style.background = T.hex.ink;
+      }
+      Object.assign(ctl.style, {
+        color: T.hex.ink,
+        background: T.hex.bg,
+        boxShadow: "0 0 0 1px " + color.mix(T.hex.bg, T.hex.ink, 0.12),
+      });
     };
 
     let resolveReady;
-    const ready = new Promise(r => (resolveReady = r));
+    const ready = new Promise((r) => (resolveReady = r));
     let s;
-    const urls = list.map(p => photoURL(p, 1280));
+    const urls = list.map((p) => photoURL(p, 1280));
     let settled = 0;
-    urls.forEach((u, i) => loadImage(u).then(im => {
-      imgs[i] = im; lvs[i] = levels(im);
-      if (s && s.gl) texes[i] = s.texture(im, { mipmap: true });
-    }).catch(err => console.warn(err.message)).finally(() => {
-      if (++settled < urls.length) return;
-      order = imgs.map((im, k) => (im ? k : -1)).filter(k => k >= 0);
-      if (!order.length) s?.fail();
-      else {
-        layoutPill(); s?.syncPause(); s?.redraw();
-        if (!params.alt) { const al = order.map(k => list[k].alt).filter(Boolean).join('; '); if (al) el.setAttribute('aria-label', al); }
-      }
-      resolveReady();
-    }));
+    urls.forEach((u, i) =>
+      loadImage(u)
+        .then((im) => {
+          imgs[i] = im;
+          lvs[i] = levels(im);
+          if (s && s.gl) texes[i] = s.texture(im, { mipmap: true });
+        })
+        .catch((err) => console.warn(err.message))
+        .finally(() => {
+          if (++settled < urls.length) return;
+          order = imgs.map((im, k) => (im ? k : -1)).filter((k) => k >= 0);
+          if (!order.length) s?.fail();
+          else {
+            layoutPill();
+            s?.syncPause();
+            s?.redraw();
+            if (!params.alt) {
+              const al = order
+                .map((k) => list[k].alt)
+                .filter(Boolean)
+                .join("; ");
+              if (al) el.setAttribute("aria-label", al);
+            }
+          }
+          resolveReady();
+        }),
+    );
 
     s = stage(el, {
-      name: 'photographs',
-      cell: st => params.cell || clamp(Math.min(st.cssW, st.cssH) / 320, 2, 3),
+      name: "photographs",
+      cell: (st) => params.cell || clamp(Math.min(st.cssW, st.cssH) / 320, 2, 3),
       loops: () => autoplay && order.length > 1,
       // a wipe needs no more than 30 frames a second; a hold needs none
       fps: () => 30,
       init(gl, st) {
         prog = st.program(frag);
-        texes = imgs.map(im => (im ? st.texture(im, { mipmap: true }) : null));
-        last = '';
+        texes = imgs.map((im) => (im ? st.texture(im, { mipmap: true }) : null));
+        last = "";
       },
       loaded: () => order.length > 0,
       ready: () => order.length > 0 && !!texes[order[0]],
       pointer(kind, st) {
         const N = order.length;
-        if (kind === 'enter' || kind === 'down') scrubbing = true;
-        if (kind === 'leave') { scrubbing = false; clock = 0; target = Math.round(pos); }
-        if (st.reduced && st.pointer.inside && N) { pos = target = Math.floor(st.pointer.u * N * 0.999); }
+        if (kind === "enter" || kind === "down") scrubbing = true;
+        if (kind === "leave") {
+          scrubbing = false;
+          clock = 0;
+          target = Math.round(pos);
+        }
+        if (st.reduced && st.pointer.inside && N) {
+          pos = target = Math.floor(st.pointer.u * N * 0.999);
+        }
       },
       frame(gl, t, dt, st) {
         const N = order.length;
@@ -175,21 +285,32 @@ export default {
           if (scrubbing && P.inside) {
             // the pointer picks a place on the timeline; the picture follows at a steady pace.
             // Each frame holds for most of its stretch and wipes to the next near its end
-            const at = P.u * N * 0.9999, seg = Math.floor(at), fr = at - seg;
+            const at = P.u * N * 0.9999,
+              seg = Math.floor(at),
+              fr = at - seg;
             const snapped = seg + (seg < N - 1 ? Math.min(1, Math.max(0, (fr - 0.68) / 0.3)) : 0);
             const want = Math.floor((pos + 0.0001) / N) * N + snapped;
-            const d = want - pos, sp = 2.4 * dt;
+            const d = want - pos,
+              sp = 2.4 * dt;
             pos += Math.sign(d) * Math.min(Math.abs(d), sp + Math.abs(d) * 4 * dt);
           } else if (autoplay) {
             clock += dt;
-            if (clock > hold + move) { clock = 0; target = Math.floor(target + 0.001) + 1; }
+            if (clock > hold + move) {
+              clock = 0;
+              target = Math.floor(target + 0.001) + 1;
+            }
             const d = target - pos;
             pos += Math.sign(d) * Math.min(Math.abs(d), dt / move);
           }
         }
-        if (pos > N * 50) { pos -= N * 40; target -= N * 40; }
-        const k = Math.floor(pos), f = pos - k;
-        const ia = ((k % N) + N) % N, ib = (ia + 1) % N;
+        if (pos > N * 50) {
+          pos -= N * 40;
+          target -= N * 40;
+        }
+        const k = Math.floor(pos),
+          f = pos - k;
+        const ia = ((k % N) + N) % N,
+          ib = (ia + 1) % N;
         const p = f < 1e-4 ? 0 : Math.min(1, Math.max(0, (f - 0.02) / 0.96));
         const pe = p * p * (3 - 2 * p);
         const drift = params.drift === 1 && !st.reduced;
@@ -197,47 +318,101 @@ export default {
         const key = `${ia}:${ib}:${pe.toFixed(4)}`;
         if (dt > 0 && !st.dirty && !drift && key === last) return;
         last = key;
-        segs.forEach(([, fill], i) => { fill.style.transform = `scaleX(${i <= ia ? 1 : i === ib ? pe : 0})`; });
+        segs.forEach(([, fill], i) => {
+          fill.style.transform = `scaleX(${i <= ia ? 1 : i === ib ? pe : 0})`;
+        });
         const at = pe > 0.5 ? ib : ia;
-        const c = captionOf(order[at]) ?? String(at + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+        const c =
+          captionOf(order[at]) ??
+          String(at + 1).padStart(2, "0") + " / " + String(N).padStart(2, "0");
         if (cap.textContent !== c) cap.textContent = c;
-        const A = order[ia], B = order[ib];
-        const ta = texes[A], tb = texes[B] || ta;
+        const A = order[ia],
+          B = order[ib];
+        const ta = texes[A],
+          tb = texes[B] || ta;
         if (!ta) return;
-        const contain = params.fit === 'contain';
-        const fitOf = j => {
-          const im = imgs[j], ia_ = im.naturalWidth / im.naturalHeight;
+        const contain = params.fit === "contain";
+        const fitOf = (j) => {
+          const im = imgs[j],
+            ia_ = im.naturalWidth / im.naturalHeight;
           const fo = (params.focus && params.focus[j]) || (list[j] && list[j].focus) || [0.5, 0.5];
-          if (contain) return { fit: [1, 1, 0, 0], cn: (st.w / st.h) > ia_ ? [ia_ / (st.w / st.h), 1] : [1, (st.w / st.h) / ia_] };
+          if (contain)
+            return {
+              fit: [1, 1, 0, 0],
+              cn: st.w / st.h > ia_ ? [ia_ / (st.w / st.h), 1] : [1, st.w / st.h / ia_],
+            };
           return { fit: cover(st.w, st.h, ia_, fo[0], fo[1], 1), cn: [1, 1] };
         };
-        const kOf = j => {
+        const kOf = (j) => {
           if (!drift) return [1, 0, 0, 0];
           const a = t * 0.11 + j * 2.1;
-          return [1.035 + 0.015 * Math.sin(a), 0.006 * Math.sin(a * 0.8 + 1), 0.005 * Math.cos(a * 0.7), 0];
+          return [
+            1.035 + 0.015 * Math.sin(a),
+            0.006 * Math.sin(a * 0.8 + 1),
+            0.005 * Math.cos(a * 0.7),
+            0,
+          ];
         };
-        const fa = fitOf(A), fb = fitOf(B);
+        const fa = fitOf(A),
+          fb = fitOf(B);
         prog.use();
         setTones(gl, prog, T);
-        ta.bind(0); tb.bind(1);
-        prog.int('u_ta', 0).int('u_tb', 1);
-        prog.set('u_res', [st.w, st.h]).set('u_time', t).set('u_seed', 5).set('u_cellPx', st.k)
-          .set('u_fa', fa.fit).set('u_fb', fb.fit).set('u_ca', fa.cn).set('u_cb', fb.cn).set('u_ka', kOf(A)).set('u_kb', kOf(B))
-          .set('u_la', lvs[A]).set('u_lb', lvs[B]).set('u_p', pe).set('u_dark', T.dark ? 1 : 0);
+        ta.bind(0);
+        tb.bind(1);
+        prog.int("u_ta", 0).int("u_tb", 1);
+        prog
+          .set("u_res", [st.w, st.h])
+          .set("u_time", t)
+          .set("u_seed", 5)
+          .set("u_cellPx", st.k)
+          .set("u_fa", fa.fit)
+          .set("u_fb", fb.fit)
+          .set("u_ca", fa.cn)
+          .set("u_cb", fb.cn)
+          .set("u_ka", kOf(A))
+          .set("u_kb", kOf(B))
+          .set("u_la", lvs[A])
+          .set("u_lb", lvs[B])
+          .set("u_p", pe)
+          .set("u_dark", T.dark ? 1 : 0);
         st.fullscreen();
       },
-      fallback: () => fallbackImage(urls[order[0] ?? 0], params.alt || list[0].alt || '', 'cover', list[order[0] ?? 0]?.focus || [0.5, 0.5]),
-      failed() { ctl.style.display = 'none'; },
+      fallback: () =>
+        fallbackImage(
+          urls[order[0] ?? 0],
+          params.alt || list[0].alt || "",
+          "cover",
+          list[order[0] ?? 0]?.focus || [0.5, 0.5],
+        ),
+      failed() {
+        ctl.style.display = "none";
+      },
     });
-    const alt = params.alt || list.map(p => p.alt).filter(Boolean).join('; ');
-    if (alt) { el.setAttribute('role', 'img'); el.setAttribute('aria-label', alt); }
-    el.style.touchAction = 'pan-y';
+    const alt =
+      params.alt ||
+      list
+        .map((p) => p.alt)
+        .filter(Boolean)
+        .join("; ");
+    if (alt) {
+      el.setAttribute("role", "img");
+      el.setAttribute("aria-label", alt);
+    }
+    el.style.touchAction = "pan-y";
     return {
       ready,
-      destroy() { s.destroy(); ctl.remove(); },
+      destroy() {
+        s.destroy();
+        ctl.remove();
+      },
       pause: () => s.pause(),
       resume: () => s.resume(),
-      setPalette(p) { if (p !== undefined) given = p; T = tones(paletteOf(el, given)); style(); s.redraw(); },
+      setPalette(p) {
+        if (p !== undefined) given = p;
+        T = tones(paletteOf(el, given));
+        style();
+        s.redraw();
+      },
     };
   },
 };

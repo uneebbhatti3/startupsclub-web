@@ -17,23 +17,23 @@ kinds it suits (`types`: software, tech, gaming, product, service); `demo.html` 
 
 ## Pick a layout and a preset
 
-| layout | shows | presets |
-|---|---|---|
-| `hub` | a centre and its tools; with `children` a mind map, or a web with `"shape": "radial"` | hub-tools, hub-branches, hub-web, hub-stack (tech), hub-stores (gaming) |
-| `ring` | logos or regions on an orbit | ring-apps, ring-regions, ring-edge (tech), ring-servers (gaming) |
-| `tree` | one thing branching out | tree-orders, tree-release (tech) |
-| `lanes` | one input, a core, parallel lanes (three threads) | lanes-agent, lanes-media, lanes-deploy, lanes-render (tech), lanes-matchmaking (gaming) |
-| `fanin`, `bowtie` | many into one; and out to many | fanin-warehouse, fanin-telemetry (tech), bowtie-events, bowtie-model (tech) |
-| `sync` | two systems, records crossing | sync-crm, sync-saves (gaming) |
-| `timeline` | steps done in turn | timeline-onboarding, timeline-season (gaming) |
-| `grid` | files into a pipeline | grid-documents, grid-assets (gaming) |
-| `free` | your own nodes and edges | free-approval |
+| layout            | shows                                                                                 | presets                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `hub`             | a centre and its tools; with `children` a mind map, or a web with `"shape": "radial"` | hub-tools, hub-branches, hub-web, hub-stack (tech), hub-stores (gaming)                 |
+| `ring`            | logos or regions on an orbit                                                          | ring-apps, ring-regions, ring-edge (tech), ring-servers (gaming)                        |
+| `tree`            | one thing branching out                                                               | tree-orders, tree-release (tech)                                                        |
+| `lanes`           | one input, a core, parallel lanes (three threads)                                     | lanes-agent, lanes-media, lanes-deploy, lanes-render (tech), lanes-matchmaking (gaming) |
+| `fanin`, `bowtie` | many into one; and out to many                                                        | fanin-warehouse, fanin-telemetry (tech), bowtie-events, bowtie-model (tech)             |
+| `sync`            | two systems, records crossing                                                         | sync-crm, sync-saves (gaming)                                                           |
+| `timeline`        | steps done in turn                                                                    | timeline-onboarding, timeline-season (gaming)                                           |
+| `grid`            | files into a pipeline                                                                 | grid-documents, grid-assets (gaming)                                                    |
+| `free`            | your own nodes and edges                                                              | free-approval                                                                           |
 
 Filter by kind: `dg.presets()` gives the object; keep the ones whose `types` has the page's kind. Gaming and tech pages take the tech
 and gaming presets with pulses; a product or service page takes at most one, held still.
 
 ```html
-<link rel="stylesheet" href="assets/diagrams/diagram.css">
+<link rel="stylesheet" href="assets/diagrams/diagram.css" />
 <div class="panel"><div class="dg" data-diagram="lanes-agent"></div></div>
 <script type="module" src="assets/diagrams/mount.js"></script>
 ```
@@ -42,7 +42,13 @@ Copy a preset into `data-diagram='{...}'`, then rename every label, icon and num
 or a quote (`it's`) ends a single-quoted attribute, so then put the spec in a script inside the element:
 
 ```html
-<div class="panel"><div class="dg" data-diagram><script type="application/json">{"layout": "hub", ...}</script></div></div>
+<div class="panel">
+  <div class="dg" data-diagram>
+    <script type="application/json">
+      {"layout": "hub", ...}
+    </script>
+  </div>
+</div>
 ```
 
 A spec that does not parse logs a `console.error` and leaves only the names it could read.

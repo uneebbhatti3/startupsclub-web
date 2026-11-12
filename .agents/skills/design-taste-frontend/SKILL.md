@@ -63,14 +63,14 @@ a place adds `<meta name="page-kind" content="place">`. The dealers take the las
 (`start.mjs --page`, `moments.mjs --page`), the hero dealer the page type; `consistency.mjs` reads
 the metas.
 
-| Brief | page type | site-kind | kind |
-|---|---|---|---|
-| App, SaaS, AI, developer tool, fintech or banking app, a studio selling its own software | software | software | software |
-| A game, a studio launching its game | software | gaming | gaming |
-| Hardware or a tech device (a drone, a robot arm, a keyboard) | product | tech | tech |
-| Any other physical product or brand (a chair, a bike, coffee beans sold online) | product | other | product |
-| People are hired: clinic, law firm, agency, creative studio, trade | service | other | service |
-| People come to it: cafe, bar, bakery, restaurant, guesthouse, small hotel, shop, florist, bike shop, gym, local studio | place | other | place |
+| Brief                                                                                                                  | page type | site-kind | kind     |
+| ---------------------------------------------------------------------------------------------------------------------- | --------- | --------- | -------- |
+| App, SaaS, AI, developer tool, fintech or banking app, a studio selling its own software                               | software  | software  | software |
+| A game, a studio launching its game                                                                                    | software  | gaming    | gaming   |
+| Hardware or a tech device (a drone, a robot arm, a keyboard)                                                           | product   | tech      | tech     |
+| Any other physical product or brand (a chair, a bike, coffee beans sold online)                                        | product   | other     | product  |
+| People are hired: clinic, law firm, agency, creative studio, trade                                                     | service   | other     | service  |
+| People come to it: cafe, bar, bakery, restaurant, guesthouse, small hotel, shop, florist, bike shop, gym, local studio | place     | other     | place    |
 
 A maker that also opens its door or teaches (a ceramics studio, a bakery with a web shop) is a
 **place**; its web shop becomes the goods section. It is a product only when nothing happens at the door.
@@ -132,26 +132,26 @@ The full plans, deal lists and section order: `references/sections.md`.
 
 Open the reference of every asset family the page uses first. A dash means never.
 
-| Need | Asset | Software, gaming | Hardware | Product, service | Place | Reference |
-|---|---|---|---|---|---|---|
-| Heights, edges, heroes, type | `system.css`, `assets/layout` | dealt hero | dealt hero | dealt hero | place hero | `layout-v4.md` |
-| Sections and recipes | `starter.html` | its plan | product plan | its plan | place plan | `sections.md`, `sections-library.md` |
-| Tokens, grid, buttons, nav, footer, colour | `system.css`, `system.js` | yes | yes | yes | place tokens | `system.md` |
-| Forms, keyboard, head and share tags | `starter.html`, `system.css`, `system.js` | yes | yes | yes | yes | `system.md` |
-| Copy, contacts, credits | `scripts/copy-lint.mjs` | yes | yes | yes | yes | `copy.md`, `copy-voice.md` |
-| Hero entrance, hover, press, focus, nav, tabs | `assets/motion` | yes | yes | yes | yes | `motion.md` |
-| Card loops, a count | `assets/motion`, `assets/ui` | yes | yes | - | - | `motion.md`, `cards.md` |
-| Photographs | `scripts/photos.mjs` | people, customers; a game's art, else stand-ins of its setting | lead | lead | lead, 12-20 | `photos.md` |
-| Real tool, app and file icons | `scripts/icons.mjs` | yes | yes | tools really used | - | `icons.md` |
-| Feature cards, UI fragments | `assets/ui` | lead (gaming: none) | its app | an app the client runs | - | `cards.md` |
-| Diagram cards (hub, lanes, pulses) | `assets/diagrams` | 0-2, pulsing | 0-2, pulsing | 0-1, still | - | `diagrams.md` |
-| CSS grounds | `assets/backgrounds` | 0-2 dealt | 0-2 dealt | flat tokens | flat tokens | `backgrounds.md` |
-| Shader grounds | `assets/effects` | the one effect | the one effect | - | - | `effects-usage.md` |
-| Creative parts (`fx-*`) | `assets/components` | yes | yes | `fx-photo` plain, `fx-map` still | `fx-map` still | `effects-creative.md` |
-| Objects and prints | `assets/objects` | one, as the effect; a render when the brief asks for 3D | its render when the brief asks for 3D | its render when the brief asks for 3D | - | `effects-objects.md` |
-| Award-site moments | `assets/moments` | 1-2 | 1-2 | 1-2 (photo, type) | 1-2 (photo, type) | `moments.md` |
-| Big scenes | `assets/scenes` | 0-1 | 0-1 | - | - | `scenes.md` |
-| Speed and weight | `scripts/perf.mjs` | yes | yes | yes | yes | `perf.md` |
+| Need                                          | Asset                                     | Software, gaming                                               | Hardware                              | Product, service                      | Place             | Reference                            |
+| --------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- | ------------------------------------- | ------------------------------------- | ----------------- | ------------------------------------ |
+| Heights, edges, heroes, type                  | `system.css`, `assets/layout`             | dealt hero                                                     | dealt hero                            | dealt hero                            | place hero        | `layout-v4.md`                       |
+| Sections and recipes                          | `starter.html`                            | its plan                                                       | product plan                          | its plan                              | place plan        | `sections.md`, `sections-library.md` |
+| Tokens, grid, buttons, nav, footer, colour    | `system.css`, `system.js`                 | yes                                                            | yes                                   | yes                                   | place tokens      | `system.md`                          |
+| Forms, keyboard, head and share tags          | `starter.html`, `system.css`, `system.js` | yes                                                            | yes                                   | yes                                   | yes               | `system.md`                          |
+| Copy, contacts, credits                       | `scripts/copy-lint.mjs`                   | yes                                                            | yes                                   | yes                                   | yes               | `copy.md`, `copy-voice.md`           |
+| Hero entrance, hover, press, focus, nav, tabs | `assets/motion`                           | yes                                                            | yes                                   | yes                                   | yes               | `motion.md`                          |
+| Card loops, a count                           | `assets/motion`, `assets/ui`              | yes                                                            | yes                                   | -                                     | -                 | `motion.md`, `cards.md`              |
+| Photographs                                   | `scripts/photos.mjs`                      | people, customers; a game's art, else stand-ins of its setting | lead                                  | lead                                  | lead, 12-20       | `photos.md`                          |
+| Real tool, app and file icons                 | `scripts/icons.mjs`                       | yes                                                            | yes                                   | tools really used                     | -                 | `icons.md`                           |
+| Feature cards, UI fragments                   | `assets/ui`                               | lead (gaming: none)                                            | its app                               | an app the client runs                | -                 | `cards.md`                           |
+| Diagram cards (hub, lanes, pulses)            | `assets/diagrams`                         | 0-2, pulsing                                                   | 0-2, pulsing                          | 0-1, still                            | -                 | `diagrams.md`                        |
+| CSS grounds                                   | `assets/backgrounds`                      | 0-2 dealt                                                      | 0-2 dealt                             | flat tokens                           | flat tokens       | `backgrounds.md`                     |
+| Shader grounds                                | `assets/effects`                          | the one effect                                                 | the one effect                        | -                                     | -                 | `effects-usage.md`                   |
+| Creative parts (`fx-*`)                       | `assets/components`                       | yes                                                            | yes                                   | `fx-photo` plain, `fx-map` still      | `fx-map` still    | `effects-creative.md`                |
+| Objects and prints                            | `assets/objects`                          | one, as the effect; a render when the brief asks for 3D        | its render when the brief asks for 3D | its render when the brief asks for 3D | -                 | `effects-objects.md`                 |
+| Award-site moments                            | `assets/moments`                          | 1-2                                                            | 1-2                                   | 1-2 (photo, type)                     | 1-2 (photo, type) | `moments.md`                         |
+| Big scenes                                    | `assets/scenes`                           | 0-1                                                            | 0-1                                   | -                                     | -                 | `scenes.md`                          |
+| Speed and weight                              | `scripts/perf.mjs`                        | yes                                                            | yes                                   | yes                                   | yes               | `perf.md`                            |
 
 Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` in full before the first page.
 
@@ -218,7 +218,7 @@ Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` i
    widest view across the wrap, no box); a game without art files passes `--has setting` (the
    `photo` hero, its name over a stand-in of its setting; a game always passes `--has`). A product
    page is dealt only the product, photo and film heroes. A place's hero is printed, never dealt (`--type
-   place`). A dealt part that needs a photograph the page lacks is dealt again (`sections.md` section 2). Take the
+place`). A dealt part that needs a photograph the page lacks is dealt again (`sections.md` section 2). Take the
    first palette and the first pairing printed (the next only when the first clashes with the
    client's own logo or photographs, or the pairing fails `hero-lines`, said on plan line 2); the client's own colours go through
    `start.mjs brand` instead (`sections.md` section 4, Look); never violet: deal again. Keep the `:root` block as printed. Radius: `sharp` for fintech and developer tools, `soft` by default,
@@ -268,7 +268,7 @@ Read `copy.md`, `copy-voice.md`, `system.md`, `layout-v4.md` and `sections.md` i
    copy-lint opens no browser and takes under a second. Fix every FAIL (a copy-lint WARN too, or say
    why it stays) and read the copy aloud (`copy-voice.md` section 6); shoot again and read every
    screenshot against the checklist. In the fix rounds run `consistency.mjs --quick --widths
-   1440,390`. Then the gate, which runs the checker at 1440 and 390 every time, walks the page at 320
+1440,390`. Then the gate, which runs the checker at 1440 and 390 every time, walks the page at 320
    for overflow, collide and tap-size, and runs copy-lint, whose FAILs block like the checker's:
 
    ```bash

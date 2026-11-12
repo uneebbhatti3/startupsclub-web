@@ -10,7 +10,7 @@ and loop number: `motion.md`.
 ## Base
 
 - `*{box-sizing:border-box}`, `html,body{margin:0}` and `<meta name="viewport" content="width=device-width,
-  initial-scale=1, viewport-fit=cover">` (without the reset the hero ends at 908 and `.wrap` at x 88).
+initial-scale=1, viewport-fit=cover">` (without the reset the hero ends at 908 and `.wrap` at x 88).
 - Spacing scale 4, 8, 12, 16, 24, 32, 48, 64, 96, 128 (`--s-1` to `--s-10`) for every margin, gap
   and padding you write. Heading to content 48px (32 on a phone); cards 24px apart (12).
 - One height per card row and per tile kind, page-wide; sections at H or 2H.
@@ -26,15 +26,15 @@ and loop number: `motion.md`.
 
 On `:root`, used everywhere (desktop / under 640px):
 
-| Token | Value | Use |
-|---|---|---|
-| `--nav` | 72 / 56 | the fixed header |
-| `--padt` | 120 / 96 | a section's top padding: the h2 sits here |
-| `--padb` | 72 / 48 | a section's bottom padding (plus `--bar`) |
-| `--gut` | 80 / 24 (place 120 from 1024) | the `.wrap`'s side margin: 1280 wide, 1200 on a place |
-| `--hgap` | 48 / 40 (place 40 / 24) | the header to the hero's words, under `--photo` on a place |
-| `--hpadb` | 64 / 24 | the hero's bottom padding (plus `--bar`) |
-| `--bar` | 0, or `calc(64px + env(safe-area-inset-bottom))` with `nav.actionbar` under 640 | added to every bottom padding (the hero's only without script: the bar is never on the first screen); content is never cut to hide behind the bar |
+| Token     | Value                                                                           | Use                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--nav`   | 72 / 56                                                                         | the fixed header                                                                                                                                  |
+| `--padt`  | 120 / 96                                                                        | a section's top padding: the h2 sits here                                                                                                         |
+| `--padb`  | 72 / 48                                                                         | a section's bottom padding (plus `--bar`)                                                                                                         |
+| `--gut`   | 80 / 24 (place 120 from 1024)                                                   | the `.wrap`'s side margin: 1280 wide, 1200 on a place                                                                                             |
+| `--hgap`  | 48 / 40 (place 40 / 24)                                                         | the header to the hero's words, under `--photo` on a place                                                                                        |
+| `--hpadb` | 64 / 24                                                                         | the hero's bottom padding (plus `--bar`)                                                                                                          |
+| `--bar`   | 0, or `calc(64px + env(safe-area-inset-bottom))` with `nav.actionbar` under 640 | added to every bottom padding (the hero's only without script: the bar is never on the first screen); content is never cut to hide behind the bar |
 
 Grid: `.grid` is 12 columns with a 24px gap (12 under 640); the column numbers are in
 `layout-v4.md` section 4. A picture wall is its own grid with a gap of 0 or 2px (page CSS
@@ -50,7 +50,7 @@ under the h2). A place sets `--t-h2: clamp(24px, .762vw + 21px, 32px)`.
 - Text people read (sub-lines, card lines, list items, answers) is 16px or more, line height 1.5 to
   1.8, in `--ink` at 7:1 or more. `--muted` (4.5:1 or more) only for labels, dates, meta and a
   heading's grey run-on: `<h2>Send invoices in minutes. <span class="muted">Clients pay by
-  card.</span></h2>`. Large text (24px+) in a muted half or an inactive row 3:1 at least. On a place
+card.</span></h2>`. Large text (24px+) in a muted half or an inactive row 3:1 at least. On a place
   every text is 4.5:1 or more, and every word on the brand band 7:1. Never 14px paragraphs or 15px grey card text.
 - The hero has one quieter level of small text at most (a grey fact line, or a pill above the h1).
 - Highlight by contrast, never by colour: no marker highlights or coloured bars behind words; colour
@@ -111,7 +111,7 @@ under the h2). A place sets `--t-h2: clamp(24px, .762vw + 21px, 32px)`.
   `nav nav--split`; `nav--tone` puts the bar on the inverse ground (tech).
 - The logo: the client's SVG; else the dealt mark and the name at 20px in the display face
   (each kind deals from its own list in `sections.md`: `<span class="mark"
-  data-mark="arc|ring|stack|dots|petal|leaf">`, `<span class="mark mark--initial">K</span>`, or the
+data-mark="arc|ring|stack|dots|petal|leaf">`, `<span class="mark mark--initial">K</span>`, or the
   name alone for `wordmark`). The footer repeats it.
 - Four to six plain one-word nouns (ST-09; a place: Menu, Rooms, Workshop, Visit, About) at
   15px/500 that never wrap, each with its own anchor; a second action as a plain word only when the client has one

@@ -104,18 +104,18 @@ These look like good copy, which is why they survive review.
 
 ## Over-correction: what the rules themselves produce
 
-| Rule applied | Habit it breeds | Counter |
-| --- | --- | --- |
-| No em dashes | Comma splices, full stops only | colons, brackets, semicolons where natural |
-| No "not X but Y" | "rather than", "instead of", "without the" | count them together; state the positive |
-| No hype words | calm vocabulary: quietly, steady, honest, practical | a fact in place of any adjective |
-| Avoid threes | everything in pairs | list as many items as there are |
-| Be specific | invented numbers and anecdotes | the fact sheet, or a plainer line |
-| Short, punchy sentences | a drumbeat of fragments | one sentence a section may run long |
-| End strong | a moral or a quip on every paragraph | end on information |
-| Add personality | a joke in every section | a humour budget, spent in the microcopy |
-| Vary section length | one huge and one tiny section on every page | length follows the material |
-| One rule pack on every page | a new uniform house style | the sameness check across pages |
+| Rule applied                | Habit it breeds                                     | Counter                                    |
+| --------------------------- | --------------------------------------------------- | ------------------------------------------ |
+| No em dashes                | Comma splices, full stops only                      | colons, brackets, semicolons where natural |
+| No "not X but Y"            | "rather than", "instead of", "without the"          | count them together; state the positive    |
+| No hype words               | calm vocabulary: quietly, steady, honest, practical | a fact in place of any adjective           |
+| Avoid threes                | everything in pairs                                 | list as many items as there are            |
+| Be specific                 | invented numbers and anecdotes                      | the fact sheet, or a plainer line          |
+| Short, punchy sentences     | a drumbeat of fragments                             | one sentence a section may run long        |
+| End strong                  | a moral or a quip on every paragraph                | end on information                         |
+| Add personality             | a joke in every section                             | a humour budget, spent in the microcopy    |
+| Vary section length         | one huge and one tiny section on every page         | length follows the material                |
+| One rule pack on every page | a new uniform house style                           | the sameness check across pages            |
 
 ## Not tells (leave them alone)
 

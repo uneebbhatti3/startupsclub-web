@@ -20,29 +20,60 @@
   A statement of up to about 28 letters reads best (two to five words).
 */
 export default function (root, opts, lib) {
-  const type = root.querySelector(opts.heading || '.mo-la__type, h2, h1');
+  const type = root.querySelector(opts.heading || ".mo-la__type, h2, h1");
   if (!type) return {};
-  root.classList.add('mo-la');
-  if (lib.reduced()) { root.classList.add('is-done'); return {}; }
-  const chars = lib.split(type, 'chars');
+  root.classList.add("mo-la");
+  if (lib.reduced()) {
+    root.classList.add("is-done");
+    return {};
+  }
+  const chars = lib.split(type, "chars");
   if (!chars.length) return {};
-  const spread = lib.clamp(+opts.spread || 1, 0.4, 1.6), from = opts.from ?? 1, to = opts.to ?? 0.5;
+  const spread = lib.clamp(+opts.spread || 1, 0.4, 1.6),
+    from = opts.from ?? 1,
+    to = opts.to ?? 0.5;
   // every letter has its own fixed start, from a small seeded generator: the same line scatters the same way every time
   let a = 0x9e3779b1;
-  const rnd = () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const rnd = () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
   const n = chars.length;
-  const seeds = chars.map((_, i) => ({ x: (rnd() * 2 - 1) * 1.5 * spread, y: (0.5 + rnd() * 1.3) * (rnd() < 0.55 ? 1 : -1) * spread, r: (rnd() * 2 - 1) * 46 * spread, at: (i / Math.max(1, n - 1)) * 0.5 }));
-  root.classList.add('is-live');
-  const s = lib.scrub(type, (p, r) => {
-    const vh = innerHeight;
-    const t = lib.clamp((vh * from - r.top) / Math.max(1, vh * (from - to)));
-    chars.forEach((c, i) => {
-      const k = seeds[i];
-      const e = lib.ease.quint(lib.clamp((t - k.at * 0.6) / 0.4));
-      const u = 1 - e;
-      c.style.transform = u < 0.002 ? '' : `translate(${(k.x * u).toFixed(3)}em, ${(k.y * u).toFixed(3)}em) rotate(${(k.r * u).toFixed(2)}deg)`;
-      c.style.opacity = u < 0.002 ? '' : (0.08 + 0.92 * e).toFixed(3);
-    });
-  }, { mode: 'view', margin: '30% 0px' });
-  return { destroy() { s.destroy(); chars.forEach(c => { c.style.transform = ''; c.style.opacity = ''; }); root.classList.remove('is-live'); } };
+  const seeds = chars.map((_, i) => ({
+    x: (rnd() * 2 - 1) * 1.5 * spread,
+    y: (0.5 + rnd() * 1.3) * (rnd() < 0.55 ? 1 : -1) * spread,
+    r: (rnd() * 2 - 1) * 46 * spread,
+    at: (i / Math.max(1, n - 1)) * 0.5,
+  }));
+  root.classList.add("is-live");
+  const s = lib.scrub(
+    type,
+    (p, r) => {
+      const vh = innerHeight;
+      const t = lib.clamp((vh * from - r.top) / Math.max(1, vh * (from - to)));
+      chars.forEach((c, i) => {
+        const k = seeds[i];
+        const e = lib.ease.quint(lib.clamp((t - k.at * 0.6) / 0.4));
+        const u = 1 - e;
+        c.style.transform =
+          u < 0.002
+            ? ""
+            : `translate(${(k.x * u).toFixed(3)}em, ${(k.y * u).toFixed(3)}em) rotate(${(k.r * u).toFixed(2)}deg)`;
+        c.style.opacity = u < 0.002 ? "" : (0.08 + 0.92 * e).toFixed(3);
+      });
+    },
+    { mode: "view", margin: "30% 0px" },
+  );
+  return {
+    destroy() {
+      s.destroy();
+      chars.forEach((c) => {
+        c.style.transform = "";
+        c.style.opacity = "";
+      });
+      root.classList.remove("is-live");
+    },
+  };
 }

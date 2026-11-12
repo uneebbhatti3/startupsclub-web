@@ -6,5 +6,9 @@ coverage
 playwright-report
 test-results
 package-lock.json
-public
-src/components/ui
+
+# Google Search Console ownership file: must stay byte-for-byte as issued.
+public/google*.html
+
+# Skill templates are filled by exact string replacement (scripts/effects.mjs); reformatting breaks them.
+.agents/**/*.template.html

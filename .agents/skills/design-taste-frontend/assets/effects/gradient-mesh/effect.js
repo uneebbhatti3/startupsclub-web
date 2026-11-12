@@ -3,24 +3,24 @@
 // warp folds the plane and the fold is lit, so the folds read. With `lines` set, the warped grid that
 // shapes it is drawn over it in thin lines with small points at the joins, like a mesh in a design
 // tool, bunching where the surface folds. By default there is no grid.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  speed:    { default: 0.06, min: 0,   max: 0.4, step: 0.01 }, // drift; 0.06 gives cycles of about 30 s
-  lines:    { default: 0,    min: 0,   max: 16,  step: 1 },    // grid lines across the height; 0 (the default) for none, 6 to 10 for a design-tool mesh
-  warp:     { default: 0.65, min: 0,   max: 1,   step: 0.01 }, // how deeply the plane folds
-  relief:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // light and shade on the folds
-  softness: { default: 0.55, min: 0,   max: 1,   step: 0.01 }, // 0 distinct islands .. 1 long blends
-  joins:    { default: 1,    min: 0,   max: 1,   step: 1 },    // small points where the grid lines meet
-  angle:    { default: -12,  min: -90, max: 90,  step: 1 },    // turns the mesh, degrees
-  tint:     { default: 0.6,  min: 0,   max: 1,   step: 0.01 }, // how strong the accent islands are
-  calm:     { default: 0.4,  min: 0,   max: 1,   step: 0.01 }, // quieter area of the ground where text sits
-  calmX:    { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:    { default: 0.7,  min: 0,   max: 1,   step: 0.01 },
+  speed: { default: 0.06, min: 0, max: 0.4, step: 0.01 }, // drift; 0.06 gives cycles of about 30 s
+  lines: { default: 0, min: 0, max: 16, step: 1 }, // grid lines across the height; 0 (the default) for none, 6 to 10 for a design-tool mesh
+  warp: { default: 0.65, min: 0, max: 1, step: 0.01 }, // how deeply the plane folds
+  relief: { default: 0.5, min: 0, max: 1, step: 0.01 }, // light and shade on the folds
+  softness: { default: 0.55, min: 0, max: 1, step: 0.01 }, // 0 distinct islands .. 1 long blends
+  joins: { default: 1, min: 0, max: 1, step: 1 }, // small points where the grid lines meet
+  angle: { default: -12, min: -90, max: 90, step: 1 }, // turns the mesh, degrees
+  tint: { default: 0.6, min: 0, max: 1, step: 0.01 }, // how strong the accent islands are
+  calm: { default: 0.4, min: 0, max: 1, step: 0.01 }, // quieter area of the ground where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const N = 12;
-const ADD = Array.from({ length: N }, (_, i) => `  MESH_ADD(u_q${i}, u_k${i}, ${i}.0)`).join('\n');
+const ADD = Array.from({ length: N }, (_, i) => `  MESH_ADD(u_q${i}, u_k${i}, ${i}.0)`).join("\n");
 
 const frag = /* glsl */ `
 // the warp in two octaves; its slopes are taken from the broad octave only (half the cost)
@@ -90,7 +90,7 @@ ${ADD}
 }
 `;
 
-const L = c => color.lab(c)[0];
+const L = (c) => color.lab(c)[0];
 const at = (c, l) => color.withLightness(c, Math.min(0.98, Math.max(0.04, l)));
 const sat = (c, k) => color.saturate(c, k);
 
@@ -103,43 +103,64 @@ function tones(P, prm, kind) {
   const Lb = L(bg);
   const neutral = color.chroma(bg) < 0.035;
   const far = !neutral && color.chroma(accent) > 0.035 && color.hueDistance(bg, accent) > 55;
-  if (kind === 'dark') {
+  if (kind === "dark") {
     const acc = far ? at(sat(bg, 1.8), 0.6) : accent;
     const La = Math.max(0.55, L(acc));
     const k = [
-      color.mix(bg, surface, 0.4),                                   // ground
-      sat(color.mix(acc, ink, 0.55), 0.8),                           // ice, the highlight
-      sat(at(acc, La - 0.04 * (1 - tn)), 1.05),                      // accent
-      sat(at(color.mix(acc, muted, 0.3), Lb + 0.3), 0.9),            // slate accent
-      sat(at(acc, Lb + 0.07), 1.2),                                  // deep accent
-      sat(at(color.mix(bg, acc, 0.5), Lb + 0.18), 1.0),              // middle
+      color.mix(bg, surface, 0.4), // ground
+      sat(color.mix(acc, ink, 0.55), 0.8), // ice, the highlight
+      sat(at(acc, La - 0.04 * (1 - tn)), 1.05), // accent
+      sat(at(color.mix(acc, muted, 0.3), Lb + 0.3), 0.9), // slate accent
+      sat(at(acc, Lb + 0.07), 1.2), // deep accent
+      sat(at(color.mix(bg, acc, 0.5), Lb + 0.18), 1.0), // middle
     ];
-    return { k, hi: color.mix(acc, ink, 0.75), lo: at(bg, Math.max(0.02, Lb - 0.03)), ground: k[0], line: color.mix(ink, acc, 0.25), lineA: 0.2 };
+    return {
+      k,
+      hi: color.mix(acc, ink, 0.75),
+      lo: at(bg, Math.max(0.02, Lb - 0.03)),
+      ground: k[0],
+      line: color.mix(ink, acc, 0.25),
+      lineA: 0.2,
+    };
   }
-  if (kind === 'colour') {
+  if (kind === "colour") {
     const light = L(ink) > Lb ? ink : sat(color.lighten(bg, Math.min(0.2, 0.98 - Lb)), 0.5);
     const acc = far ? color.mix(bg, light, 0.3) : accent;
     const k = [
-      bg,                                                            // ground
-      color.mix(bg, light, 0.72),                                    // pale highlight
-      sat(color.mix(bg, acc, 0.45 + 0.35 * tn), 1.05),               // accent or a light step
-      sat(color.lighten(bg, 0.07), 1.1),                             // bright ground
-      sat(color.lighten(bg, -0.16), 1.0),                            // deep
-      color.mix(bg, light, 0.35),                                    // middle
+      bg, // ground
+      color.mix(bg, light, 0.72), // pale highlight
+      sat(color.mix(bg, acc, 0.45 + 0.35 * tn), 1.05), // accent or a light step
+      sat(color.lighten(bg, 0.07), 1.1), // bright ground
+      sat(color.lighten(bg, -0.16), 1.0), // deep
+      color.mix(bg, light, 0.35), // middle
     ];
-    return { k, hi: color.mix(bg, light, 0.85), lo: color.lighten(bg, -0.22), ground: bg, line: light, lineA: 0.24 };
+    return {
+      k,
+      hi: color.mix(bg, light, 0.85),
+      lo: color.lighten(bg, -0.22),
+      ground: bg,
+      line: light,
+      lineA: 0.24,
+    };
   }
   const acc = far ? at(sat(bg, 1.4), Lb - 0.25) : accent;
   const La = Math.min(Lb - 0.25, Math.max(0.42, L(acc)));
   const k = [
-    sat(color.lighten(bg, 0.02), 1.05),                              // ground
-    sat(at(bg, Math.min(0.985, Lb + 0.085)), 0.6),                   // highlight, near white
-    sat(at(acc, La + 0.05 * (1 - tn)), 1.05),                        // accent
-    sat(color.mix(bg, acc, 0.42), 1.25),                             // accent light
-    sat(at(acc, La - 0.12), 1.0),                                    // deep accent (a shade, not ink: no mud)
-    sat(color.lighten(bg, -0.075), 1.7),                             // a deeper step of the ground
+    sat(color.lighten(bg, 0.02), 1.05), // ground
+    sat(at(bg, Math.min(0.985, Lb + 0.085)), 0.6), // highlight, near white
+    sat(at(acc, La + 0.05 * (1 - tn)), 1.05), // accent
+    sat(color.mix(bg, acc, 0.42), 1.25), // accent light
+    sat(at(acc, La - 0.12), 1.0), // deep accent (a shade, not ink: no mud)
+    sat(color.lighten(bg, -0.075), 1.7), // a deeper step of the ground
   ];
-  return { k, hi: at(bg, Math.min(0.99, Lb + 0.1)), lo: sat(at(acc, La - 0.16), 0.9), ground: k[0], line: color.mix(ink, acc, 0.3), lineA: 0.16 };
+  return {
+    k,
+    hi: at(bg, Math.min(0.99, Lb + 0.1)),
+    lo: sat(at(acc, La - 0.16), 0.9),
+    ground: k[0],
+    line: color.mix(ink, acc, 0.3),
+    lineA: 0.16,
+  };
 }
 
 // the tone of each grid point: the ground near the calm area, then the others dealt so that no two
@@ -150,16 +171,20 @@ function uniforms({ palette, params, rng, kind, width, height }) {
   const T = tones(palette, params, kind);
   const asp = width && height ? width / height : 4 / 3;
   const a = (params.angle * Math.PI) / 180;
-  const C = 4, R = 3, sx = (asp * 1.2) / C, sy = 1.2 / R;
+  const C = 4,
+    R = 3,
+    sx = (asp * 1.2) / C,
+    sy = 1.2 / R;
   const pts = [];
-  for (let j = 0; j < R; j++) for (let i = 0; i < C; i++) {
-    let x = ((i + 0.5) / C - 0.5) * asp * 1.2 + (r() - 0.5) * sx * 0.5;
-    let y = ((j + 0.5) / R - 0.5) * 1.2 + (r() - 0.5) * sy * 0.5;
-    [x, y] = [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
-    pts.push([x, y]);
-  }
+  for (let j = 0; j < R; j++)
+    for (let i = 0; i < C; i++) {
+      let x = ((i + 0.5) / C - 0.5) * asp * 1.2 + (r() - 0.5) * sx * 0.5;
+      let y = ((j + 0.5) / R - 0.5) * 1.2 + (r() - 0.5) * sy * 0.5;
+      [x, y] = [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+      pts.push([x, y]);
+    }
   const calm = [(params.calmX - 0.5) * asp, 0.5 - params.calmY];
-  const dist = s => Math.hypot(s[0] - calm[0], s[1] - calm[1]);
+  const dist = (s) => Math.hypot(s[0] - calm[0], s[1] - calm[1]);
   const off = Math.floor(r() * DEAL.length);
   const tone = pts.map((s, n) => DEAL[(n + off) % DEAL.length]);
   // the point nearest the calm area holds the ground, and so does a close neighbour of it
@@ -171,20 +196,23 @@ function uniforms({ palette, params, rng, kind, width, height }) {
   const u = {
     u_sigma: Math.min(sx, sy) * 0.4,
     u_rot: [Math.cos(ga), Math.sin(ga)],
-    u_hi: color.labVec(T.hi), u_lo: color.labVec(T.lo), u_ground: color.labVec(T.ground),
-    u_line: color.labVec(T.line), u_lineA: T.lineA,
+    u_hi: color.labVec(T.hi),
+    u_lo: color.labVec(T.lo),
+    u_ground: color.labVec(T.ground),
+    u_line: color.labVec(T.line),
+    u_lineA: T.lineA,
   };
   pts.forEach((s, n) => {
-    u['u_q' + n] = [s[0], s[1], r() * 6.283, 0.05 + 0.05 * r()];
-    u['u_k' + n] = color.labVec(T.k[tone[n]]);
+    u["u_q" + n] = [s[0], s[1], r() * 6.283, 0.05 + 0.05 * r()];
+    u["u_k" + n] = color.labVec(T.k[tone[n]]);
   });
   return u;
 }
 
 export default {
-  id: 'gradient-mesh',
-  name: 'Gradient mesh',
-  family: 'mesh',
+  id: "gradient-mesh",
+  name: "Gradient mesh",
+  family: "mesh",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -199,10 +227,13 @@ export default {
       fallback: ({ palette: P, params: prm, kind }) => {
         const T = tones(P, prm, kind);
         const k = T.k;
-        const cx = Math.round(prm.calmX * 100), cy = Math.round(prm.calmY * 100);
+        const cx = Math.round(prm.calmX * 100),
+          cy = Math.round(prm.calmY * 100);
         const ln = color.mix(k[0], T.line, T.lineA);
         const cell = prm.lines > 0 ? Math.round(400 / prm.lines) : 0;
-        const grid = cell ? `repeating-linear-gradient(0deg, ${ln} 0 1px, transparent 1px ${cell}px), repeating-linear-gradient(90deg, ${ln} 0 1px, transparent 1px ${cell}px), ` : '';
+        const grid = cell
+          ? `repeating-linear-gradient(0deg, ${ln} 0 1px, transparent 1px ${cell}px), repeating-linear-gradient(90deg, ${ln} 0 1px, transparent 1px ${cell}px), `
+          : "";
         // a still patchwork of the mesh tones under a straight grid, the ground where the calm area is
         return `${grid}radial-gradient(38% 50% at ${cx}% ${cy}%, ${k[0]}, transparent 75%), radial-gradient(40% 55% at ${100 - cx}% ${100 - cy}%, ${k[2]}, transparent 72%), radial-gradient(36% 48% at ${(cx + 50) % 100}% ${cy}%, ${k[1]}, transparent 72%), radial-gradient(42% 50% at ${100 - cx}% ${cy}%, ${k[4]}, transparent 72%), radial-gradient(40% 52% at ${cx}% ${100 - cy}%, ${k[3]}, transparent 72%), ${k[5]}`;
       },

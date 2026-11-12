@@ -5,23 +5,23 @@
 // no columns or rows line up into stripes. Lit slopes carry more and larger points on dark grounds,
 // shaded slopes on light grounds (like a stipple drawing), so the land reads as form, and the crests
 // take the accent. Where the rows crowd toward the horizon the points blend into their average tone.
-import { shader, color, paletteKind } from '../fx.js';
+import { shader, color, paletteKind } from "../fx.js";
 
 const params = {
-  spacing:   { default: 14,   min: 8,    max: 40,  step: 1 },     // point spacing at the bottom edge, CSS px
-  dot:       { default: 3,    min: 1,    max: 6,   step: 0.1 },   // point size at the bottom edge, CSS px
-  amplitude: { default: 0.17, min: 0,    max: 0.25, step: 0.01 }, // wave height
-  waveScale: { default: 0.8,  min: 0.2,  max: 3,   step: 0.05 },  // wave size (higher: shorter waves)
-  speed:     { default: 0.08, min: 0,    max: 0.5, step: 0.005 }, // wave speed
-  opacity:   { default: 0.85, min: 0.1,  max: 1,   step: 0.01 },  // ink strength of the points
-  shade:     { default: 0.75, min: 0,    max: 1,   step: 0.01 },  // how much the light shapes the land
-  crest:     { default: 0.85, min: 0,    max: 1,   step: 0.01 },  // accent colour on the wave crests
-  horizon:   { default: 0.24, min: 0.12, max: 0.6, step: 0.01 },  // horizon height, 0 top .. 1 bottom
-  fog:       { default: 0.4,  min: 0,    max: 1,   step: 0.01 },  // how fast far points fade
-  haze:      { default: 0.35, min: 0,    max: 1,   step: 0.01 },  // soft light over the horizon
-  calm:      { default: 0.9,  min: 0,    max: 1,   step: 0.01 },  // fade the points where text sits (below 0.8 dots stay under the words)
-  calmX:     { default: 0.25, min: 0,    max: 1,   step: 0.01 },
-  calmY:     { default: 0.7,  min: 0,    max: 1,   step: 0.01 },
+  spacing: { default: 14, min: 8, max: 40, step: 1 }, // point spacing at the bottom edge, CSS px
+  dot: { default: 3, min: 1, max: 6, step: 0.1 }, // point size at the bottom edge, CSS px
+  amplitude: { default: 0.17, min: 0, max: 0.25, step: 0.01 }, // wave height
+  waveScale: { default: 0.8, min: 0.2, max: 3, step: 0.05 }, // wave size (higher: shorter waves)
+  speed: { default: 0.08, min: 0, max: 0.5, step: 0.005 }, // wave speed
+  opacity: { default: 0.85, min: 0.1, max: 1, step: 0.01 }, // ink strength of the points
+  shade: { default: 0.75, min: 0, max: 1, step: 0.01 }, // how much the light shapes the land
+  crest: { default: 0.85, min: 0, max: 1, step: 0.01 }, // accent colour on the wave crests
+  horizon: { default: 0.24, min: 0.12, max: 0.6, step: 0.01 }, // horizon height, 0 top .. 1 bottom
+  fog: { default: 0.4, min: 0, max: 1, step: 0.01 }, // how fast far points fade
+  haze: { default: 0.35, min: 0, max: 1, step: 0.01 }, // soft light over the horizon
+  calm: { default: 0.9, min: 0, max: 1, step: 0.01 }, // fade the points where text sits (below 0.8 dots stay under the words)
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -121,14 +121,21 @@ function tones(P) {
   // the accent marks the crests; one that clashes with a colour ground or barely shows on it is
   // replaced by a strong step of the ink
   let acc = accent;
-  if ((kind === 'colour' && color.hueDistance(bg, accent) > 55 && color.contrast(bg, accent) < 2) || color.contrast(bg, accent) < 1.35) acc = color.mix(bg, ink, 0.85);
+  if (
+    (kind === "colour" && color.hueDistance(bg, accent) > 55 && color.contrast(bg, accent) < 2) ||
+    color.contrast(bg, accent) < 1.35
+  )
+    acc = color.mix(bg, ink, 0.85);
   return {
     dark,
     ground: bg,
     ink,
     acc,
     // a gentle lift over the horizon: a little lighter on light grounds, a little toward the ink otherwise
-    haze: dark || kind === 'colour' ? color.mix(bg, color.mix(ink, acc, 0.4), 0.1) : color.mix(bg, '#ffffff', 0.35),
+    haze:
+      dark || kind === "colour"
+        ? color.mix(bg, color.mix(ink, acc, 0.4), 0.1)
+        : color.mix(bg, "#ffffff", 0.35),
   };
 }
 
@@ -150,35 +157,55 @@ function uniforms({ palette, seed }) {
 // soft lift of light; one background layer per row
 function fallback({ palette: P, params: prm, height }) {
   const k = tones(P);
-  const Hpx = height || 500, hz = prm.horizon * 100;
-  const Hb = Hpx * (1 - prm.horizon);              // px from the horizon to the bottom edge
+  const Hpx = height || 500,
+    hz = prm.horizon * 100;
+  const Hb = Hpx * (1 - prm.horizon); // px from the horizon to the bottom edge
   const layers = [];
   // rows in perspective: each one deeper by about one point spacing on screen, smaller and fainter
-  let d = 1, n = 0, y = 100;
+  let d = 1,
+    n = 0,
+    y = 100;
   for (; n < 30; n++) {
     y = hz + (100 - hz) * (0.985 / d);
     const s = Math.max(2.5, prm.spacing / d);
-    const r = Math.max(0.5, (prm.dot / 2) / d);
+    const r = Math.max(0.5, prm.dot / 2 / d);
     const fog = Math.pow(Math.max(0, (y - hz) / (100 - hz)), 0.3 + 1.05 * prm.fog);
-    const c = color.mix(k.ground, n < 6 && prm.crest > 0 ? color.mix(k.ink, k.acc, 0.3) : k.ink, Math.min(1, prm.opacity * fog));
+    const c = color.mix(
+      k.ground,
+      n < 6 && prm.crest > 0 ? color.mix(k.ink, k.acc, 0.3) : k.ink,
+      Math.min(1, prm.opacity * fog),
+    );
     const off = (n * 7.3) % s;
-    layers.push(`radial-gradient(circle, ${c} ${r.toFixed(2)}px, ${c}00 ${(r + 0.7).toFixed(2)}px) ${off.toFixed(1)}px ${y.toFixed(2)}% / ${s.toFixed(2)}px ${s.toFixed(2)}px repeat-x`);
+    layers.push(
+      `radial-gradient(circle, ${c} ${r.toFixed(2)}px, ${c}00 ${(r + 0.7).toFixed(2)}px) ${off.toFixed(1)}px ${y.toFixed(2)}% / ${s.toFixed(2)}px ${s.toFixed(2)}px repeat-x`,
+    );
     d += Math.max(0.05, (0.8 * prm.spacing * d) / Hb);
     if (s <= 2.6) break;
   }
   // beyond the last row: the points' average tone fading into the haze
   const far = color.mix(k.ground, k.ink, Math.min(0.3, prm.opacity * 0.22));
-  layers.push(`linear-gradient(to bottom, ${k.ground} 0, ${k.haze} ${hz.toFixed(1)}%, ${far} ${Math.min(99, y).toFixed(1)}%, ${k.ground}00 ${Math.min(100, y + 2).toFixed(1)}%)`);
+  layers.push(
+    `linear-gradient(to bottom, ${k.ground} 0, ${k.haze} ${hz.toFixed(1)}%, ${far} ${Math.min(99, y).toFixed(1)}%, ${k.ground}00 ${Math.min(100, y + 2).toFixed(1)}%)`,
+  );
   layers.push(k.ground);
-  return layers.join(', ');
+  return layers.join(", ");
 }
 
 export default {
-  id: 'dot-terrain',
-  name: 'Dot terrain',
-  family: 'pattern',
+  id: "dot-terrain",
+  name: "Dot terrain",
+  family: "pattern",
   params,
   mount(el, { palette, params: given, seed }) {
-    return shader(el, { frag, schema: params, params: given, palette, seed, uniforms, still: 4, fallback });
+    return shader(el, {
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      seed,
+      uniforms,
+      still: 4,
+      fallback,
+    });
   },
 };

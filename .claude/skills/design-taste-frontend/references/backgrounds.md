@@ -71,6 +71,7 @@ ground's mood, roles, pairs, avoids and sections.
   Build what it prints, then hold the rules: at most two dealt grounds a page beyond the tokens, each
   once, never on a card, never two strong ones as neighbours, one loud one at most, never two that
   list each other in `avoids`.
+
 - **The effect rule:** a ground with grain, dither or texture (`grain`, `field`, `stage`, `deep`) or
   motion (`liquid`) is the page's one effect (`effects-usage.md`); with another effect dealt, deal
   again without them. `liquid` runs on a clock from load with a pause disc and holds still under

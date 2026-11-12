@@ -4,13 +4,13 @@ Real things shown through a print effect, alive under the pointer. Four of them 
 own photographs (`src`); one models a generic thing in code. Each is the picture of one card or one
 hero frame: still or nearly still at rest, and it moves under the pointer, never on scroll.
 
-| id | what it shows | moves by itself | hover / touch |
-|---|---|---|---|
-| `split-reveal` | one photograph, half printed as a halftone, a line between | no | the line follows the pointer; drag on touch; a slider for the keyboard |
-| `dither-sequence` | 2 to 6 photographs that belong together, dithered, cut one to the next | yes: holds, then wipes (pause disc) | the pointer scrubs the frames; drag on touch |
-| `dot-object` | one object cut out of its photograph and set in dots | no | under the pointer the dots take the photograph's real colour, like a loupe |
-| `exploded-layers` | one photograph (or up to four) as four printed sheets in perspective | no | the sheets open apart; with `names` each gets a label; tap on touch |
-| `product-turntable` | a generic camera, chair, speaker or cup on a turntable, dithered | yes: one step every 1.7 s (pause disc) | moving across turns it step by step; drag on touch |
+| id                  | what it shows                                                          | moves by itself                        | hover / touch                                                              |
+| ------------------- | ---------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| `split-reveal`      | one photograph, half printed as a halftone, a line between             | no                                     | the line follows the pointer; drag on touch; a slider for the keyboard     |
+| `dither-sequence`   | 2 to 6 photographs that belong together, dithered, cut one to the next | yes: holds, then wipes (pause disc)    | the pointer scrubs the frames; drag on touch                               |
+| `dot-object`        | one object cut out of its photograph and set in dots                   | no                                     | under the pointer the dots take the photograph's real colour, like a loupe |
+| `exploded-layers`   | one photograph (or up to four) as four printed sheets in perspective   | no                                     | the sheets open apart; with `names` each gets a label; tap on touch        |
+| `product-turntable` | a generic camera, chair, speaker or cup on a turntable, dithered       | yes: one step every 1.7 s (pause disc) | moving across turns it step by step; drag on touch                         |
 
 `index.json` lists them; each folder's `meta.json` has every param (and its `for` and `never`), and
 `demo.html` (served, not from disk) shows the object in a hero and two cards with a palette switch.
@@ -52,9 +52,12 @@ fit tech or gaming sites, a local coffee shop never.
   <h3>Every edit on its own layer</h3>
   <p>Turn any adjustment off later without touching the rest.</p>
   <div class="panel">
-    <div data-scene="exploded-layers" data-scene-src="assets/img/sample-edit.jpg"
-         data-scene-params='{"names":["Photo","Colour","Shade","Masks"]}'
-         aria-label="A portrait taken apart into its four edit layers"></div>
+    <div
+      data-scene="exploded-layers"
+      data-scene-src="assets/img/sample-edit.jpg"
+      data-scene-params='{"names":["Photo","Colour","Shade","Masks"]}'
+      aria-label="A portrait taken apart into its four edit layers"
+    ></div>
   </div>
 </article>
 <!-- once, after system.js -->
@@ -64,20 +67,39 @@ fit tech or gaming sites, a local coffee shop never.
 One per object, copy and change the `src` and the words:
 
 ```html
-<div data-scene="split-reveal" data-scene-src='{"src":"assets/img/raw-scan.jpg","alt":"A scanned print, half of it screened","focus":[0.5,0.4]}' data-scene-params='{"split":0.6}'></div>
-<div data-scene="dither-sequence" data-scene-src='[{"src":"assets/img/a.jpg","alt":"Front"},{"src":"assets/img/b.jpg","alt":"Side"},{"src":"assets/img/c.jpg","alt":"Back"}]'></div>
-<div data-scene="dot-object" data-scene-src="assets/img/sensor-on-white.jpg" aria-label="The sensor the app reads"></div>
-<div data-scene="exploded-layers" data-scene-src="assets/img/map-tile.png" data-scene-params='{"names":["Imagery","Roads","Labels","Terrain"]}'></div>
-<div data-scene="product-turntable" data-scene-params='{"form":"chair"}' aria-label="A side chair from the catalogue"></div>
+<div
+  data-scene="split-reveal"
+  data-scene-src='{"src":"assets/img/raw-scan.jpg","alt":"A scanned print, half of it screened","focus":[0.5,0.4]}'
+  data-scene-params='{"split":0.6}'
+></div>
+<div
+  data-scene="dither-sequence"
+  data-scene-src='[{"src":"assets/img/a.jpg","alt":"Front"},{"src":"assets/img/b.jpg","alt":"Side"},{"src":"assets/img/c.jpg","alt":"Back"}]'
+></div>
+<div
+  data-scene="dot-object"
+  data-scene-src="assets/img/sensor-on-white.jpg"
+  aria-label="The sensor the app reads"
+></div>
+<div
+  data-scene="exploded-layers"
+  data-scene-src="assets/img/map-tile.png"
+  data-scene-params='{"names":["Imagery","Roads","Labels","Terrain"]}'
+></div>
+<div
+  data-scene="product-turntable"
+  data-scene-params='{"form":"chair"}'
+  aria-label="A side chair from the catalogue"
+></div>
 ```
 
 - The host is an empty `div`. In a `.panel`, `.panel__screen` or `.frame` it fills the box (give
   the box its size: an aspect ratio or a height); elsewhere give it a size yourself.
 - `data-scene-src`: a page-relative path or URL, or JSON: `{ src, alt, focus: [x, y], by, page,
-  licence, licenceUrl }`, or an array of them. Serve photographs from the site itself (a host that
+licence, licenceUrl }`, or an array of them. Serve photographs from the site itself (a host that
   sends no CORS headers cannot be printed: the plain photograph shows instead).
 - `data-scene-params`: JSON, every param in `meta.json`. `data-scene-palette`: JSON `{ bg, ink,
-  muted, accent }`. `aria-label`: what the picture shows (else the photograph's alt).
+muted, accent }`. `aria-label`: what the picture shows (else the photograph's alt).
 - **Colours**: without a palette the scene prints in the page tokens (`--bg`, `--surface`, `--ink`,
   `--muted`, `--accent`) on the ground of the box it sits in (a `.panel` on `--surface` prints on
   `--surface`; a dark band prints in a light ink). It paints its own ground: put it in a plain
@@ -94,7 +116,7 @@ One per object, copy and change the `src` and the words:
   Never a credit under the picture, never a line per photograph. The client's own photographs need
   none.
 - **Script**: `import obj from 'assets/objects/split-reveal/object.js'; const ctrl = obj.mount(el,
-  { src, params, palette })`. The controller has `pause()`, `resume()`, `setPalette(p | null)`,
+{ src, params, palette })`. The controller has `pause()`, `resume()`, `setPalette(p | null)`,
   `destroy()` and `ready` (a promise, once the photographs are in). `auto.js` exports `scenes`, a Map
   from element to controller; after a theme change call `setPalette(null)` on each.
 

@@ -33,19 +33,19 @@ object render for the two object scenes.
   sections or more), never in the scene's section or the one beside it, never one in the scene's
   `avoidMoments` or its twin (`effects-usage.md`, Big scene).
 
-| id | fits | types | needs | WebGL | restH | phone |
-| --- | --- | --- | --- | --- | --- | --- |
-| `descend-through-weather` | hero (below it only) | tech, gaming | two photographs of the client's world, high and low | - | 2 | still |
-| `shaped-window-over-fixed-world` | hero (below it only) | tech, gaming | one wide photograph of the client's world | - | 2 | still |
-| `fixed-hero-object` | hero (below it only) | tech, gaming | an object render or cut-out, 1-4 chapters | 1 | 2 | still |
-| `powers-of-ten-pullback` | product | software, tech | the product's UI at true size | - | 1 | still |
-| `product-assembles-into-its-action` | product | software, tech | the screen as HTML, 4-6 steps | - | 1 | still |
-| `parts-lock-into-the-whole` | product | software, tech | the screen cut along its panels | - | 1 | still |
-| `fly-into-the-shape` | between, product | software, tech, gaming | the mark as one path, one dark photograph | - | 1 | still |
-| `letter-physics` | statement | software, tech, gaming | a claim and its answer | - | 1 | light |
-| `object-through-giant-type` | statement | software, tech, gaming | a quote of 3-5 short lines, an object | 1 | 1 | still |
-| `dot-becomes-the-full-stop` | statement | software, tech, gaming | one claim of 4-6 words | - | 1 | light |
-| `letter-bar-floods-the-ground` | between, statement | software, tech, gaming | two statements, an inverse section after | - | 1 | still |
+| id                                  | fits                 | types                  | needs                                               | WebGL | restH | phone |
+| ----------------------------------- | -------------------- | ---------------------- | --------------------------------------------------- | ----- | ----- | ----- |
+| `descend-through-weather`           | hero (below it only) | tech, gaming           | two photographs of the client's world, high and low | -     | 2     | still |
+| `shaped-window-over-fixed-world`    | hero (below it only) | tech, gaming           | one wide photograph of the client's world           | -     | 2     | still |
+| `fixed-hero-object`                 | hero (below it only) | tech, gaming           | an object render or cut-out, 1-4 chapters           | 1     | 2     | still |
+| `powers-of-ten-pullback`            | product              | software, tech         | the product's UI at true size                       | -     | 1     | still |
+| `product-assembles-into-its-action` | product              | software, tech         | the screen as HTML, 4-6 steps                       | -     | 1     | still |
+| `parts-lock-into-the-whole`         | product              | software, tech         | the screen cut along its panels                     | -     | 1     | still |
+| `fly-into-the-shape`                | between, product     | software, tech, gaming | the mark as one path, one dark photograph           | -     | 1     | still |
+| `letter-physics`                    | statement            | software, tech, gaming | a claim and its answer                              | -     | 1     | light |
+| `object-through-giant-type`         | statement            | software, tech, gaming | a quote of 3-5 short lines, an object               | 1     | 1     | still |
+| `dot-becomes-the-full-stop`         | statement            | software, tech, gaming | one claim of 4-6 words                              | -     | 1     | light |
+| `letter-bar-floods-the-ground`      | between, statement   | software, tech, gaming | two statements, an inverse section after            | -     | 1     | still |
 
 `powers-of-ten-pullback` is never the hero: its first screen has no headline and no action.
 Every scene's header comment in `scene.js` holds its markup and options; `meta.json` holds its
@@ -62,12 +62,21 @@ mounts; at the end of `<body>`, the runtime once:
 ```html
 <head>
   …
-  <script>document.documentElement.classList.add('sc-js');setTimeout(()=>document.documentElement.classList.add('sc-safe'),2500)</script>
-  <link rel="stylesheet" href="assets/scenes/scenes.css">
-  <link rel="stylesheet" href="assets/scenes/<id>/scene.css">
+  <script>
+    document.documentElement.classList.add("sc-js");
+    setTimeout(() => document.documentElement.classList.add("sc-safe"), 2500);
+  </script>
+  <link rel="stylesheet" href="assets/scenes/scenes.css" />
+  <link rel="stylesheet" href="assets/scenes/<id>/scene.css" />
 </head>
 …
-<section class="sc" data-big-scene="<id>" data-big-scene-opts='{"hold": 1}' style="--h: <the scene's restH>" aria-labelledby="…">
+<section
+  class="sc"
+  data-big-scene="<id>"
+  data-big-scene-opts='{"hold": 1}'
+  style="--h: <the scene's restH>"
+  aria-labelledby="…"
+>
   <div class="sc__stage">…</div>
 </section>
 …

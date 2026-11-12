@@ -10,24 +10,24 @@ Reading the numbers:
 - **WebGL off is a proxy, not a verdict.** SwiftShader runs shaders on the CPU and would swamp the main thread, so long tasks and blocking time come from loads where every WebGL piece shows its still fallback. That is different work from the shader: shader compile and link on a real GPU is not measured, and the INFO line with WebGL on is for orientation only.
 - Counts (images, contexts, modules) and bytes are exact; they do not depend on host load.
 
-| Check | WARN | FAIL |
-|---|---|---|
-| Transfer (text gzipped) | above 1500 KiB | above 3000 KiB |
-| Images total / largest single image | above 1200 / 350 KiB | above 2400 / 700 KiB |
-| JS parsed / CSS | above 450 / 120 KiB | above 900 / 250 KiB |
-| Requests | above 60 | above 110 |
-| Font families / files / bytes | above 2 / 4 / 160 KiB | above 3 / 6 / 320 KiB |
-| `<img>` without width and height (or CSS aspect-ratio) | 1 to 3 | 4 or more |
-| `<img>` below the fold and not lazy | 1 to 3 | 4 or more |
-| Oversized images, `<img>`, CSS background and SVG (natural over 2.2x the shown width) | 1 to 3 | 4 or more |
-| Photos as CSS or SVG background below the fold (cannot be lazy) | 1 to 3 | 4 or more |
-| WebGL contexts live (load, bottom, peak) | | above 4 (hard cap) |
-| WebGL contexts made over the whole scroll | above 12 | above 24 |
-| Long tasks / blocking time, median, WebGL off | above 8 / 1.5 s | above 20 / 4 s |
-| FCP / LCP, median | above 2.5 / 4.5 s | above 4.5 / 8 s |
-| Layout shift, median | above 0.1 | above 0.25 |
-| Effect, object or component module loaded, never mounted | 1 or 2 | 3 or more |
-| Broken request, sideways overflow | | any |
+| Check                                                                                 | WARN                  | FAIL                  |
+| ------------------------------------------------------------------------------------- | --------------------- | --------------------- |
+| Transfer (text gzipped)                                                               | above 1500 KiB        | above 3000 KiB        |
+| Images total / largest single image                                                   | above 1200 / 350 KiB  | above 2400 / 700 KiB  |
+| JS parsed / CSS                                                                       | above 450 / 120 KiB   | above 900 / 250 KiB   |
+| Requests                                                                              | above 60              | above 110             |
+| Font families / files / bytes                                                         | above 2 / 4 / 160 KiB | above 3 / 6 / 320 KiB |
+| `<img>` without width and height (or CSS aspect-ratio)                                | 1 to 3                | 4 or more             |
+| `<img>` below the fold and not lazy                                                   | 1 to 3                | 4 or more             |
+| Oversized images, `<img>`, CSS background and SVG (natural over 2.2x the shown width) | 1 to 3                | 4 or more             |
+| Photos as CSS or SVG background below the fold (cannot be lazy)                       | 1 to 3                | 4 or more             |
+| WebGL contexts live (load, bottom, peak)                                              |                       | above 4 (hard cap)    |
+| WebGL contexts made over the whole scroll                                             | above 12              | above 24              |
+| Long tasks / blocking time, median, WebGL off                                         | above 8 / 1.5 s       | above 20 / 4 s        |
+| FCP / LCP, median                                                                     | above 2.5 / 4.5 s     | above 4.5 / 8 s       |
+| Layout shift, median                                                                  | above 0.1             | above 0.25            |
+| Effect, object or component module loaded, never mounted                              | 1 or 2                | 3 or more             |
+| Broken request, sideways overflow                                                     |                       | any                   |
 
 Sizes are KiB (1024 bytes). The 2.2x rule already covers a 2x screen; a photo that is also upscaled (natural under 0.75x shown) warns. "Never mounted" counts entry files only (`effect.js`, `object.js`, `component.js`, a ui `fragment.js`); shared helpers such as `photo-kit` never count. An object has no marker, so objects are judged by count: more object modules loaded than canvases or fallback hosts drawn.
 

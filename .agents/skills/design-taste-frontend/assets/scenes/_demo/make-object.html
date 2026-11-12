@@ -1,20 +1,44 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Object render</title>
-<style>body{margin:0;background:#888}canvas{display:block}</style></head>
-<body>
-<canvas id="c" width="300" height="340"></canvas>
-<script>
-/* A stoneware mug modelled and lit in code (signed distance fields, one fragment shader), rendered once with
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Object render</title>
+    <style>
+      body {
+        margin: 0;
+        background: #888;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" width="300" height="340"></canvas>
+    <script>
+      /* A stoneware mug modelled and lit in code (signed distance fields, one fragment shader), rendered once with
    alpha and handed to shoot.mjs make as a PNG: the demo cut-out for the object scenes. Colours: ?body=e8e1d4&glaze=6f7f7a */
-window.addEventListener('error', e => { window.__err = e.message; });
-try {
-const q = new URLSearchParams(location.search);
-const hexv = (s, d) => { const h = (s || d).replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255); };
-const body = hexv(q.get('body'), 'e8e1d4'), glaze = hexv(q.get('glaze'), '5f6e6a');
-const cv = document.getElementById('c');
-const g = cv.getContext('webgl', { alpha: true, premultipliedAlpha: false, preserveDrawingBuffer: true, antialias: false });
-const V = 'attribute vec2 a_p;varying vec2 v_uv;void main(){v_uv=a_p*0.5+0.5;gl_Position=vec4(a_p,0.0,1.0);}';
-const F = `
+      window.addEventListener("error", (e) => {
+        window.__err = e.message;
+      });
+      try {
+        const q = new URLSearchParams(location.search);
+        const hexv = (s, d) => {
+          const h = (s || d).replace("#", "");
+          return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+        };
+        const body = hexv(q.get("body"), "e8e1d4"),
+          glaze = hexv(q.get("glaze"), "5f6e6a");
+        const cv = document.getElementById("c");
+        const g = cv.getContext("webgl", {
+          alpha: true,
+          premultipliedAlpha: false,
+          preserveDrawingBuffer: true,
+          antialias: false,
+        });
+        const V =
+          "attribute vec2 a_p;varying vec2 v_uv;void main(){v_uv=a_p*0.5+0.5;gl_Position=vec4(a_p,0.0,1.0);}";
+        const F = `
 precision highp float;
 varying vec2 v_uv;
 uniform vec2 u_res; uniform vec3 u_body; uniform vec3 u_glaze;
@@ -68,37 +92,72 @@ void main(){
   col = pow(col, vec3(0.95));
   gl_FragColor = vec4(col, 1.0);
 }`;
-const sh = (t, s) => { const o = g.createShader(t); g.shaderSource(o, s); g.compileShader(o); if (!g.getShaderParameter(o, g.COMPILE_STATUS)) throw new Error(g.getShaderInfoLog(o)); return o; };
-const prog = g.createProgram(); g.attachShader(prog, sh(g.VERTEX_SHADER, V)); g.attachShader(prog, sh(g.FRAGMENT_SHADER, F)); g.linkProgram(prog);
-if (!g.getProgramParameter(prog, g.LINK_STATUS)) throw new Error(g.getProgramInfoLog(prog));
-g.useProgram(prog);
-const b = g.createBuffer(); g.bindBuffer(g.ARRAY_BUFFER, b); g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), g.STATIC_DRAW);
-const l = g.getAttribLocation(prog, 'a_p'); g.enableVertexAttribArray(l); g.vertexAttribPointer(l, 2, g.FLOAT, false, 0, 0);
-g.viewport(0, 0, cv.width, cv.height);
-g.uniform2f(g.getUniformLocation(prog, 'u_res'), cv.width, cv.height);
-g.uniform3f(g.getUniformLocation(prog, 'u_body'), ...body);
-g.uniform3f(g.getUniformLocation(prog, 'u_glaze'), ...glaze);
-g.clearColor(0, 0, 0, 0); g.clear(g.COLOR_BUFFER_BIT);
-g.drawArrays(g.TRIANGLES, 0, 3);
-g.finish();
-// trim: find the opaque bounds and crop to them with a small margin, so the PNG's bottom row is the foot
-const px = new Uint8Array(cv.width * cv.height * 4); g.readPixels(0, 0, cv.width, cv.height, g.RGBA, g.UNSIGNED_BYTE, px);
-let x0 = cv.width, x1 = 0, y0 = cv.height, y1 = 0;
-for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (px[(y * cv.width + x) * 4 + 3] > 8) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
-const out = document.createElement('canvas'); const m = 6;
-out.width = x1 - x0 + 1 + 2 * m; out.height = y1 - y0 + 1 + 2 * m;
-const ctx = out.getContext('2d');
-const img = ctx.createImageData(out.width, out.height);
-for (let y = 0; y < out.height; y++) for (let x = 0; x < out.width; x++) {
-  const sx = x0 - m + x, sy = (cv.height - 1) - (y0 - m + y); // flip: GL rows start at the bottom
-  const o = (y * out.width + x) * 4;
-  if (sx < 0 || sy < 0 || sx >= cv.width || sy >= cv.height) continue;
-  const s = (sy * cv.width + sx) * 4;
-  img.data[o] = px[s]; img.data[o + 1] = px[s + 1]; img.data[o + 2] = px[s + 2]; img.data[o + 3] = px[s + 3];
-}
-ctx.putImageData(img, 0, 0);
-window.__out = out.toDataURL('image/png');
-document.body.appendChild(out);
-} catch (e) { window.__err = String(e && e.message || e); }
-</script>
-</body></html>
+        const sh = (t, s) => {
+          const o = g.createShader(t);
+          g.shaderSource(o, s);
+          g.compileShader(o);
+          if (!g.getShaderParameter(o, g.COMPILE_STATUS)) throw new Error(g.getShaderInfoLog(o));
+          return o;
+        };
+        const prog = g.createProgram();
+        g.attachShader(prog, sh(g.VERTEX_SHADER, V));
+        g.attachShader(prog, sh(g.FRAGMENT_SHADER, F));
+        g.linkProgram(prog);
+        if (!g.getProgramParameter(prog, g.LINK_STATUS)) throw new Error(g.getProgramInfoLog(prog));
+        g.useProgram(prog);
+        const b = g.createBuffer();
+        g.bindBuffer(g.ARRAY_BUFFER, b);
+        g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), g.STATIC_DRAW);
+        const l = g.getAttribLocation(prog, "a_p");
+        g.enableVertexAttribArray(l);
+        g.vertexAttribPointer(l, 2, g.FLOAT, false, 0, 0);
+        g.viewport(0, 0, cv.width, cv.height);
+        g.uniform2f(g.getUniformLocation(prog, "u_res"), cv.width, cv.height);
+        g.uniform3f(g.getUniformLocation(prog, "u_body"), ...body);
+        g.uniform3f(g.getUniformLocation(prog, "u_glaze"), ...glaze);
+        g.clearColor(0, 0, 0, 0);
+        g.clear(g.COLOR_BUFFER_BIT);
+        g.drawArrays(g.TRIANGLES, 0, 3);
+        g.finish();
+        // trim: find the opaque bounds and crop to them with a small margin, so the PNG's bottom row is the foot
+        const px = new Uint8Array(cv.width * cv.height * 4);
+        g.readPixels(0, 0, cv.width, cv.height, g.RGBA, g.UNSIGNED_BYTE, px);
+        let x0 = cv.width,
+          x1 = 0,
+          y0 = cv.height,
+          y1 = 0;
+        for (let y = 0; y < cv.height; y++)
+          for (let x = 0; x < cv.width; x++)
+            if (px[(y * cv.width + x) * 4 + 3] > 8) {
+              x0 = Math.min(x0, x);
+              x1 = Math.max(x1, x);
+              y0 = Math.min(y0, y);
+              y1 = Math.max(y1, y);
+            }
+        const out = document.createElement("canvas");
+        const m = 6;
+        out.width = x1 - x0 + 1 + 2 * m;
+        out.height = y1 - y0 + 1 + 2 * m;
+        const ctx = out.getContext("2d");
+        const img = ctx.createImageData(out.width, out.height);
+        for (let y = 0; y < out.height; y++)
+          for (let x = 0; x < out.width; x++) {
+            const sx = x0 - m + x,
+              sy = cv.height - 1 - (y0 - m + y); // flip: GL rows start at the bottom
+            const o = (y * out.width + x) * 4;
+            if (sx < 0 || sy < 0 || sx >= cv.width || sy >= cv.height) continue;
+            const s = (sy * cv.width + sx) * 4;
+            img.data[o] = px[s];
+            img.data[o + 1] = px[s + 1];
+            img.data[o + 2] = px[s + 2];
+            img.data[o + 3] = px[s + 3];
+          }
+        ctx.putImageData(img, 0, 0);
+        window.__out = out.toDataURL("image/png");
+        document.body.appendChild(out);
+      } catch (e) {
+        window.__err = String((e && e.message) || e);
+      }
+    </script>
+  </body>
+</html>

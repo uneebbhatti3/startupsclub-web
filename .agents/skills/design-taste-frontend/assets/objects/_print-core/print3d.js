@@ -56,13 +56,14 @@
                  of distance), u_rot, u_pivot.
 */
 
-const HAS_DOM = typeof window !== 'undefined' && typeof document !== 'undefined';
-const reducedQuery = HAS_DOM && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-const coarseQuery = HAS_DOM && window.matchMedia ? window.matchMedia('(pointer: coarse)') : null;
+const HAS_DOM = typeof window !== "undefined" && typeof document !== "undefined";
+const reducedQuery =
+  HAS_DOM && window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+const coarseQuery = HAS_DOM && window.matchMedia ? window.matchMedia("(pointer: coarse)") : null;
 const DEG = Math.PI / 180;
 
 // the order is the print pass's u_mode
-export const EFFECTS = ['dither', 'halftone', 'engrave', 'ascii', 'render'];
+export const EFFECTS = ["dither", "halftone", "engrave", "ascii", "render"];
 // the cell of each effect at cell 0, CSS px: dither cell, screen pitch, line pitch, type height
 // (render: the grain's scale)
 const CELL = { dither: 2, halftone: 6, engrave: 6.5, ascii: 9, render: 1 };
@@ -74,36 +75,70 @@ const DPR_CAP = { dither: 3, ascii: 2, halftone: 2, engrave: 2, render: 2 };
 
 // GLSL ES 3.00 (section 3.7): words reserved for future use, which a conforming compiler rejects as a
 // name; plus words later versions made keywords (precise, buffer, shared), which some drivers reject
-const GLSL_RESERVED = new Set(('attribute varying coherent volatile restrict readonly writeonly resource atomic_uint ' +
-  'noperspective patch sample subroutine common partition active asm class union enum typedef template this goto ' +
-  'inline noinline public static extern external interface long short double half fixed unsigned superp input output ' +
-  'hvec2 hvec3 hvec4 dvec2 dvec3 dvec4 fvec2 fvec3 fvec4 dmat2 dmat3 dmat4 sampler3DRect filter sizeof cast namespace using ' +
-  'precise buffer shared image1D image2D image3D imageCube iimage1D iimage2D iimage3D iimageCube uimage1D uimage2D ' +
-  'uimage3D uimageCube image1DArray image2DArray iimage1DArray iimage2DArray uimage1DArray uimage2DArray image1DShadow ' +
-  'image2DShadow image1DArrayShadow image2DArrayShadow imageBuffer iimageBuffer uimageBuffer sampler1D sampler1DShadow ' +
-  'sampler1DArray sampler1DArrayShadow isampler1D isampler1DArray usampler1D usampler1DArray sampler2DRect ' +
-  'sampler2DRectShadow isampler2DRect usampler2DRect samplerBuffer isamplerBuffer usamplerBuffer sampler2DMS ' +
-  'isampler2DMS usampler2DMS sampler2DMSArray isampler2DMSArray usampler2DMSArray samplerCubeArray').split(' '));
+const GLSL_RESERVED = new Set(
+  (
+    "attribute varying coherent volatile restrict readonly writeonly resource atomic_uint " +
+    "noperspective patch sample subroutine common partition active asm class union enum typedef template this goto " +
+    "inline noinline public static extern external interface long short double half fixed unsigned superp input output " +
+    "hvec2 hvec3 hvec4 dvec2 dvec3 dvec4 fvec2 fvec3 fvec4 dmat2 dmat3 dmat4 sampler3DRect filter sizeof cast namespace using " +
+    "precise buffer shared image1D image2D image3D imageCube iimage1D iimage2D iimage3D iimageCube uimage1D uimage2D " +
+    "uimage3D uimageCube image1DArray image2DArray iimage1DArray iimage2DArray uimage1DArray uimage2DArray image1DShadow " +
+    "image2DShadow image1DArrayShadow image2DArrayShadow imageBuffer iimageBuffer uimageBuffer sampler1D sampler1DShadow " +
+    "sampler1DArray sampler1DArrayShadow isampler1D isampler1DArray usampler1D usampler1DArray sampler2DRect " +
+    "sampler2DRectShadow isampler2DRect usampler2DRect samplerBuffer isamplerBuffer usamplerBuffer sampler2DMS " +
+    "isampler2DMS usampler2DMS sampler2DMSArray isampler2DMSArray usampler2DMSArray samplerCubeArray"
+  ).split(" "),
+);
 // qualifiers: keywords, never names (a struct field named flat left a hero empty on a real GPU)
-const GLSL_QUALIFIERS = new Set(['flat', 'smooth', 'centroid', 'invariant', 'layout', 'uniform', 'const', 'in', 'out', 'inout', 'lowp', 'mediump', 'highp', 'precision']);
-const GLSL_TYPES = new Set(('void bool int uint float vec2 vec3 vec4 bvec2 bvec3 bvec4 ivec2 ivec3 ivec4 uvec2 uvec3 uvec4 mat2 mat3 mat4 ' +
-  'mat2x2 mat2x3 mat2x4 mat3x2 mat3x3 mat3x4 mat4x2 mat4x3 mat4x4 sampler2D sampler3D samplerCube sampler2DShadow ' +
-  'samplerCubeShadow sampler2DArray sampler2DArrayShadow isampler2D isampler3D isamplerCube isampler2DArray usampler2D ' +
-  'usampler3D usamplerCube usampler2DArray').split(' '));
-const GLSL_KEYWORDS = new Set([...GLSL_TYPES, ...GLSL_QUALIFIERS, ...'break continue do for while switch case default if else true false discard return struct'.split(' ')]);
+const GLSL_QUALIFIERS = new Set([
+  "flat",
+  "smooth",
+  "centroid",
+  "invariant",
+  "layout",
+  "uniform",
+  "const",
+  "in",
+  "out",
+  "inout",
+  "lowp",
+  "mediump",
+  "highp",
+  "precision",
+]);
+const GLSL_TYPES = new Set(
+  (
+    "void bool int uint float vec2 vec3 vec4 bvec2 bvec3 bvec4 ivec2 ivec3 ivec4 uvec2 uvec3 uvec4 mat2 mat3 mat4 " +
+    "mat2x2 mat2x3 mat2x4 mat3x2 mat3x3 mat3x4 mat4x2 mat4x3 mat4x4 sampler2D sampler3D samplerCube sampler2DShadow " +
+    "samplerCubeShadow sampler2DArray sampler2DArrayShadow isampler2D isampler3D isamplerCube isampler2DArray usampler2D " +
+    "usampler3D usamplerCube usampler2DArray"
+  ).split(" "),
+);
+const GLSL_KEYWORDS = new Set([
+  ...GLSL_TYPES,
+  ...GLSL_QUALIFIERS,
+  ..."break continue do for while switch case default if else true false discard return struct".split(
+    " ",
+  ),
+]);
 // built-in functions: GLSL ES 3.00 forbids redefining them, and a variable of that name hides them
-const GLSL_BUILTINS = new Set(('radians degrees sin cos tan asin acos atan sinh cosh tanh asinh acosh atanh pow exp log exp2 log2 ' +
-  'sqrt inversesqrt abs sign floor trunc round roundEven ceil fract mod modf min max clamp mix step smoothstep isnan isinf ' +
-  'floatBitsToInt floatBitsToUint intBitsToFloat uintBitsToFloat packSnorm2x16 unpackSnorm2x16 packUnorm2x16 ' +
-  'unpackUnorm2x16 packHalf2x16 unpackHalf2x16 length distance dot cross normalize faceforward reflect refract ' +
-  'matrixCompMult outerProduct transpose determinant inverse lessThan lessThanEqual greaterThan greaterThanEqual equal ' +
-  'notEqual any all not textureSize texture textureProj textureLod textureOffset texelFetch texelFetchOffset ' +
-  'textureProjOffset textureLodOffset textureProjLod textureProjLodOffset textureGrad textureGradOffset textureProjGrad ' +
-  'textureProjGradOffset dFdx dFdy fwidth').split(' '));
-const GL_NAMES = /^gl_(FragCoord|FragDepth|FrontFacing|PointCoord|Position|PointSize|VertexID|InstanceID|DepthRange|Max\w+|Min\w+)$/;
+const GLSL_BUILTINS = new Set(
+  (
+    "radians degrees sin cos tan asin acos atan sinh cosh tanh asinh acosh atanh pow exp log exp2 log2 " +
+    "sqrt inversesqrt abs sign floor trunc round roundEven ceil fract mod modf min max clamp mix step smoothstep isnan isinf " +
+    "floatBitsToInt floatBitsToUint intBitsToFloat uintBitsToFloat packSnorm2x16 unpackSnorm2x16 packUnorm2x16 " +
+    "unpackUnorm2x16 packHalf2x16 unpackHalf2x16 length distance dot cross normalize faceforward reflect refract " +
+    "matrixCompMult outerProduct transpose determinant inverse lessThan lessThanEqual greaterThan greaterThanEqual equal " +
+    "notEqual any all not textureSize texture textureProj textureLod textureOffset texelFetch texelFetchOffset " +
+    "textureProjOffset textureLodOffset textureProjLod textureProjLodOffset textureGrad textureGradOffset textureProjGrad " +
+    "textureProjGradOffset dFdx dFdy fwidth"
+  ).split(" "),
+);
+const GL_NAMES =
+  /^gl_(FragCoord|FragDepth|FrontFacing|PointCoord|Position|PointSize|VertexID|InstanceID|DepthRange|Max\w+|Min\w+)$/;
 // a WebGL1 shader (GLSL ES 1.00, no #version 300 es) may use these; the predefined macros everywhere
-const GLSL_ES1 = new Set(['attribute', 'varying', 'gl_FragColor', 'gl_FragData']);
-const GLSL_MACROS = new Set(['__VERSION__', '__LINE__', '__FILE__', 'GL_ES']);
+const GLSL_ES1 = new Set(["attribute", "varying", "gl_FragColor", "gl_FragData"]);
+const GLSL_MACROS = new Set(["__VERSION__", "__LINE__", "__FILE__", "GL_ES"]);
 
 /**
   The words in a GLSL ES 3.00 source that a strict compiler (a real GPU's) rejects, as
@@ -115,45 +150,54 @@ const GLSL_MACROS = new Set(['__VERSION__', '__LINE__', '__FILE__', 'GL_ES']);
 export function glslProblems(src) {
   const out = [];
   // comments out (line numbers kept), then the code as lines
-  const code = String(src).replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).replace(/\/\/[^\n]*/g, '');
-  const lines = code.split('\n');
+  const code = String(src)
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+    .replace(/\/\/[^\n]*/g, "");
+  const lines = code.split("\n");
   const types = new Set(GLSL_TYPES);
   for (const m of code.matchAll(/\bstruct\s+([A-Za-z_]\w*)/g)) types.add(m[1]);
-  const lineOf = i => code.slice(0, i).split('\n').length;
-  const es1 = !/#\s*version\s+300\s+es/.test(code) && /\b(gl_FragColor|attribute|varying)\b/.test(code);
+  const lineOf = (i) => code.slice(0, i).split("\n").length;
+  const es1 =
+    !/#\s*version\s+300\s+es/.test(code) && /\b(gl_FragColor|attribute|varying)\b/.test(code);
   lines.forEach((ln, i) => {
     if (/^\s*#\s*(version|line|extension|pragma)\b/.test(ln)) return;
     // every word (not the exponent of a number such as 1e9)
     for (const m of ln.matchAll(/(?<!\w)[A-Za-z_]\w*/g)) {
-      const w = m[0], at = `line ${i + 1}: `;
+      const w = m[0],
+        at = `line ${i + 1}: `;
       if (GLSL_MACROS.has(w) || (es1 && GLSL_ES1.has(w))) continue;
       if (GLSL_RESERVED.has(w)) out.push(at + `"${w}" is reserved in GLSL ES 3.00`);
-      else if (w.includes('__')) out.push(at + `"${w}": a double underscore is reserved`);
-      else if (w.startsWith('gl_') && !GL_NAMES.test(w)) out.push(at + `"${w}": the gl_ prefix is reserved`);
-      else if (ln[m.index - 1] === '.' && GLSL_KEYWORDS.has(w)) out.push(at + `".${w}": a keyword is never a field`);
+      else if (w.includes("__")) out.push(at + `"${w}": a double underscore is reserved`);
+      else if (w.startsWith("gl_") && !GL_NAMES.test(w))
+        out.push(at + `"${w}": the gl_ prefix is reserved`);
+      else if (ln[m.index - 1] === "." && GLSL_KEYWORDS.has(w))
+        out.push(at + `".${w}": a keyword is never a field`);
     }
   });
   // declared names: "type name" (variables, struct fields, parameters, functions), and the further
   // names of a list ("float a = 1.0, b;")
-  const decl = new RegExp(`(?<![\\w.])(${[...types].join('|')})\\s+([A-Za-z_]\\w*)`, 'g');
+  const decl = new RegExp(`(?<![\\w.])(${[...types].join("|")})\\s+([A-Za-z_]\\w*)`, "g");
   for (const m of code.matchAll(decl)) {
     const names = [m[2]];
     const rest = code.slice(m.index + m[0].length);
     if (!/^\s*\(/.test(rest)) {
       // a variable list: further names after commas at depth 0, up to the end of the statement
-      let depth = 0, j = 0;
+      let depth = 0,
+        j = 0;
       for (; j < rest.length; j++) {
         const c = rest[j];
-        if (c === '(' || c === '[') depth++;
-        else if (c === ')' || c === ']') { if (--depth < 0) break; }
-        else if ((c === ';' || c === '{' || c === '}') && depth <= 0) break;
-        else if (c === ',' && depth === 0) {
+        if (c === "(" || c === "[") depth++;
+        else if (c === ")" || c === "]") {
+          if (--depth < 0) break;
+        } else if ((c === ";" || c === "{" || c === "}") && depth <= 0) break;
+        else if (c === "," && depth === 0) {
           // the next word, and what follows it: another word means a parameter list ("float a,
           // inout Surf s"), where each name has its own type and qualifiers; anything else (= ; , [ ) })
           // means it is the next name of the list, so a keyword there ("float a, flat;") is a fault
           const n = rest.slice(j + 1).match(/^\s*([A-Za-z_]\w*)\s*(\S?)/);
           if (!n) continue;
-          const word = n[1], kw = GLSL_KEYWORDS.has(word) || GLSL_RESERVED.has(word) || types.has(word);
+          const word = n[1],
+            kw = GLSL_KEYWORDS.has(word) || GLSL_RESERVED.has(word) || types.has(word);
           if (kw && /[A-Za-z_]/.test(n[2])) break;
           names.push(word);
         }
@@ -161,8 +205,10 @@ export function glslProblems(src) {
     }
     for (const n of names) {
       const at = `line ${lineOf(m.index)}: `;
-      if (GLSL_KEYWORDS.has(n) || GLSL_RESERVED.has(n)) out.push(at + `"${n}" is a keyword or reserved word, not a name`);
-      else if (GLSL_BUILTINS.has(n)) out.push(at + `"${n}" is a built-in function: name it otherwise`);
+      if (GLSL_KEYWORDS.has(n) || GLSL_RESERVED.has(n))
+        out.push(at + `"${n}" is a keyword or reserved word, not a name`);
+      else if (GLSL_BUILTINS.has(n))
+        out.push(at + `"${n}" is a built-in function: name it otherwise`);
       else if (types.has(n)) out.push(at + `"${n}" is a type, not a name`);
     }
   }
@@ -176,40 +222,71 @@ export const FB = { w: 640, h: 640, size: 0.6 };
 /* ------------------------------------------------------------------ colour (OKLab) */
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const toLin = v => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
-const toGam = v => (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+const toLin = (v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+const toGam = (v) => (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
 function hexRgb(hex) {
-  let h = String(hex).trim().replace(/^#/, '');
-  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  let h = String(hex).trim().replace(/^#/, "");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const n = parseInt(h.slice(0, 6), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 // the render's own curves (formShader: toLin, toSrgb, filmic), for the render's poster
-const lin22 = v => Math.pow(Math.max(v, 0), 2.2);
-const gam22 = v => Math.pow(clamp(v, 0, 1), 1 / 2.2);
-const filmicJs = x => clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0, 1);
+const lin22 = (v) => Math.pow(Math.max(v, 0), 2.2);
+const gam22 = (v) => Math.pow(clamp(v, 0, 1), 1 / 2.2);
+const filmicJs = (x) => clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0, 1);
 function filmicInv(y) {
   y = clamp(y, 0, 0.995);
-  const a = 2.43 * y - 2.51, b = 0.59 * y - 0.03, c = 0.14 * y;
+  const a = 2.43 * y - 2.51,
+    b = 0.59 * y - 0.03,
+    c = 0.14 * y;
   return (-b - Math.sqrt(Math.max(0, b * b - 4 * a * c))) / (2 * a);
 }
 // the colour a render poster's accent part is rendered in (make-fallbacks.html), lit again in the page's accent
-export const RENDER_REF = '#808080';
-const rgbHex = c => '#' + c.map(v => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0')).join('');
+export const RENDER_REF = "#808080";
+const rgbHex = (c) =>
+  "#" +
+  c
+    .map((v) =>
+      Math.round(clamp(v, 0, 1) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("");
 function oklab(rgb) {
   const [r, g, b] = rgb.map(toLin);
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
 }
 function fromOklab([L, A, B]) {
-  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3, m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3, s = (L - 0.0894841775 * A - 1.291485548 * B) ** 3;
-  return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s].map(v => clamp(toGam(clamp(v, 0, 1)), 0, 1));
+  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3,
+    m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3,
+    s = (L - 0.0894841775 * A - 1.291485548 * B) ** 3;
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ].map((v) => clamp(toGam(clamp(v, 0, 1)), 0, 1));
 }
-export const mixColor = (a, b, t) => { const A = oklab(hexRgb(a)), B = oklab(hexRgb(b)); return rgbHex(fromOklab(A.map((v, i) => v + (B[i] - v) * t))); };
-const lightness = c => oklab(hexRgb(c))[0];
-const smooth01 = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+export const mixColor = (a, b, t) => {
+  const A = oklab(hexRgb(a)),
+    B = oklab(hexRgb(b));
+  return rgbHex(fromOklab(A.map((v, i) => v + (B[i] - v) * t)));
+};
+const lightness = (c) => oklab(hexRgb(c))[0];
+const smooth01 = (a, b, x) => {
+  const t = clamp((x - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
+};
 /**
   The colour a render paints its accent part in: the page's accent as an enamel or a glaze carries it.
   A UI accent is tuned for buttons and links (on a dark page often light or neon), and a whole lamp
@@ -220,7 +297,8 @@ const smooth01 = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return
 */
 export function paintColor(hex) {
   const [L, A, B] = oklab(hexRgb(hex));
-  const C = Math.hypot(A, B), h = Math.atan2(B, A);
+  const C = Math.hypot(A, B),
+    h = Math.atan2(B, A);
   const yellow = smooth01(0.55, 0.95, Math.cos(h - 100 * DEG));
   const lmax = 0.64 + (0.84 - 0.64) * yellow;
   const neutral = 1 - smooth01(0.02, 0.06, C);
@@ -229,18 +307,33 @@ export function paintColor(hex) {
   return rgbHex(fromOklab([L2, C2 * Math.cos(h), C2 * Math.sin(h)]));
 }
 
-const DEFAULT_PALETTE = { bg: '#ffffff', surface: '#f4f4f4', ink: '#111111', muted: '#6b6b6b', accent: '#1a4be0', accentInk: '#ffffff' };
+const DEFAULT_PALETTE = {
+  bg: "#ffffff",
+  surface: "#f4f4f4",
+  ink: "#111111",
+  muted: "#6b6b6b",
+  accent: "#1a4be0",
+  accentInk: "#ffffff",
+};
 
 let probe = null;
 function cssHex(v) {
-  v = (v || '').trim();
+  v = (v || "").trim();
   if (!v) return null;
-  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v)) return v.length === 4 ? '#' + v.slice(1).split('').map(c => c + c).join('') : v.toLowerCase();
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v))
+    return v.length === 4
+      ? "#" +
+          v
+            .slice(1)
+            .split("")
+            .map((c) => c + c)
+            .join("")
+      : v.toLowerCase();
   if (!HAS_DOM) return null;
-  probe = probe || document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  probe = probe || document.createElement("canvas").getContext("2d", { willReadFrequently: true });
   probe.canvas.width = probe.canvas.height = 1;
   probe.clearRect(0, 0, 1, 1);
-  probe.fillStyle = '#000';
+  probe.fillStyle = "#000";
   probe.fillStyle = v;
   probe.fillRect(0, 0, 1, 1);
   const d = probe.getImageData(0, 0, 1, 1).data;
@@ -251,22 +344,36 @@ function cssHex(v) {
 export function readPalette(el) {
   if (!HAS_DOM) return { ...DEFAULT_PALETTE };
   const cs = getComputedStyle(el || document.documentElement);
-  const g = (...n) => { for (const k of n) { const v = cssHex(cs.getPropertyValue(k)); if (v) return v; } return undefined; };
-  return normalizePalette({ bg: g('--fx-bg', '--bg'), surface: g('--fx-surface', '--surface'), ink: g('--fx-ink', '--ink'), muted: g('--fx-muted', '--muted'), accent: g('--accent', '--fx-accent'), accentInk: g('--accent-ink', '--fx-accent-ink') });
+  const g = (...n) => {
+    for (const k of n) {
+      const v = cssHex(cs.getPropertyValue(k));
+      if (v) return v;
+    }
+    return undefined;
+  };
+  return normalizePalette({
+    bg: g("--fx-bg", "--bg"),
+    surface: g("--fx-surface", "--surface"),
+    ink: g("--fx-ink", "--ink"),
+    muted: g("--fx-muted", "--muted"),
+    accent: g("--accent", "--fx-accent"),
+    accentInk: g("--accent-ink", "--fx-accent-ink"),
+  });
 }
 export function normalizePalette(p = {}) {
-  const hex = c => (c == null ? null : cssHex(String(c)) || null);
+  const hex = (c) => (c == null ? null : cssHex(String(c)) || null);
   const bg = hex(p.bg) || DEFAULT_PALETTE.bg;
-  const ink = hex(p.ink) || (lightness(bg) < 0.6 ? '#f2f2f2' : '#111111');
+  const ink = hex(p.ink) || (lightness(bg) < 0.6 ? "#f2f2f2" : "#111111");
   return {
-    bg, ink,
+    bg,
+    ink,
     surface: hex(p.surface) || mixColor(bg, ink, 0.05),
     muted: hex(p.muted) || mixColor(ink, bg, 0.45),
     accent: hex(p.accent) || ink,
-    accentInk: hex(p.accentInk || p['accent-ink']) || bg,
+    accentInk: hex(p.accentInk || p["accent-ink"]) || bg,
   };
 }
-export const isDarkPaper = p => lightness(p.bg) < 0.6;
+export const isDarkPaper = (p) => lightness(p.bg) < 0.6;
 
 /**
   The palette an object prints in when it sits on a dealt ground (a [data-fx] panel or frame): the
@@ -276,44 +383,61 @@ export const isDarkPaper = p => lightness(p.bg) < 0.6;
 export function groundPalette(el, ground) {
   const page = readPalette(el);
   let g = null;
-  try { g = JSON.parse(ground?.dataset.fxPalette || 'null'); } catch (_) { g = null; }
+  try {
+    g = JSON.parse(ground?.dataset.fxPalette || "null");
+  } catch (_) {
+    g = null;
+  }
   if (!g || !cssHex(g.bg)) return null;
   const bg = cssHex(g.bg);
   const light = lightness(bg) >= 0.6;
-  const pageLight = lightness(page.ink) < 0.5;   // the page's ink is dark: a light page
-  const ink = cssHex(g.ink || '') || (light ? (pageLight ? page.ink : '#17181b') : (pageLight ? '#f1f1ef' : page.ink));
-  return normalizePalette({ bg, surface: cssHex(g.surface || '') || mixColor(bg, light ? '#ffffff' : '#000000', 0.5), ink, muted: g.muted, accent: page.accent, accentInk: page.accentInk });
+  const pageLight = lightness(page.ink) < 0.5; // the page's ink is dark: a light page
+  const ink =
+    cssHex(g.ink || "") ||
+    (light ? (pageLight ? page.ink : "#17181b") : pageLight ? "#f1f1ef" : page.ink);
+  return normalizePalette({
+    bg,
+    surface: cssHex(g.surface || "") || mixColor(bg, light ? "#ffffff" : "#000000", 0.5),
+    ink,
+    muted: g.muted,
+    accent: page.accent,
+    accentInk: page.accentInk,
+  });
 }
 
 /* ------------------------------------------------------------------ params */
 
 export const COMMON_PARAMS = {
-  effect:      { default: 'render', options: EFFECTS },       // render (a studio render of the thing), or a print: dither, halftone, engrave or ascii
-  cell:        { default: 0,    min: 0,    max: 28 },          // CSS px of a cell, screen or line pitch (0: the effect's own, finer in a small frame)
-  size:        { default: 0.78, min: 0.3,  max: 1.8 },         // share of the frame the object's box fills (the tighter way); over 1 it runs off the edges
-  x:           { default: 0,    min: -0.6, max: 0.6 },         // move the object across the frame (share of the frame's width, + right)
-  y:           { default: 0,    min: -0.6, max: 0.6 },         // and up (share of the frame's height, + up)
-  turn:        { default: 1,    min: 0,    max: 1 },           // 1: it turns (or sways) by itself and gets a pause button; 0: still until hovered or clicked
-  speed:       { default: 1,    min: 0,    max: 4 },           // multiplies the object's own turn
-  angle:       { default: 0,    min: -180, max: 180 },         // turn at rest and in the still frame, degrees
-  accent:      { default: 1,    min: 0,    max: 1 },           // 1 prints the object's accent part in the accent
-  shadow:      { default: 1,    min: 0,    max: 1.6 },         // floor shadow strength (0: no floor at all)
-  body:        { default: 1,    min: 0,    max: 1 },           // paper tint inside the silhouette (surface colour), so the object is opaque on a ground
-  levels:      { default: 2,    min: 2,    max: 3 },           // dither: 2 one ink, 3 adds a half tone
-  contrast:    { default: 1,    min: 0.5,  max: 2 },
-  light:       { default: 0,    min: -90,  max: 90 },          // key light swing at rest, degrees
-  interactive: { default: 1,    min: 0,    max: 1 },           // 0: no hover light, no click step, not focusable (a picture only)
-  debug:       { default: 0,    min: 0,    max: 1 },           // 1 shows the form pass (ink as grey, plates tinted)
-  step:        { default: 0,    min: 0,    max: 1 },           // 1: start with the step taken (the lamp on, the cards fanned)
-  transparent: { default: 0,    min: 0,    max: 1 },           // 1: no paper outside the object (it prints over the panel's ground)
+  effect: { default: "render", options: EFFECTS }, // render (a studio render of the thing), or a print: dither, halftone, engrave or ascii
+  cell: { default: 0, min: 0, max: 28 }, // CSS px of a cell, screen or line pitch (0: the effect's own, finer in a small frame)
+  size: { default: 0.78, min: 0.3, max: 1.8 }, // share of the frame the object's box fills (the tighter way); over 1 it runs off the edges
+  x: { default: 0, min: -0.6, max: 0.6 }, // move the object across the frame (share of the frame's width, + right)
+  y: { default: 0, min: -0.6, max: 0.6 }, // and up (share of the frame's height, + up)
+  turn: { default: 1, min: 0, max: 1 }, // 1: it turns (or sways) by itself and gets a pause button; 0: still until hovered or clicked
+  speed: { default: 1, min: 0, max: 4 }, // multiplies the object's own turn
+  angle: { default: 0, min: -180, max: 180 }, // turn at rest and in the still frame, degrees
+  accent: { default: 1, min: 0, max: 1 }, // 1 prints the object's accent part in the accent
+  shadow: { default: 1, min: 0, max: 1.6 }, // floor shadow strength (0: no floor at all)
+  body: { default: 1, min: 0, max: 1 }, // paper tint inside the silhouette (surface colour), so the object is opaque on a ground
+  levels: { default: 2, min: 2, max: 3 }, // dither: 2 one ink, 3 adds a half tone
+  contrast: { default: 1, min: 0.5, max: 2 },
+  light: { default: 0, min: -90, max: 90 }, // key light swing at rest, degrees
+  interactive: { default: 1, min: 0, max: 1 }, // 0: no hover light, no click step, not focusable (a picture only)
+  debug: { default: 0, min: 0, max: 1 }, // 1 shows the form pass (ink as grey, plates tinted)
+  step: { default: 0, min: 0, max: 1 }, // 1: start with the step taken (the lamp on, the cards fanned)
+  transparent: { default: 0, min: 0, max: 1 }, // 1: no paper outside the object (it prints over the panel's ground)
 };
 
 function resolve(schema, given = {}) {
   const out = {};
   for (const [k, d] of Object.entries(schema)) {
     let v = given[k];
-    if (d.options) { out[k] = typeof v === 'number' ? d.options[v] || d.default : d.options.includes(v) ? v : d.default; continue; }
-    v = v == null || v === '' ? d.default : Number(v);
+    if (d.options) {
+      out[k] =
+        typeof v === "number" ? d.options[v] || d.default : d.options.includes(v) ? v : d.default;
+      continue;
+    }
+    v = v == null || v === "" ? d.default : Number(v);
     if (!Number.isFinite(v)) v = d.default;
     out[k] = clamp(v, d.min ?? -Infinity, d.max ?? Infinity);
   }
@@ -773,69 +897,96 @@ void main() {
 // Two steps, so a browser with KHR_parallel_shader_compile builds the program off the main thread:
 // startProgram queues the work, finishProgram (once it is done) reads the status and the uniforms.
 function startProgram(gl, frag, label, vert = FULL_VERT) {
-  const p = gl.createProgram(), sh = [];
-  for (const [type, src] of [[gl.VERTEX_SHADER, vert], [gl.FRAGMENT_SHADER, frag]]) {
+  const p = gl.createProgram(),
+    sh = [];
+  for (const [type, src] of [
+    [gl.VERTEX_SHADER, vert],
+    [gl.FRAGMENT_SHADER, frag],
+  ]) {
     const s = gl.createShader(type);
     gl.shaderSource(s, src);
     gl.compileShader(s);
     gl.attachShader(p, s);
     sh.push(s);
   }
-  gl.bindAttribLocation(p, 0, 'a_pos');
+  gl.bindAttribLocation(p, 0, "a_pos");
   gl.linkProgram(p);
   return { p, sh, label };
 }
 function finishProgram(gl, sp) {
   const { p, sh, label } = sp;
   if (!gl.getProgramParameter(p, gl.LINK_STATUS) && !gl.isContextLost()) {
-    const log = sh.map(s => gl.getShaderInfoLog(s)).join('\n') + gl.getProgramInfoLog(p);
+    const log = sh.map((s) => gl.getShaderInfoLog(s)).join("\n") + gl.getProgramInfoLog(p);
     throw new Error(`print3d: the ${label} shader did not build\n${log}`);
   }
   for (const s of sh) gl.deleteShader(s);
-  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS), loc = {};
-  for (let i = 0; i < n; i++) { const u = gl.getActiveUniform(p, i); loc[u.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, u.name); }
+  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS),
+    loc = {};
+  for (let i = 0; i < n; i++) {
+    const u = gl.getActiveUniform(p, i);
+    loc[u.name.replace(/\[0\]$/, "")] = gl.getUniformLocation(p, u.name);
+  }
   return { p, loc };
 }
 
 // one glyph atlas per page: the type ramp from blank to full, white on clear, in the page's mono
 // font (--font-mono, e.g. Geist Mono from Google Fonts), redrawn once that font has loaded
-const RAMP = ' .:-=+*#%@';
-const atlas = { canvas: null, font: '', version: 0, waiting: false, listeners: new Set() };
+const RAMP = " .:-=+*#%@";
+const atlas = { canvas: null, font: "", version: 0, waiting: false, listeners: new Set() };
 function monoFamily() {
-  const v = HAS_DOM ? getComputedStyle(document.documentElement).getPropertyValue('--font-mono').trim() : '';
+  const v = HAS_DOM
+    ? getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim()
+    : "";
   return v || 'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace';
 }
 function glyphAtlas() {
   const family = monoFamily();
   if (atlas.canvas && atlas.font === family) return atlas.canvas;
-  const w = 40, h = 64, c = atlas.canvas || document.createElement('canvas');
-  c.width = w * RAMP.length; c.height = h;
-  const x = c.getContext('2d');
+  const w = 40,
+    h = 64,
+    c = atlas.canvas || document.createElement("canvas");
+  c.width = w * RAMP.length;
+  c.height = h;
+  const x = c.getContext("2d");
   x.clearRect(0, 0, c.width, c.height);
-  x.fillStyle = '#fff';
-  x.textAlign = 'center';
-  x.textBaseline = 'middle';
+  x.fillStyle = "#fff";
+  x.textAlign = "center";
+  x.textBaseline = "middle";
   const font = `600 ${Math.round(h * 0.8)}px ${family}`;
   x.font = font;
   for (let i = 0; i < RAMP.length; i++) x.fillText(RAMP[i], (i + 0.5) * w, h * 0.55);
-  atlas.canvas = c; atlas.font = family; atlas.version++;
+  atlas.canvas = c;
+  atlas.font = family;
+  atlas.version++;
   if (document.fonts && !atlas.waiting && !document.fonts.check(font)) {
     atlas.waiting = true;
-    document.fonts.load(font).then(() => { atlas.waiting = false; atlas.font = ''; glyphAtlas(); atlas.listeners.forEach(f => f()); }).catch(() => { atlas.waiting = false; });
+    document.fonts
+      .load(font)
+      .then(() => {
+        atlas.waiting = false;
+        atlas.font = "";
+        glyphAtlas();
+        atlas.listeners.forEach((f) => f());
+      })
+      .catch(() => {
+        atlas.waiting = false;
+      });
   }
   return c;
 }
 
 /* ------------------------------------------------------------------ page styles (once) */
 
-const PAUSE_SVG = '<svg viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="2" width="3" height="10" rx="1"/><rect x="8" y="2" width="3" height="10" rx="1"/></svg>';
-const PLAY_SVG = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6c0 .5.5.8.9.5l7.2-4.8c.4-.3.4-.8 0-1L4.9 1.7c-.4-.3-.9 0-.9.5Z"/></svg>';
+const PAUSE_SVG =
+  '<svg viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="2" width="3" height="10" rx="1"/><rect x="8" y="2" width="3" height="10" rx="1"/></svg>';
+const PLAY_SVG =
+  '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6c0 .5.5.8.9.5l7.2-4.8c.4-.3.4-.8 0-1L4.9 1.7c-.4-.3-.9 0-.9.5Z"/></svg>';
 let styled = false;
 function injectStyles() {
   if (styled || !HAS_DOM) return;
   styled = true;
-  const s = document.createElement('style');
-  s.dataset.print3d = '';
+  const s = document.createElement("style");
+  s.dataset.print3d = "";
   // the host fills its panel or frame; the pause button looks like system.css's .loop-pause where
   // that is not loaded (zero specificity, so the page's own rule wins)
   s.textContent = `
@@ -854,15 +1005,36 @@ function injectStyles() {
 
 /* ------------------------------------------------------------------ maths */
 
-const norm = v => { const l = Math.hypot(...v) || 1; return v.map(x => x / l); };
-const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = (v) => {
+  const l = Math.hypot(...v) || 1;
+  return v.map((x) => x / l);
+};
+const cross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
 // row-major 3x3 products and the column-major array GLSL wants
-const mul3 = (A, B) => { const r = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) r.push(A[i * 3] * B[j] + A[i * 3 + 1] * B[3 + j] + A[i * 3 + 2] * B[6 + j]); return r; };
-const colMajor = M => [M[0], M[3], M[6], M[1], M[4], M[7], M[2], M[5], M[8]];
-const transpose = M => [M[0], M[3], M[6], M[1], M[4], M[7], M[2], M[5], M[8]];
-const rotY = a => { const c = Math.cos(a), s = Math.sin(a); return [c, 0, s, 0, 1, 0, -s, 0, c]; };
-const rotX = a => { const c = Math.cos(a), s = Math.sin(a); return [1, 0, 0, 0, c, -s, 0, s, c]; };
-const ease = s => (s < 0.5 ? 4 * s * s * s : 1 - Math.pow(-2 * s + 2, 3) / 2);
+const mul3 = (A, B) => {
+  const r = [];
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++)
+      r.push(A[i * 3] * B[j] + A[i * 3 + 1] * B[3 + j] + A[i * 3 + 2] * B[6 + j]);
+  return r;
+};
+const colMajor = (M) => [M[0], M[3], M[6], M[1], M[4], M[7], M[2], M[5], M[8]];
+const transpose = (M) => [M[0], M[3], M[6], M[1], M[4], M[7], M[2], M[5], M[8]];
+const rotY = (a) => {
+  const c = Math.cos(a),
+    s = Math.sin(a);
+  return [c, 0, s, 0, 1, 0, -s, 0, c];
+};
+const rotX = (a) => {
+  const c = Math.cos(a),
+    s = Math.sin(a);
+  return [1, 0, 0, 0, c, -s, 0, s, c];
+};
+const ease = (s) => (s < 0.5 ? 4 * s * s * s : 1 - Math.pow(-2 * s + 2, 3) / 2);
 
 /* ------------------------------------------------------------------ the context pool */
 
@@ -886,30 +1058,56 @@ const ease = s => (s < 0.5 ? 4 * s * s * s : 1 - Math.pow(-2 * s + 2, 3) / 2);
   config.adapt: slow frames lower the texels, then the march steps, then stop the turn (false only
   for screenshot tests in a CPU-rendered browser, where every frame is slow).
 */
-export const config = { maxLive: 2, maxCanvasPx: 1.5e6, fineTexels: 1.2e6, idleMs: 1500, adapt: true };
+export const config = {
+  maxLive: 2,
+  maxCanvasPx: 1.5e6,
+  fineTexels: 1.2e6,
+  idleMs: 1500,
+  adapt: true,
+};
 // The page's one count of live WebGL contexts, window.__tpGl, at most window.__tpGlMax (default 4: the house rule, a laptop's
 // integrated GPU). scenes/lib.js glBudget, fx.js (every effect, and fx.glBudget for the ones that make their own),
 // print3d.js's pool and liquid-hover all count in it, so a scene, an object, a ground and a moment never add up to
 // more than the cap. A gallery or lab that shows many at once sets window.__tpGlMax before the scripts load.
-const tpHeld = () => (typeof window !== 'undefined' && window.__tpGl) || 0;
-const tpMax = () => (typeof window !== 'undefined' && window.__tpGlMax) || 4;
-const tpAdd = n => { if (typeof window !== 'undefined') window.__tpGl = Math.max(0, tpHeld() + n); };
+const tpHeld = () => (typeof window !== "undefined" && window.__tpGl) || 0;
+const tpMax = () => (typeof window !== "undefined" && window.__tpGlMax) || 4;
+const tpAdd = (n) => {
+  if (typeof window !== "undefined") window.__tpGl = Math.max(0, tpHeld() + n);
+};
 class LiveSet extends Set {
-  add(x) { if (!this.has(x)) tpAdd(1); return super.add(x); }
-  delete(x) { const r = super.delete(x); if (r) tpAdd(-1); return r; }
-  clear() { tpAdd(-this.size); super.clear(); }
+  add(x) {
+    if (!this.has(x)) tpAdd(1);
+    return super.add(x);
+  }
+  delete(x) {
+    const r = super.delete(x);
+    if (r) tpAdd(-1);
+    return r;
+  }
+  clear() {
+    tpAdd(-this.size);
+    super.clear();
+  }
 }
 const pool = { live: new LiveSet(), waiting: [] };
 // the contexts objects may hold now: config.maxLive, less what the page's other users (a scene's own canvas, a ground) hold
 const poolCap = () => Math.min(config.maxLive, tpMax() - Math.max(0, tpHeld() - pool.live.size));
-const unwait = o => { const i = pool.waiting.indexOf(o); if (i >= 0) pool.waiting.splice(i, 1); };
+const unwait = (o) => {
+  const i = pool.waiting.indexOf(o);
+  if (i >= 0) pool.waiting.splice(i, 1);
+};
 function acquire(o) {
   if (pool.live.has(o)) return true;
   if (pool.live.size >= poolCap()) {
     const held = [...pool.live];
-    const victim = held.find(h => !h.busy()) || (o.touched() ? held.find(h => !h.touched()) : null) ||
-      (o.fresh() ? held.find(h => !h.touched() && !h.fresh()) : null);
-    if (!victim) { if (!pool.waiting.includes(o)) pool.waiting.push(o); return false; }
+    const victim =
+      held.find((h) => !h.busy()) ||
+      (o.touched() ? held.find((h) => !h.touched()) : null) ||
+      (o.fresh() ? held.find((h) => !h.touched() && !h.fresh()) : null);
+    if (!victim) {
+      if (!pool.waiting.includes(o)) pool.waiting.push(o);
+      return false;
+    }
     pool.live.delete(victim);
     victim.stop(true);
     if (victim.wants() && !pool.waiting.includes(victim)) pool.waiting.push(victim);
@@ -919,10 +1117,16 @@ function acquire(o) {
   return true;
 }
 function release(o) {
-  if (!pool.live.delete(o)) { unwait(o); return; }
+  if (!pool.live.delete(o)) {
+    unwait(o);
+    return;
+  }
   while (pool.live.size < poolCap() && pool.waiting.length) {
     const n = pool.waiting.shift();
-    if (n.wants()) { pool.live.add(n); n.start(); }
+    if (n.wants()) {
+      pool.live.add(n);
+      n.start();
+    }
   }
 }
 /** live WebGL contexts the objects of this page hold now */
@@ -947,32 +1151,36 @@ export function definePrint(def) {
   return {
     id: def.id,
     name: def.name,
-    kind: 'form',
+    kind: "form",
     // extra poster plates beyond fallback.png and fallback-dark.png (make-fallbacks.html prints them)
     plates: def.plates || [],
     // the print its print poster (fallback.png) is made in
-    posterPrint: def.posterPrint || 'halftone',
+    posterPrint: def.posterPrint || "halftone",
     params,
     place,
     /** the shader sources exactly as they are compiled (lint-glsl.mjs checks them for reserved words) */
     source: () => ({ form: formShader(def), print: PRINT_FRAG, vert: FULL_VERT }),
     /** mount(el, { place: 'card'|'tile'|'hero', params, palette }) -> controller */
     mount(el, opts = {}) {
-      const preset = typeof opts.place === 'string' ? place[opts.place] || {} : opts.place || {};
+      const preset = typeof opts.place === "string" ? place[opts.place] || {} : opts.place || {};
       // a preset's narrow: its values for a frame about as tall as it is wide (a phone), unless
       // the page set those params itself
-      const { narrow: n, ...wide } = preset, given = opts.params || {};
-      const narrow = n ? Object.fromEntries(Object.entries(n).filter(([k]) => given[k] == null)) : null;
+      const { narrow: n, ...wide } = preset,
+        given = opts.params || {};
+      const narrow = n
+        ? Object.fromEntries(Object.entries(n).filter(([k]) => given[k] == null))
+        : null;
       return mountPrint(el, def, params, { ...opts, params: { ...wide, ...given }, narrow, wide });
     },
   };
 }
 
 function mountPrint(el, def, schema, opts) {
-  if (!HAS_DOM) throw new Error('print3d needs a browser');
+  if (!HAS_DOM) throw new Error("print3d needs a browser");
   injectStyles();
-  const ground = el.parentElement?.closest('[data-fx]') || null;
-  const pagePalette = () => normalizePalette(opts.palette || groundPalette(el, ground) || readPalette(el));
+  const ground = el.parentElement?.closest("[data-fx]") || null;
+  const pagePalette = () =>
+    normalizePalette(opts.palette || groundPalette(el, ground) || readPalette(el));
   let palette = pagePalette();
   let params = resolve(schema, opts.params);
   // a frame about as tall as wide takes the preset's narrow values (on a resize too)
@@ -982,102 +1190,207 @@ function mountPrint(el, def, schema, opts) {
     const n = el.clientWidth / Math.max(1, el.clientHeight) < 1.15;
     if (n === isNarrow) return false;
     isNarrow = n;
-    const back = Object.fromEntries(Object.keys(opts.narrow).map(k => [k, opts.wide?.[k] ?? schema[k]?.default]));
+    const back = Object.fromEntries(
+      Object.keys(opts.narrow).map((k) => [k, opts.wide?.[k] ?? schema[k]?.default]),
+    );
     params = resolve(schema, { ...params, ...(n ? opts.narrow : back) });
     return true;
   }
   applyNarrow();
-  el.classList.add('print3d');
-  if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+  el.classList.add("print3d");
+  if (getComputedStyle(el).position === "static") el.style.position = "relative";
 
   // the picture shown while no context is live: the poster (the object printed ahead of time, from
   // the plates in fallback.png) until the first frame, then the last frame drawn
-  const still = document.createElement('canvas');
-  still.className = 'print3d__still';
-  still.setAttribute('aria-hidden', 'true');
+  const still = document.createElement("canvas");
+  still.className = "print3d__still";
+  still.setAttribute("aria-hidden", "true");
   el.appendChild(still);
-  let stillKind = '';   // '', 'poster' or 'frame'
+  let stillKind = ""; // '', 'poster' or 'frame'
 
   // the layer that takes the pointer, the keys and the focus ring, above the canvas; a button when
   // a click does something, else a picture
-  const label = el.getAttribute('aria-label') || def.label || def.name;
-  el.removeAttribute('aria-label');
-  const hit = document.createElement('div');
-  hit.className = 'print3d__hit';
+  const label = el.getAttribute("aria-label") || def.label || def.name;
+  el.removeAttribute("aria-label");
+  const hit = document.createElement("div");
+  hit.className = "print3d__hit";
   el.appendChild(hit);
-  const toggle = def.step !== 'impulse';
+  const toggle = def.step !== "impulse";
   function setRole() {
     if (params.interactive) {
-      hit.setAttribute('role', 'button');
+      hit.setAttribute("role", "button");
       hit.tabIndex = 0;
-      hit.setAttribute('aria-label', def.press ? `${label}. ${def.press}` : label);
-      if (toggle) hit.setAttribute('aria-pressed', String(state.stepT > 0.5)); else hit.removeAttribute('aria-pressed');
-      hit.style.pointerEvents = '';
+      hit.setAttribute("aria-label", def.press ? `${label}. ${def.press}` : label);
+      if (toggle) hit.setAttribute("aria-pressed", String(state.stepT > 0.5));
+      else hit.removeAttribute("aria-pressed");
+      hit.style.pointerEvents = "";
     } else {
-      hit.setAttribute('role', 'img');
-      hit.removeAttribute('tabindex');
-      hit.removeAttribute('aria-pressed');
-      hit.setAttribute('aria-label', label);
-      hit.style.pointerEvents = 'none';
+      hit.setAttribute("role", "img");
+      hit.removeAttribute("tabindex");
+      hit.removeAttribute("aria-pressed");
+      hit.setAttribute("aria-label", label);
+      hit.style.pointerEvents = "none";
     }
   }
 
   const state = {
-    t: 0, time: 0, yaw: params.angle * DEG, spin: 0, step: params.step ? 1 : 0, stepT: params.step ? 1 : 0, kick: 99, kicks: 0,
-    hover: 0, hoverT: 0, mx: 0, my: 0, mxT: 0, myT: 0, params, dim: 0, k: [0, 0, 0, 0], turnK: 0,
+    t: 0,
+    time: 0,
+    yaw: params.angle * DEG,
+    spin: 0,
+    step: params.step ? 1 : 0,
+    stepT: params.step ? 1 : 0,
+    kick: 99,
+    kicks: 0,
+    hover: 0,
+    hoverT: 0,
+    mx: 0,
+    my: 0,
+    mxT: 0,
+    myT: 0,
+    params,
+    dim: 0,
+    k: [0, 0, 0, 0],
+    turnK: 0,
   };
-  let canvas = null, gl = null, form = null, print = null, fbo = null, tex = null, texReady = false;
-  let glyphTex = null, glyphVer = 0, auxTex = null, vbo = null;
-  let fine = false;   // a render's still frame: the march at up to one texel per canvas pixel
-  let half = true, W = 0, H = 0, dpr = 1, texW = 1, texH = 1, scaleX = 1, scaleY = 1, cssW = 0, cssH = 0, pixelated = false;
-  let budgetK = coarseQuery?.matches ? 0.7 : 1, steps = def.steps || 96, slow = false;
-  let destroyed = false, userPaused = false, inView = false, near = false, raf = 0, last = 0, shown = false, failed = '';
-  let starting = false, dirty = true, hold = false, idleT = 0, losses = 0, focused = false, warmUntil = 0, warmT = 0;
+  let canvas = null,
+    gl = null,
+    form = null,
+    print = null,
+    fbo = null,
+    tex = null,
+    texReady = false;
+  let glyphTex = null,
+    glyphVer = 0,
+    auxTex = null,
+    vbo = null;
+  let fine = false; // a render's still frame: the march at up to one texel per canvas pixel
+  let half = true,
+    W = 0,
+    H = 0,
+    dpr = 1,
+    texW = 1,
+    texH = 1,
+    scaleX = 1,
+    scaleY = 1,
+    cssW = 0,
+    cssH = 0,
+    pixelated = false;
+  let budgetK = coarseQuery?.matches ? 0.7 : 1,
+    steps = def.steps || 96,
+    slow = false;
+  let destroyed = false,
+    userPaused = false,
+    inView = false,
+    near = false,
+    raf = 0,
+    last = 0,
+    shown = false,
+    failed = "";
+  let starting = false,
+    dirty = true,
+    hold = false,
+    idleT = 0,
+    losses = 0,
+    focused = false,
+    warmUntil = 0,
+    warmT = 0;
   const perf = { n: 0, sum: 0, warm: 0, fps: 0 };
 
   const reduced = () => !!(reducedQuery && reducedQuery.matches);
   const turnOn = () => params.turn > 0 && !userPaused && !slow && !reduced();
-  const kicking = () => def.step === 'impulse' && state.kicks > 0 && state.kick < (def.kickTime || 4);
+  const kicking = () =>
+    def.step === "impulse" && state.kicks > 0 && state.kick < (def.kickTime || 4);
   // the visitor is on it: the pointer, the keyboard focus, a step under way
-  const touched = () => state.hoverT > 0 || focused || Math.abs(state.step - state.stepT) > 1e-4 || kicking();
+  const touched = () =>
+    state.hoverT > 0 || focused || Math.abs(state.step - state.stepT) > 1e-4 || kicking();
   // something is moving: the turn (or its ease out), the pointer's light, a step, a click's impulse
-  const busy = () => turnOn() || state.turnK > 0.001 || state.hoverT > 0 || state.hover > 0.002 || Math.abs(state.step - state.stepT) > 1e-4 ||
-    kicking() || !!(def.busy && def.busy(state));
+  const busy = () =>
+    turnOn() ||
+    state.turnK > 0.001 ||
+    state.hoverT > 0 ||
+    state.hover > 0.002 ||
+    Math.abs(state.step - state.stepT) > 1e-4 ||
+    kicking() ||
+    !!(def.busy && def.busy(state));
   // it wants a live context: held for a test, or near the screen with a frame to draw or something moving
-  const wants = () => !destroyed && !failed && !document.hidden &&
-    (hold || (near && (dirty || performance.now() < warmUntil || focused || (!reduced() && busy()))));
-  const running = () => !destroyed && inView && !document.hidden && !reduced() && !!gl && !!print && !starting && busy();
+  const wants = () =>
+    !destroyed &&
+    !failed &&
+    !document.hidden &&
+    (hold ||
+      (near && (dirty || performance.now() < warmUntil || focused || (!reduced() && busy()))));
+  const running = () =>
+    !destroyed &&
+    inView &&
+    !document.hidden &&
+    !reduced() &&
+    !!gl &&
+    !!print &&
+    !starting &&
+    busy();
   // fresh: no frame of its own drawn yet (only the poster shows)
   let drawnOnce = false;
-  const slot = { wants, touched, fresh: () => !drawnOnce && !failed, busy: () => starting || running(), start: () => start(), stop: b => stop(b) };
+  const slot = {
+    wants,
+    touched,
+    fresh: () => !drawnOnce && !failed,
+    busy: () => starting || running(),
+    start: () => start(),
+    stop: (b) => stop(b),
+  };
   state.turnK = turnOn() ? 1 : 0;
   setRole();
 
   /* ---------- the poster and the kept frame */
-  let posterImg = null, posterSrc = null;
-  const isRender = () => params.effect === 'render';
+  let posterImg = null,
+    posterSrc = null;
+  const isRender = () => params.effect === "render";
   // the plates for this paper and kind of picture; an object whose picture depends on the palette (the
   // globe puts its accent on the sea or the land) picks its own with def.poster(palette, dark, render)
   function posterFile(dark) {
     const own = def.poster && def.poster(palette, dark, isRender());
-    const f = own || (isRender() ? (dark ? './fallback-render-dark.png' : './fallback-render.png')
-      : dark ? def.fallbackDark || './fallback-dark.png' : def.fallback || './fallback.png');
+    const f =
+      own ||
+      (isRender()
+        ? dark
+          ? "./fallback-render-dark.png"
+          : "./fallback-render.png"
+        : dark
+          ? def.fallbackDark || "./fallback-dark.png"
+          : def.fallback || "./fallback.png");
     return new URL(f, def.base).href;
   }
   // force: the palette changed, so a kept frame is stale and the poster (in the new colours) replaces it
   function loadPoster(force = false) {
     const src = posterFile(isDarkPaper(palette));
-    if (posterImg && posterSrc === src) { drawPoster(force); return; }
+    if (posterImg && posterSrc === src) {
+      drawPoster(force);
+      return;
+    }
     posterSrc = src;
     const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => { if (!destroyed && posterSrc === src) { posterImg = img; drawPoster(force); } };
+    img.decoding = "async";
+    img.onload = () => {
+      if (!destroyed && posterSrc === src) {
+        posterImg = img;
+        drawPoster(force);
+      }
+    };
     // a missing poster is a fault of the object's folder: say so (the checker reads the console)
-    img.onerror = () => { if (!destroyed && posterSrc === src) { console.error(`print3d: ${def.id}: no poster at ${src}`); el.dataset.printPoster = 'missing'; } };
+    img.onerror = () => {
+      if (!destroyed && posterSrc === src) {
+        console.error(`print3d: ${def.id}: no poster at ${src}`);
+        el.dataset.printPoster = "missing";
+      }
+    };
     img.src = src;
   }
   // the shadow under a rendered object: the paper a good deal deeper, toward the ink
-  const shadowHex = () => isDarkPaper(palette) ? mixColor(palette.bg, '#000000', 0.7) : mixColor(palette.bg, palette.ink, 0.5);
+  const shadowHex = () =>
+    isDarkPaper(palette)
+      ? mixColor(palette.bg, "#000000", 0.7)
+      : mixColor(palette.bg, palette.ink, 0.5);
   /*
     The poster in the palette.
     A print (fallback.png): red ink and floor, green accent, blue the silhouette, layered over the paper.
@@ -1090,84 +1403,141 @@ function mountPrint(el, def, schema, opts) {
   */
   function drawPoster(force = false) {
     if (!posterImg || destroyed || (shown && !failed)) return;
-    if (stillKind === 'frame' && !force && !failed) return;   // a frame drawn since is the better picture
+    if (stillKind === "frame" && !force && !failed) return; // a frame drawn since is the better picture
     const render = posterSrc && /fallback-render/.test(posterSrc);
-    const W2 = posterImg.naturalWidth, h = posterImg.naturalHeight, w = render ? W2 >> 1 : W2;
+    const W2 = posterImg.naturalWidth,
+      h = posterImg.naturalHeight,
+      w = render ? W2 >> 1 : W2;
     let src;
     if (render) {
-      const c = document.createElement('canvas');
-      c.width = W2; c.height = h;
-      const cx = c.getContext('2d', { willReadFrequently: true });
+      const c = document.createElement("canvas");
+      c.width = W2;
+      c.height = h;
+      const cx = c.getContext("2d", { willReadFrequently: true });
       cx.drawImage(posterImg, 0, 0);
       src = cx.getImageData(0, 0, W2, h).data;
     }
-    still.width = w; still.height = h;
-    const x = still.getContext('2d', { willReadFrequently: true });
+    still.width = w;
+    still.height = h;
+    const x = still.getContext("2d", { willReadFrequently: true });
     x.clearRect(0, 0, w, h);
     if (!render) x.drawImage(posterImg, 0, 0);
-    const d = render ? x.createImageData(w, h) : x.getImageData(0, 0, w, h), px = d.data;
-    const P = hexRgb(palette.bg).map(v => v * 255), S = hexRgb(palette.surface).map(v => v * 255);
-    const I = hexRgb(palette.ink).map(v => v * 255), A = hexRgb(params.accent ? palette.accent : palette.ink).map(v => v * 255);
-    const clear = !!params.transparent, body = params.body;
-    const SH = hexRgb(shadowHex()).map(v => v * 255);
+    const d = render ? x.createImageData(w, h) : x.getImageData(0, 0, w, h),
+      px = d.data;
+    const P = hexRgb(palette.bg).map((v) => v * 255),
+      S = hexRgb(palette.surface).map((v) => v * 255);
+    const I = hexRgb(palette.ink).map((v) => v * 255),
+      A = hexRgb(params.accent ? palette.accent : palette.ink).map((v) => v * 255);
+    const clear = !!params.transparent,
+      body = params.body;
+    const SH = hexRgb(shadowHex()).map((v) => v * 255);
     // the render: the reference the accent part was rendered in, and the accent to light instead
-    const file = (posterSrc || '').split('/').pop();
-    const ref = hexRgb(paintColor((def.plates || []).find(p => p.file === file)?.accent || RENDER_REF)).map(lin22);
+    const file = (posterSrc || "").split("/").pop();
+    const ref = hexRgb(
+      paintColor((def.plates || []).find((p) => p.file === file)?.accent || RENDER_REF),
+    ).map(lin22);
     const refY = Math.max(1e-4, 0.2126 * ref[0] + 0.7152 * ref[1] + 0.0722 * ref[2]);
     const T = hexRgb(params.accent ? paintColor(palette.accent) : palette.ink).map(lin22);
     for (let i = 0, n = w * h; i < n; i++) {
       const o = i * 4;
-      let r = P[0], g = P[1], b = P[2], a = clear ? 0 : 1;
-      const over = (C, k) => { if (k <= 0) return; const na = k + a * (1 - k); r = (C[0] * k + r * a * (1 - k)) / na; g = (C[1] * k + g * a * (1 - k)) / na; b = (C[2] * k + b * a * (1 - k)) / na; a = na; };
+      let r = P[0],
+        g = P[1],
+        b = P[2],
+        a = clear ? 0 : 1;
+      const over = (C, k) => {
+        if (k <= 0) return;
+        const na = k + a * (1 - k);
+        r = (C[0] * k + r * a * (1 - k)) / na;
+        g = (C[1] * k + g * a * (1 - k)) / na;
+        b = (C[2] * k + b * a * (1 - k)) / na;
+        a = na;
+      };
       if (render) {
-        const y = (i / w) | 0, l = (y * W2 + (i - y * w)) * 4, c = l + w * 4;
-        const acc = src[l + 1] / 255, cov = src[l + 2] / 255;
+        const y = (i / w) | 0,
+          l = (y * W2 + (i - y * w)) * 4,
+          c = l + w * 4;
+        const acc = src[l + 1] / 255,
+          cov = src[l + 2] / 255;
         if (cov > 0.02) {
           let col = [src[c], src[c + 1], src[c + 2]];
           if (acc > 0.01) {
             // the light on the reference, back through the tone curve, on the page's accent
-            const rad = col.map(v => filmicInv(lin22(v / 255)));
+            const rad = col.map((v) => filmicInv(lin22(v / 255)));
             const E = (0.2126 * rad[0] + 0.7152 * rad[1] + 0.0722 * rad[2]) / refY;
             col = col.map((v, k) => v + (255 * gam22(filmicJs(T[k] * E)) - v) * acc);
           }
           over(col, cov);
         } else over(SH, src[l] / 255);
       } else {
-        const kI = px[o] / 255, kA = px[o + 1] / 255, kB = (px[o + 2] / 255) * body;
+        const kI = px[o] / 255,
+          kA = px[o + 1] / 255,
+          kB = (px[o + 2] / 255) * body;
         // layers over each other, un-premultiplied: paper (or clear), the silhouette's stock, ink, accent
-        over(S, kB); over(I, kI); over(A, kA);
+        over(S, kB);
+        over(I, kI);
+        over(A, kA);
       }
-      px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = a * 255;
+      px[o] = r;
+      px[o + 1] = g;
+      px[o + 2] = b;
+      px[o + 3] = a * 255;
     }
     x.putImageData(d, 0, 0);
-    stillKind = 'poster';
+    stillKind = "poster";
     placeStill();
-    still.style.transition = 'none';
-    still.style.opacity = '1';
+    still.style.transition = "none";
+    still.style.opacity = "1";
   }
   // the poster at the size and place the live print will take (the plates were printed at FB.size
   // in an FB.w x FB.h frame; the picture scales with pixels per unit); a kept frame where the canvas was
   function placeStill() {
-    if (stillKind === 'frame') {
-      Object.assign(still.style, { position: 'absolute', display: 'block', pointerEvents: 'none', left: '0px', top: '0px', width: cssW + 'px', height: cssH + 'px', imageRendering: pixelated ? 'pixelated' : '' });
+    if (stillKind === "frame") {
+      Object.assign(still.style, {
+        position: "absolute",
+        display: "block",
+        pointerEvents: "none",
+        left: "0px",
+        top: "0px",
+        width: cssW + "px",
+        height: cssH + "px",
+        imageRendering: pixelated ? "pixelated" : "",
+      });
       return;
     }
-    if (stillKind !== 'poster') return;
-    const w = el.clientWidth, h = el.clientHeight, R = def.radius || 0.6, ex = def.extent || [R, R];
-    const k = (params.size * Math.min(w / (2 * ex[0]), h / (2 * ex[1]))) / (FB.size * Math.min(FB.w / (2 * ex[0]), FB.h / (2 * ex[1])));
-    const pw = FB.w * k, ph = FB.h * k, cx = w / 2 + params.x * w, cy = h / 2 - params.y * h;
+    if (stillKind !== "poster") return;
+    const w = el.clientWidth,
+      h = el.clientHeight,
+      R = def.radius || 0.6,
+      ex = def.extent || [R, R];
+    const k =
+      (params.size * Math.min(w / (2 * ex[0]), h / (2 * ex[1]))) /
+      (FB.size * Math.min(FB.w / (2 * ex[0]), FB.h / (2 * ex[1])));
+    const pw = FB.w * k,
+      ph = FB.h * k,
+      cx = w / 2 + params.x * w,
+      cy = h / 2 - params.y * h;
     // a dither plate holds one pixel per cell: scaled up crisp
-    Object.assign(still.style, { position: 'absolute', display: 'block', pointerEvents: 'none', width: pw + 'px', height: ph + 'px', left: cx - pw / 2 + 'px', top: cy - ph / 2 + 'px', imageRendering: still.width < FB.w * 0.75 ? 'pixelated' : '' });
+    Object.assign(still.style, {
+      position: "absolute",
+      display: "block",
+      pointerEvents: "none",
+      width: pw + "px",
+      height: ph + "px",
+      left: cx - pw / 2 + "px",
+      top: cy - ph / 2 + "px",
+      imageRendering: still.width < FB.w * 0.75 ? "pixelated" : "",
+    });
   }
   // the frame on the live canvas, kept as a 2D picture before the context is freed
   function keepFrame() {
     if (!gl || !print || !shown || gl.isContextLost()) return;
-    render();                       // drawn in this task, so the drawing buffer is whole when copied
-    still.width = canvas.width; still.height = canvas.height;
-    const x = still.getContext('2d');
+    render(); // drawn in this task, so the drawing buffer is whole when copied
+    still.width = canvas.width;
+    still.height = canvas.height;
+    const x = still.getContext("2d");
     x.clearRect(0, 0, still.width, still.height);
     x.drawImage(canvas, 0, 0);
-    stillKind = 'frame';
+    stillKind = "frame";
     placeStill();
   }
   function showFallback(reason) {
@@ -1175,21 +1545,29 @@ function mountPrint(el, def, schema, opts) {
     stop(false);
     syncPause();
     el.dataset.printFallback = reason;
-    still.style.opacity = '1';
+    still.style.opacity = "1";
     loadPoster(true);
   }
   function reveal() {
     if (shown || !canvas) return;
     shown = true;
-    if (!drawnOnce) { drawnOnce = true; syncPause(); }
+    if (!drawnOnce) {
+      drawnOnce = true;
+      syncPause();
+    }
     const c = canvas;
-    if (stillKind === 'frame' || reduced()) {
+    if (stillKind === "frame" || reduced()) {
       // the same picture: swap at once
-      c.style.transition = 'none'; c.style.opacity = '1';
-      requestAnimationFrame(() => { if (shown && canvas === c) still.style.opacity = '0'; });
+      c.style.transition = "none";
+      c.style.opacity = "1";
+      requestAnimationFrame(() => {
+        if (shown && canvas === c) still.style.opacity = "0";
+      });
     } else {
-      c.style.transition = 'opacity 320ms ease'; c.style.opacity = '1';
-      still.style.transition = 'opacity 320ms ease'; still.style.opacity = '0';
+      c.style.transition = "opacity 320ms ease";
+      c.style.opacity = "1";
+      still.style.transition = "opacity 320ms ease";
+      still.style.opacity = "0";
     }
   }
 
@@ -1198,34 +1576,70 @@ function mountPrint(el, def, schema, opts) {
   // error), 'link' (a uniform whose type differs between the two shaders), 'reserved' (a struct field
   // named flat) or 'empty' (a frame that draws nothing), and each must end on the poster
   function sources() {
-    const brk = window.__printBreak || '';
-    let frag = formShader(def), vert = FULL_VERT;
-    if (brk === 'reserved') frag = frag.replace('out vec4 o;', 'out vec4 o;\nstruct Broken { float flat; };');
-    if (brk === 'compile') frag = frag.replace('out vec4 o;', 'out vec4 o;\nfloat brokenOnPurpose = ;');   // a syntax error the word check lets through
-    if (brk === 'link') vert = vert.replace('in vec2 a_pos;', 'in vec2 a_pos;\nuniform float u_full;').replace('vec4(a_pos, 0.0, 1.0)', 'vec4(a_pos, u_full * 0.0, 1.0)');
+    const brk = window.__printBreak || "";
+    let frag = formShader(def),
+      vert = FULL_VERT;
+    if (brk === "reserved")
+      frag = frag.replace("out vec4 o;", "out vec4 o;\nstruct Broken { float flat; };");
+    if (brk === "compile")
+      frag = frag.replace("out vec4 o;", "out vec4 o;\nfloat brokenOnPurpose = ;"); // a syntax error the word check lets through
+    if (brk === "link")
+      vert = vert
+        .replace("in vec2 a_pos;", "in vec2 a_pos;\nuniform float u_full;")
+        .replace("vec4(a_pos, 0.0, 1.0)", "vec4(a_pos, u_full * 0.0, 1.0)");
     return { frag, vert };
   }
   let words = null;
   function start() {
     if (gl || starting || failed || destroyed) return;
-    if (window.__printForceFallback) { release(slot); return showFallback('forced'); }   // tests: the no-WebGL2 path
+    if (window.__printForceFallback) {
+      release(slot);
+      return showFallback("forced");
+    } // tests: the no-WebGL2 path
     const src = sources();
     // words a laptop's GPU rejects, though CPU-rendered Chrome may compile them: never try, show the poster
     words = words || glslProblems(src.frag).concat(glslProblems(src.vert));
-    if (words.length) { console.error(`print3d: ${def.id}: the shader uses words a GPU rejects\n${words.join('\n')}`); release(slot); return showFallback('shader-words'); }
-    const c = document.createElement('canvas');
-    c.setAttribute('aria-hidden', 'true');
-    c.style.opacity = '0';
+    if (words.length) {
+      console.error(`print3d: ${def.id}: the shader uses words a GPU rejects\n${words.join("\n")}`);
+      release(slot);
+      return showFallback("shader-words");
+    }
+    const c = document.createElement("canvas");
+    c.setAttribute("aria-hidden", "true");
+    c.style.opacity = "0";
     let g = null;
-    try { g = c.getContext('webgl2', { alpha: true, antialias: false, depth: false, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false }); } catch (_) { g = null; }
-    if (!g) { release(slot); return showFallback('no-webgl2'); }
+    try {
+      g = c.getContext("webgl2", {
+        alpha: true,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+      });
+    } catch (_) {
+      g = null;
+    }
+    if (!g) {
+      release(slot);
+      return showFallback("no-webgl2");
+    }
     el.insertBefore(c, hit);
-    canvas = c; gl = g; starting = true; texReady = false; shown = false;
-    half = !!(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'));
+    canvas = c;
+    gl = g;
+    starting = true;
+    texReady = false;
+    shown = false;
+    half = !!(
+      gl.getExtension("EXT_color_buffer_float") || gl.getExtension("EXT_color_buffer_half_float")
+    );
     // build both programs; with parallel compile, poll until done instead of blocking the page
     const t0 = performance.now();
-    const par = gl.getExtension('KHR_parallel_shader_compile');
-    const pending = [startProgram(gl, src.frag, 'form', src.vert), startProgram(gl, PRINT_FRAG, 'print')];
+    const par = gl.getExtension("KHR_parallel_shader_compile");
+    const pending = [
+      startProgram(gl, src.frag, "form", src.vert),
+      startProgram(gl, PRINT_FRAG, "print"),
+    ];
     const finish = () => {
       if (gl !== g || destroyed) return;
       try {
@@ -1234,7 +1648,7 @@ function mountPrint(el, def, schema, opts) {
       } catch (err) {
         console.error(err.message);
         release(slot);
-        return showFallback('shader-error');
+        return showFallback("shader-error");
       }
       starting = false;
       state.compileMs = Math.round(performance.now() - t0);
@@ -1245,7 +1659,7 @@ function mountPrint(el, def, schema, opts) {
     const poll = () => {
       if (gl !== g || destroyed) return;
       if (gl.isContextLost()) return;
-      if (pending.every(sp => gl.getProgramParameter(sp.p, par.COMPLETION_STATUS_KHR))) finish();
+      if (pending.every((sp) => gl.getProgramParameter(sp.p, par.COMPLETION_STATUS_KHR))) finish();
       else setTimeout(poll, 16);
     };
     vbo = gl.createBuffer();
@@ -1263,24 +1677,45 @@ function mountPrint(el, def, schema, opts) {
       gl.generateMipmap(gl.TEXTURE_2D);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, def.textureWrap === 'clamp' ? gl.CLAMP_TO_EDGE : gl.REPEAT);
+      gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_WRAP_S,
+        def.textureWrap === "clamp" ? gl.CLAMP_TO_EDGE : gl.REPEAT,
+      );
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
-    c.addEventListener('webglcontextlost', onLost);
-    if (par) poll(); else finish();
+    c.addEventListener("webglcontextlost", onLost);
+    if (par) poll();
+    else finish();
   }
   // frees the context; with keep, the frame on it stays as a 2D picture
   function stop(keep) {
-    clearTimeout(idleT); idleT = 0;
-    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    clearTimeout(idleT);
+    idleT = 0;
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
     if (!canvas) return;
     if (keep) keepFrame();
-    if (stillKind) { still.style.transition = 'none'; still.style.opacity = '1'; }
-    const c = canvas, g = gl;
-    canvas = null; gl = form = print = fbo = tex = glyphTex = auxTex = vbo = null;
-    texReady = false; starting = false; shown = false; glyphVer = 0;
-    c.removeEventListener('webglcontextlost', onLost);
-    try { g?.getExtension('WEBGL_lose_context')?.loseContext(); } catch (_) { /* gone already */ }
+    if (stillKind) {
+      still.style.transition = "none";
+      still.style.opacity = "1";
+    }
+    const c = canvas,
+      g = gl;
+    canvas = null;
+    gl = form = print = fbo = tex = glyphTex = auxTex = vbo = null;
+    texReady = false;
+    starting = false;
+    shown = false;
+    glyphVer = 0;
+    c.removeEventListener("webglcontextlost", onLost);
+    try {
+      g?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch (_) {
+      /* gone already */
+    }
     c.remove();
   }
   // the browser took the context back (too many on the page, a GPU reset): try again later, twice
@@ -1288,7 +1723,7 @@ function mountPrint(el, def, schema, opts) {
     e.preventDefault();
     stop(false);
     release(slot);
-    if (++losses > 2) return showFallback('context-lost');
+    if (++losses > 2) return showFallback("context-lost");
     dirty = true;
     setTimeout(sync, 600 * losses);
   }
@@ -1306,7 +1741,12 @@ function mountPrint(el, def, schema, opts) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   }
-  const onAtlas = () => { if (params.effect === 'ascii') { dirty = true; sync(); } };
+  const onAtlas = () => {
+    if (params.effect === "ascii") {
+      dirty = true;
+      sync();
+    }
+  };
   atlas.listeners.add(onAtlas);
 
   // the screen and the line pitch grow finer in a small frame (a card's panel), so the object reads as
@@ -1314,7 +1754,9 @@ function mountPrint(el, def, schema, opts) {
   // dots), up to 0.85 from about 610 CSS px (dither and type keep theirs: a dither cell is already
   // 2 CSS px, type must stay legible)
   let cellK = 1;
-  const cellCss = () => params.cell || CELL[params.effect] * (params.effect === 'halftone' || params.effect === 'engrave' ? cellK : 1);
+  const cellCss = () =>
+    params.cell ||
+    CELL[params.effect] * (params.effect === "halftone" || params.effect === "engrave" ? cellK : 1);
   // texels the raymarch may use for dots and lines: one per CSS pixel of the frame (0.75 x 0.75 once
   // the frame is large), never more than the object's own budget, less on a phone or after slow frames
   const budget = () => {
@@ -1330,39 +1772,68 @@ function mountPrint(el, def, schema, opts) {
     texel per glyph. Every canvas stays within config.maxCanvasPx.
   */
   function fit() {
-    if (applyNarrow()) { state.params = params; dirty = true; }
-    const w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight), e = params.effect;
+    if (applyNarrow()) {
+      state.params = params;
+      dirty = true;
+    }
+    const w = Math.max(1, el.clientWidth),
+      h = Math.max(1, el.clientHeight),
+      e = params.effect;
     const dev = window.devicePixelRatio || 1;
     cellK = clamp(Math.min(w, h) / 720, 0.55, 0.85);
-    pixelated = e === 'dither';
+    pixelated = e === "dither";
     if (pixelated) {
       const c = Math.max(1, Math.round(cellCss() * dev));
-      W = texW = Math.max(1, Math.ceil((w * dev) / c)); H = texH = Math.max(1, Math.ceil((h * dev) / c));
-      scaleX = scaleY = 1; dpr = 1 / (cellCss());
-      cssW = (texW * c) / dev; cssH = (texH * c) / dev;
+      W = texW = Math.max(1, Math.ceil((w * dev) / c));
+      H = texH = Math.max(1, Math.ceil((h * dev) / c));
+      scaleX = scaleY = 1;
+      dpr = 1 / cellCss();
+      cssW = (texW * c) / dev;
+      cssH = (texH * c) / dev;
     } else {
       dpr = Math.max(0.5, Math.min(dev, DPR_CAP[e] || 2, Math.sqrt(config.maxCanvasPx / (w * h))));
-      W = Math.max(1, Math.round(w * dpr)); H = Math.max(1, Math.round(h * dpr));
-      cssW = w; cssH = h;
-      if (e === 'ascii') {
+      W = Math.max(1, Math.round(w * dpr));
+      H = Math.max(1, Math.round(h * dpr));
+      cssW = w;
+      cssH = h;
+      if (e === "ascii") {
         const ch = Math.max(4, Math.round(cellCss() * dpr));
-        scaleY = ch; scaleX = Math.max(3, Math.round(ch * 0.6));
+        scaleY = ch;
+        scaleX = Math.max(3, Math.round(ch * 0.6));
       } else {
-        const s = Math.min(1, Math.sqrt((fine ? Math.max(budget(), Math.min(config.fineTexels, W * H)) : budget()) / (W * H)));
+        const s = Math.min(
+          1,
+          Math.sqrt(
+            (fine ? Math.max(budget(), Math.min(config.fineTexels, W * H)) : budget()) / (W * H),
+          ),
+        );
         scaleX = scaleY = 1 / s;
       }
-      texW = Math.max(1, Math.ceil(W / scaleX)); texH = Math.max(1, Math.ceil(H / scaleY));
-      if (e !== 'ascii') { scaleX = W / texW; scaleY = H / texH; }
+      texW = Math.max(1, Math.ceil(W / scaleX));
+      texH = Math.max(1, Math.ceil(H / scaleY));
+      if (e !== "ascii") {
+        scaleX = W / texW;
+        scaleY = H / texH;
+      }
     }
     placeStill();
     if (!canvas) return;
-    if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
-    Object.assign(canvas.style, { width: cssW + 'px', height: cssH + 'px', imageRendering: pixelated ? 'pixelated' : '' });
+    if (canvas.width !== W || canvas.height !== H) {
+      canvas.width = W;
+      canvas.height = H;
+    }
+    Object.assign(canvas.style, {
+      width: cssW + "px",
+      height: cssH + "px",
+      imageRendering: pixelated ? "pixelated" : "",
+    });
     if (!gl || starting) return;
     if (!texReady || tex.w !== texW || tex.h !== texH) {
       gl.bindTexture(gl.TEXTURE_2D, tex);
-      if (half) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, texW, texH, 0, gl.RGBA, gl.HALF_FLOAT, null);
-      else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, texW, texH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      if (half)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, texW, texH, 0, gl.RGBA, gl.HALF_FLOAT, null);
+      else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, texW, texH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -1370,18 +1841,24 @@ function mountPrint(el, def, schema, opts) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
       if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE && half) {
-        half = false; texReady = false; gl.bindFramebuffer(gl.FRAMEBUFFER, null); return fit();
+        half = false;
+        texReady = false;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        return fit();
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      tex.w = texW; tex.h = texH; texReady = true;
+      tex.w = texW;
+      tex.h = texH;
+      texReady = true;
     }
-    if (e === 'ascii') ensureGlyphs();
+    if (e === "ascii") ensureGlyphs();
   }
 
   // camera, object turn, light: everything the form pass needs this frame
   function frameUniforms() {
     const cam = def.camera || {};
-    const elev = (cam.elev ?? 16) * DEG, D = cam.dist ?? 6;
+    const elev = (cam.elev ?? 16) * DEG,
+      D = cam.dist ?? 6;
     const piv = def.pivot || [0, 0.5, 0];
     const T = [piv[0], cam.target ?? piv[1], piv[2]];
     const ro = [T[0], T[1] + D * Math.sin(elev), T[2] + D * Math.cos(elev)];
@@ -1395,25 +1872,38 @@ function mountPrint(el, def, schema, opts) {
     const pxPerUnit = params.size * Math.min(W / (2 * ex[0]), H / (2 * ex[1]));
     const focal = (pxPerUnit * D) / md;
     // the object turns, then leans toward the pointer a few degrees
-    const tiltY = state.hover * state.mx * 9 * DEG, tiltX = -state.hover * state.my * 6 * DEG;
+    const tiltY = state.hover * state.mx * 9 * DEG,
+      tiltX = -state.hover * state.my * 6 * DEG;
     const Rm = mul3(rotX(tiltX), rotY(state.yaw + tiltY));
     const M = transpose(Rm);
     // key light (camera space, x right, y up, z toward the viewer): upper left at rest, swung about the
     // vertical by params.light, toward the pointer on hover
-    const b0 = def.light || [-0.42, 1.3, 0.72], la = params.light * DEG;
-    let lc = norm([b0[0] * Math.cos(la) + b0[2] * Math.sin(la), b0[1], -b0[0] * Math.sin(la) + b0[2] * Math.cos(la)]);
+    const b0 = def.light || [-0.42, 1.3, 0.72],
+      la = params.light * DEG;
+    let lc = norm([
+      b0[0] * Math.cos(la) + b0[2] * Math.sin(la),
+      b0[1],
+      -b0[0] * Math.sin(la) + b0[2] * Math.cos(la),
+    ]);
     if (state.hover > 0.001) {
       const hl = norm([state.mx * 0.95, clamp(0.85 + state.my * 0.7, 0.35, 1.6), 0.78]);
       lc = norm(lc.map((v, i) => v + (hl[i] - v) * state.hover * (def.hoverLight ?? 1)));
     }
-    const toWorld = c => norm([0, 1, 2].map(i => right[i] * c[0] + up[i] * c[1] - fwd[i] * c[2]));
-    const L = toWorld(lc), F = toWorld([0.62, 0.22, 0.75]);
-    const LD = (def.lightDist || 4) * R / 0.5;
+    const toWorld = (c) =>
+      norm([0, 1, 2].map((i) => right[i] * c[0] + up[i] * c[1] - fwd[i] * c[2]));
+    const L = toWorld(lc),
+      F = toWorld([0.62, 0.22, 0.75]);
+    const LD = ((def.lightDist || 4) * R) / 0.5;
     const pitch = cellCss() * dpr;
     return {
-      u_ro: ro, u_cam: colMajor([right[0], up[0], fwd[0], right[1], up[1], fwd[1], right[2], up[2], fwd[2]]),
-      u_rot: colMajor(M), u_pivot: piv, u_light: [piv[0] + L[0] * LD, piv[1] + L[1] * LD, piv[2] + L[2] * LD], u_fill: F, u_focal: focal,
-      u_shift: [params.x * W / md, params.y * H / md],
+      u_ro: ro,
+      u_cam: colMajor([right[0], up[0], fwd[0], right[1], up[1], fwd[1], right[2], up[2], fwd[2]]),
+      u_rot: colMajor(M),
+      u_pivot: piv,
+      u_light: [piv[0] + L[0] * LD, piv[1] + L[1] * LD, piv[2] + L[2] * LD],
+      u_fill: F,
+      u_focal: focal,
+      u_shift: [(params.x * W) / md, (params.y * H) / md],
       u_bound: [piv[0], piv[1], piv[2], (def.bound || R) * 1.02],
       u_pix: Math.max(scaleX, scaleY) / (md * focal),
       u_lineFreq: pxPerUnit / pitch,
@@ -1423,7 +1913,7 @@ function mountPrint(el, def, schema, opts) {
   function setU(prog, name, v) {
     const l = prog.loc[name];
     if (l == null) return;
-    if (typeof v === 'number') gl.uniform1f(l, v);
+    if (typeof v === "number") gl.uniform1f(l, v);
     else if (v.length === 2) gl.uniform2fv(l, v);
     else if (v.length === 3) gl.uniform3fv(l, v);
     else if (v.length === 4) gl.uniform4fv(l, v);
@@ -1431,10 +1921,13 @@ function mountPrint(el, def, schema, opts) {
   }
 
   function render(plate = false) {
-    if (!gl || !print || starting || gl.isContextLost()) return;   // not built yet, or gone
+    if (!gl || !print || starting || gl.isContextLost()) return; // not built yet, or gone
     // a render at rest is drawn once, sharp: the march at up to one texel per canvas pixel
-    const f = params.effect === 'render' && !plate && !running();
-    if (f !== fine) { fine = f; texReady = false; }
+    const f = params.effect === "render" && !plate && !running();
+    if (f !== fine) {
+      fine = f;
+      texReady = false;
+    }
     if (!texReady) fit();
     const dark = isDarkPaper(palette);
     const fu = frameUniforms();
@@ -1443,37 +1936,48 @@ function mountPrint(el, def, schema, opts) {
     gl.viewport(0, 0, texW, texH);
     gl.useProgram(form.p);
     for (const [k, v] of Object.entries(fu)) setU(form, k, v);
-    setU(form, 'u_res', [texW, texH]);
-    setU(form, 'u_scale', [scaleX, scaleY]);
-    setU(form, 'u_full', [W, H]);
-    setU(form, 'u_time', state.t);
-    setU(form, 'u_step', ease(clamp(state.step, 0, 1)));
-    setU(form, 'u_kick', state.kick);
-    setU(form, 'u_spin', state.spin);
-    setU(form, 'u_dark', dark ? 1 : 0);
-    setU(form, 'u_hover', state.hover);
-    setU(form, 'u_dim', state.dim);
-    const rend = params.effect === 'render';
+    setU(form, "u_res", [texW, texH]);
+    setU(form, "u_scale", [scaleX, scaleY]);
+    setU(form, "u_full", [W, H]);
+    setU(form, "u_time", state.t);
+    setU(form, "u_step", ease(clamp(state.step, 0, 1)));
+    setU(form, "u_kick", state.kick);
+    setU(form, "u_spin", state.spin);
+    setU(form, "u_dark", dark ? 1 : 0);
+    setU(form, "u_hover", state.hover);
+    setU(form, "u_dim", state.dim);
+    const rend = params.effect === "render";
     // a render paints its accent part as enamel or glaze carries the accent (paintColor); a print inks it
-    setU(form, 'u_accent', hexRgb(params.accent ? (rend ? paintColor(palette.accent) : palette.accent) : palette.ink));
-    setU(form, 'u_floorK', params.shadow);
-    setU(form, 'u_floorReach', def.floorReach || 0.11);
-    setU(form, 'u_floorAO', def.floorAO ?? 1);
-    setU(form, 'u_foot', def.foot || (def.extent ? def.extent[0] : def.radius || 0.5));
-    setU(form, 'u_contrast', params.contrast);
-    setU(form, 'u_k', state.k);
-    setU(form, 'u_render', rend ? (plate ? 2 : 1) : 0);
+    setU(
+      form,
+      "u_accent",
+      hexRgb(params.accent ? (rend ? paintColor(palette.accent) : palette.accent) : palette.ink),
+    );
+    setU(form, "u_floorK", params.shadow);
+    setU(form, "u_floorReach", def.floorReach || 0.11);
+    setU(form, "u_floorAO", def.floorAO ?? 1);
+    setU(form, "u_foot", def.foot || (def.extent ? def.extent[0] : def.radius || 0.5));
+    setU(form, "u_contrast", params.contrast);
+    setU(form, "u_k", state.k);
+    setU(form, "u_render", rend ? (plate ? 2 : 1) : 0);
     if (rend) {
-      setU(form, 'u_expo', def.exposure || 1);
-      setU(form, 'u_paperC', hexRgb(palette.bg).map(toLin));
-      setU(form, 'u_shadowC', hexRgb(shadowHex()));
-      setU(form, 'u_poolC', hexRgb(mixColor(palette.bg, palette.ink, 0.3)));
+      setU(form, "u_expo", def.exposure || 1);
+      setU(form, "u_paperC", hexRgb(palette.bg).map(toLin));
+      setU(form, "u_shadowC", hexRgb(shadowHex()));
+      setU(form, "u_poolC", hexRgb(mixColor(palette.bg, palette.ink, 0.3)));
     }
     if (form.loc.u_steps) gl.uniform1i(form.loc.u_steps, steps);
     if (form.loc.u_shSteps) gl.uniform1i(form.loc.u_shSteps, def.shadowSteps || 32);
-    if (auxTex && form.loc.u_aux) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, auxTex); gl.uniform1i(form.loc.u_aux, 1); }
-    const blank = window.__printBreak === 'empty';   // tests: a GPU that draws nothing
-    if (blank) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); } else gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (auxTex && form.loc.u_aux) {
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, auxTex);
+      gl.uniform1i(form.loc.u_aux, 1);
+    }
+    const blank = window.__printBreak === "empty"; // tests: a GPU that draws nothing
+    if (blank) {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    } else gl.drawArrays(gl.TRIANGLES, 0, 3);
     // pass B
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, W, H);
@@ -1481,36 +1985,50 @@ function mountPrint(el, def, schema, opts) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.uniform1i(print.loc.u_tex, 0);
-    if (params.effect === 'ascii') ensureGlyphs();
-    if (glyphTex && print.loc.u_glyph) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, glyphTex); gl.uniform1i(print.loc.u_glyph, 2); }
+    if (params.effect === "ascii") ensureGlyphs();
+    if (glyphTex && print.loc.u_glyph) {
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, glyphTex);
+      gl.uniform1i(print.loc.u_glyph, 2);
+    }
     const e = params.effect;
     const pitch = cellCss() * dpr;
-    setU(print, 'u_texSize', [texW, texH]);
-    setU(print, 'u_scale', [scaleX, scaleY]);
-    setU(print, 'u_mode', EFFECTS.indexOf(e));
-    setU(print, 'u_cell', pitch);
-    setU(print, 'u_angle', (e === 'halftone' ? 45 : 32) * DEG);
-    setU(print, 'u_levels', params.levels);
-    setU(print, 'u_debug', params.debug);
-    setU(print, 'u_plate', plate ? 1 : 0);
-    setU(print, 'u_floorShare', dark ? 0.7 : 0.82);
-    setU(print, 'u_glyphN', RAMP.length);
-    setU(print, 'u_alpha', params.transparent ? 1 : 0);
-    setU(print, 'u_body', e === 'ascii' ? 0 : params.body);
-    const ink = palette.ink, acc = params.accent ? palette.accent : ink;
-    setU(print, 'u_paper', hexRgb(palette.bg));
-    setU(print, 'u_paperIn', hexRgb(palette.surface));
-    setU(print, 'u_ink', hexRgb(ink));
-    setU(print, 'u_acc', hexRgb(acc));
-    setU(print, 'u_floor', hexRgb(mixColor(ink, palette.bg, dark ? 0.3 : 0.18)));
-    if (blank) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); } else gl.drawArrays(gl.TRIANGLES, 0, 3);
+    setU(print, "u_texSize", [texW, texH]);
+    setU(print, "u_scale", [scaleX, scaleY]);
+    setU(print, "u_mode", EFFECTS.indexOf(e));
+    setU(print, "u_cell", pitch);
+    setU(print, "u_angle", (e === "halftone" ? 45 : 32) * DEG);
+    setU(print, "u_levels", params.levels);
+    setU(print, "u_debug", params.debug);
+    setU(print, "u_plate", plate ? 1 : 0);
+    setU(print, "u_floorShare", dark ? 0.7 : 0.82);
+    setU(print, "u_glyphN", RAMP.length);
+    setU(print, "u_alpha", params.transparent ? 1 : 0);
+    setU(print, "u_body", e === "ascii" ? 0 : params.body);
+    const ink = palette.ink,
+      acc = params.accent ? palette.accent : ink;
+    setU(print, "u_paper", hexRgb(palette.bg));
+    setU(print, "u_paperIn", hexRgb(palette.surface));
+    setU(print, "u_ink", hexRgb(ink));
+    setU(print, "u_acc", hexRgb(acc));
+    setU(print, "u_floor", hexRgb(mixColor(ink, palette.bg, dark ? 0.3 : 0.18)));
+    if (blank) {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    } else gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (plate) return;
     // the first frame: a shader can build and still draw nothing on some GPU; then the poster stays
     if (!checked) {
       checked = true;
-      if (frameEmpty()) { console.error(`print3d: ${def.id}: the first frame came out empty`); release(slot); showFallback('empty-frame'); return; }
+      if (frameEmpty()) {
+        console.error(`print3d: ${def.id}: the first frame came out empty`);
+        release(slot);
+        showFallback("empty-frame");
+        return;
+      }
     }
-    dirty = false; reveal();
+    dirty = false;
+    reveal();
   }
   // true when the canvas just drawn shows nothing: no opaque pixel off the paper (or, printed clear
   // over a ground, no pixel with ink); a canvas left clear is empty either way. Read straight from
@@ -1519,29 +2037,52 @@ function mountPrint(el, def, schema, opts) {
   let checked = false;
   function frameEmpty() {
     try {
-      const P = hexRgb(palette.bg).map(v => v * 255), row = new Uint8Array(W * 4);
+      const P = hexRgb(palette.bg).map((v) => v * 255),
+        row = new Uint8Array(W * 4);
       let hits = 0;
       for (let k = 0; k < 32 && hits < 4; k++) {
-        gl.readPixels(0, Math.min(H - 1, Math.floor(((k + 0.5) / 32) * H)), W, 1, gl.RGBA, gl.UNSIGNED_BYTE, row);
+        gl.readPixels(
+          0,
+          Math.min(H - 1, Math.floor(((k + 0.5) / 32) * H)),
+          W,
+          1,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          row,
+        );
         for (let i = 0; i < row.length; i += 4) {
           // premultiplied: an opaque frame is compared with the paper, a clear one by its alpha
-          if (row[i + 3] > 20 && (params.transparent || Math.abs(row[i] - P[0]) + Math.abs(row[i + 1] - P[1]) + Math.abs(row[i + 2] - P[2]) > 24)) hits++;
+          if (
+            row[i + 3] > 20 &&
+            (params.transparent ||
+              Math.abs(row[i] - P[0]) + Math.abs(row[i + 1] - P[1]) + Math.abs(row[i + 2] - P[2]) >
+                24)
+          )
+            hits++;
         }
       }
       return hits < 4;
-    } catch (_) { return false; }   // a buffer that cannot be read is not proof of an empty one
+    } catch (_) {
+      return false;
+    } // a buffer that cannot be read is not proof of an empty one
   }
 
   // per-frame state: turn, eased pointer, step tween, object update
   function advance(dt) {
-    const turn = def.turn || { mode: 'spin', speed: 8 };
+    const turn = def.turn || { mode: "spin", speed: 8 };
     const target = turnOn() ? 1 : 0;
     state.turnK += (target - state.turnK) * (1 - Math.exp(-dt * 3));
     if (Math.abs(target - state.turnK) < 2e-3) state.turnK = target;
-    state.t += dt * state.turnK;   // the turn's own clock: it stops when the turn is paused
+    state.t += dt * state.turnK; // the turn's own clock: it stops when the turn is paused
     state.time += dt;
-    if (turn.mode === 'custom') { /* the object's update() turns it */ }
-    else if (turn.mode === 'sway') state.yaw = params.angle * DEG + (turn.amp || 30) * DEG * Math.sin((state.t * params.speed * 2 * Math.PI) / (turn.period || 16));
+    if (turn.mode === "custom") {
+      /* the object's update() turns it */
+    } else if (turn.mode === "sway")
+      state.yaw =
+        params.angle * DEG +
+        (turn.amp || 30) *
+          DEG *
+          Math.sin((state.t * params.speed * 2 * Math.PI) / (turn.period || 16));
     else state.yaw += dt * state.turnK * (turn.speed || 8) * params.speed * DEG;
     const k = 1 - Math.exp(-dt * 6);
     state.mx += (state.mxT - state.mx) * k;
@@ -1557,7 +2098,11 @@ function mountPrint(el, def, schema, opts) {
 
   function loop(ts) {
     raf = 0;
-    if (!running()) { if (gl && print && !starting) render(); sync(); return; }
+    if (!running()) {
+      if (gl && print && !starting) render();
+      sync();
+      return;
+    }
     const dt = last ? Math.min((ts - last) / 1000, 0.1) : 0;
     last = ts;
     advance(dt);
@@ -1569,17 +2114,31 @@ function mountPrint(el, def, schema, opts) {
   // 30 fps the turn stops (the pointer and the step still answer)
   function adapt(dt) {
     if (!config.adapt) return;
-    if (perf.warm < 40) { perf.warm++; return; }
-    perf.n++; perf.sum += dt;
+    if (perf.warm < 40) {
+      perf.warm++;
+      return;
+    }
+    perf.n++;
+    perf.sum += dt;
     if (perf.n < 60) return;
     const avg = perf.sum / perf.n;
     perf.fps = Math.round(1 / avg);
     perf.n = perf.sum = 0;
     if (avg <= 1 / 50) return;
     const e = params.effect;
-    if (e !== 'dither' && e !== 'ascii' && budget() > 90000) { budgetK *= 0.75; fit(); }
-    else if (steps > 56) steps = Math.round(steps * 0.8);
-    if (avg > 1 / 30 && (e === 'dither' || e === 'ascii' || budget() <= 90000) && steps <= 56 && !slow) { slow = true; syncPause(); }
+    if (e !== "dither" && e !== "ascii" && budget() > 90000) {
+      budgetK *= 0.75;
+      fit();
+    } else if (steps > 56) steps = Math.round(steps * 0.8);
+    if (
+      avg > 1 / 30 &&
+      (e === "dither" || e === "ascii" || budget() <= 90000) &&
+      steps <= 56 &&
+      !slow
+    ) {
+      slow = true;
+      syncPause();
+    }
   }
   // a still frame: the rest pose, the step as it stands (a click's impulse shown part way through)
   function restFrame() {
@@ -1595,85 +2154,140 @@ function mountPrint(el, def, schema, opts) {
   // the one place that decides: take a context, draw, run the frame loop, or keep the frame and free it
   function sync() {
     if (destroyed || failed) return;
-    if (!gl) { if (wants() && acquire(slot)) start(); return; }
-    if (starting || !print) return;
-    if (running()) {
-      if (idleT) { clearTimeout(idleT); idleT = 0; }
-      if (!raf) { last = 0; raf = requestAnimationFrame(loop); }
+    if (!gl) {
+      if (wants() && acquire(slot)) start();
       return;
     }
-    if (raf) { cancelAnimationFrame(raf); raf = 0; }
-    if (dirty && !document.hidden) { if (reduced()) restFrame(); else render(); }
+    if (starting || !print) return;
+    if (running()) {
+      if (idleT) {
+        clearTimeout(idleT);
+        idleT = 0;
+      }
+      if (!raf) {
+        last = 0;
+        raf = requestAnimationFrame(loop);
+      }
+      return;
+    }
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+    if (dirty && !document.hidden) {
+      if (reduced()) restFrame();
+      else render();
+    }
     if (hold) return;
     // off screen, or under reduced motion (nothing moves, so the still frame is the picture): keep the
     // frame and free the context at once
-    if (!near || document.hidden || (reduced() && !wants())) { stop(true); release(slot); return; }
+    if (!near || document.hidden || (reduced() && !wants())) {
+      stop(true);
+      release(slot);
+      return;
+    }
     if (!wants() && !idleT) {
       idleT = setTimeout(() => {
         idleT = 0;
-        if (gl && !starting && !running() && !wants()) { stop(true); release(slot); }
+        if (gl && !starting && !running() && !wants()) {
+          stop(true);
+          release(slot);
+        }
       }, config.idleMs);
     }
   }
 
   /* ---------- the pause button: in the bottom-right corner of the panel or frame, for a turning object */
-  const box = el.closest('[data-ui-pause-host], .panel__screen, .panel, .frame');
+  const box = el.closest("[data-ui-pause-host], .panel__screen, .panel, .frame");
   const pauseHost = box && box !== el ? box : el;
   let pauseBtn = null;
   function syncPause() {
     // no button on a poster: only once the object has drawn a frame of its own and so can turn
     const want = params.turn > 0 && !reduced() && !slow && !failed && drawnOnce;
-    if (!want) { if (pauseBtn) { pauseBtn.remove(); pauseBtn = null; } return; }
+    if (!want) {
+      if (pauseBtn) {
+        pauseBtn.remove();
+        pauseBtn = null;
+      }
+      return;
+    }
     if (!pauseBtn) {
-      if (pauseHost !== el && pauseHost.querySelector(':scope > .loop-pause')) return;   // the page put its own there
-      pauseBtn = document.createElement('button');
-      pauseBtn.type = 'button';
-      pauseBtn.className = 'loop-pause print3d-pause';
-      pauseBtn.addEventListener('click', e => { e.stopPropagation(); userPaused ? ctrl.resume() : ctrl.pause(); });
+      if (pauseHost !== el && pauseHost.querySelector(":scope > .loop-pause")) return; // the page put its own there
+      pauseBtn = document.createElement("button");
+      pauseBtn.type = "button";
+      pauseBtn.className = "loop-pause print3d-pause";
+      pauseBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userPaused ? ctrl.resume() : ctrl.pause();
+      });
       pauseHost.appendChild(pauseBtn);
     }
-    pauseBtn.setAttribute('aria-label', userPaused ? `Play ${def.name.toLowerCase()} animation` : `Pause ${def.name.toLowerCase()} animation`);
-    pauseBtn.setAttribute('aria-pressed', String(userPaused));
+    pauseBtn.setAttribute(
+      "aria-label",
+      userPaused
+        ? `Play ${def.name.toLowerCase()} animation`
+        : `Pause ${def.name.toLowerCase()} animation`,
+    );
+    pauseBtn.setAttribute("aria-pressed", String(userPaused));
     pauseBtn.innerHTML = userPaused ? PLAY_SVG : PAUSE_SVG;
   }
 
   /* ---------- pointer, click, keyboard */
-  const onMove = e => {
+  const onMove = (e) => {
     if (!params.interactive || reduced()) return;
     const r = el.getBoundingClientRect();
     state.mxT = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
     state.myT = clamp(1 - ((e.clientY - r.top) / r.height) * 2, -1, 1);
-    if (e.pointerType !== 'touch') state.hoverT = 1;
+    if (e.pointerType !== "touch") state.hoverT = 1;
     sync();
   };
-  const onLeave = () => { state.hoverT = 0; sync(); };
+  const onLeave = () => {
+    state.hoverT = 0;
+    sync();
+  };
   // the pointer came onto the card: take a context now, so it is ready when the pointer reaches the object
-  const card = el.closest('.card, article, [data-print-card]') || el;
+  const card = el.closest(".card, article, [data-print-card]") || el;
   const onWarm = () => {
     if (!params.interactive || reduced()) return;
     warmUntil = performance.now() + 4000;
-    clearTimeout(warmT); warmT = setTimeout(sync, 4100);
+    clearTimeout(warmT);
+    warmT = setTimeout(sync, 4100);
     sync();
   };
-  const act = on => {
+  const act = (on) => {
     if (!params.interactive) return;
-    if (def.step === 'impulse') { if (on !== false) { state.kick = reduced() ? (def.kickStill ?? 0.8) : 0; state.kicks++; } }
-    else state.stepT = on == null ? (state.stepT > 0.5 ? 0 : 1) : on ? 1 : 0;
-    if (toggle) hit.setAttribute('aria-pressed', String(state.stepT > 0.5));
+    if (def.step === "impulse") {
+      if (on !== false) {
+        state.kick = reduced() ? (def.kickStill ?? 0.8) : 0;
+        state.kicks++;
+      }
+    } else state.stepT = on == null ? (state.stepT > 0.5 ? 0 : 1) : on ? 1 : 0;
+    if (toggle) hit.setAttribute("aria-pressed", String(state.stepT > 0.5));
     dirty = true;
     sync();
   };
   const onClick = () => act(null);
-  const onKey = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(null); } };
-  const onFocus = () => { focused = true; sync(); };
-  const onBlur = () => { focused = false; sync(); };
-  hit.addEventListener('pointermove', onMove, { passive: true });
-  hit.addEventListener('pointerleave', onLeave, { passive: true });
-  hit.addEventListener('click', onClick);
-  hit.addEventListener('keydown', onKey);
-  hit.addEventListener('focus', onFocus);
-  hit.addEventListener('blur', onBlur);
-  card.addEventListener('pointerenter', onWarm, { passive: true });
+  const onKey = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      act(null);
+    }
+  };
+  const onFocus = () => {
+    focused = true;
+    sync();
+  };
+  const onBlur = () => {
+    focused = false;
+    sync();
+  };
+  hit.addEventListener("pointermove", onMove, { passive: true });
+  hit.addEventListener("pointerleave", onLeave, { passive: true });
+  hit.addEventListener("click", onClick);
+  hit.addEventListener("keydown", onKey);
+  hit.addEventListener("focus", onFocus);
+  hit.addEventListener("blur", onBlur);
+  card.addEventListener("pointerenter", onWarm, { passive: true });
 
   /*
     The paper under a clear object on a ground that has not drawn (still baking, a bake that never
@@ -1682,17 +2296,25 @@ function mountPrint(el, def, schema, opts) {
     flat, in the ground's own colour; never a pale lamp on a pale panel. It fades out when the
     ground draws.
   */
-  const groundDrawn = () => !ground || !!(ground.style.background || ground.style.backgroundImage || ground.dataset.fxFallback != null ||
-    ground.querySelector(':scope > canvas.fx-canvas.is-baked, :scope > canvas.fx-canvas[style*="opacity: 1"]'));
+  const groundDrawn = () =>
+    !ground ||
+    !!(
+      ground.style.background ||
+      ground.style.backgroundImage ||
+      ground.dataset.fxFallback != null ||
+      ground.querySelector(
+        ':scope > canvas.fx-canvas.is-baked, :scope > canvas.fx-canvas[style*="opacity: 1"]',
+      )
+    );
   let paperKey = null;
   function applyPalette() {
-    el.style.setProperty('--print3d-ring', palette.ink);
-    el.style.setProperty('--print3d-ring-in', params.transparent ? palette.surface : palette.bg);
+    el.style.setProperty("--print3d-ring", palette.ink);
+    el.style.setProperty("--print3d-ring-in", params.transparent ? palette.surface : palette.bg);
     const own = !params.transparent || (!!ground && !groundDrawn());
-    const key = own ? palette.bg : '';
-    if (key === paperKey) return;   // unchanged: no style write (the ground's observer would see it)
+    const key = own ? palette.bg : "";
+    if (key === paperKey) return; // unchanged: no style write (the ground's observer would see it)
     paperKey = key;
-    el.dataset.printPaper = own ? 'own' : 'ground';
+    el.dataset.printPaper = own ? "own" : "ground";
     el.style.backgroundColor = key;
   }
   applyPalette();
@@ -1701,94 +2323,213 @@ function mountPrint(el, def, schema, opts) {
   syncPause();
 
   // in view: frames run; near (40% of a screen away): a context may be taken or kept
-  const io = new IntersectionObserver(es => { inView = es[es.length - 1].isIntersecting; sync(); }, { rootMargin: '0px' });
-  const nearIO = new IntersectionObserver(es => { near = es[es.length - 1].isIntersecting; sync(); }, { rootMargin: '40% 0px' });
-  io.observe(el); nearIO.observe(el);
-  const ro = new ResizeObserver(() => { fit(); dirty = true; sync(); });
+  const io = new IntersectionObserver(
+    (es) => {
+      inView = es[es.length - 1].isIntersecting;
+      sync();
+    },
+    { rootMargin: "0px" },
+  );
+  const nearIO = new IntersectionObserver(
+    (es) => {
+      near = es[es.length - 1].isIntersecting;
+      sync();
+    },
+    { rootMargin: "40% 0px" },
+  );
+  io.observe(el);
+  nearIO.observe(el);
+  const ro = new ResizeObserver(() => {
+    fit();
+    dirty = true;
+    sync();
+  });
   ro.observe(el);
   const onVis = () => sync();
-  const onReduced = () => { syncPause(); dirty = true; sync(); };
-  document.addEventListener('visibilitychange', onVis);
-  reducedQuery?.addEventListener?.('change', onReduced);
+  const onReduced = () => {
+    syncPause();
+    dirty = true;
+    sync();
+  };
+  document.addEventListener("visibilitychange", onVis);
+  reducedQuery?.addEventListener?.("change", onReduced);
   // the ground's palette arrives when system.js lights it (or changes with a theme switch)
-  let mo = null, paperMo = null;
+  let mo = null,
+    paperMo = null;
   if (ground && !opts.palette) {
     mo = new MutationObserver(() => ctrl.setPalette(null));
-    mo.observe(ground, { attributes: true, attributeFilter: ['data-fx-palette'] });
+    mo.observe(ground, { attributes: true, attributeFilter: ["data-fx-palette"] });
   }
   // the ground draws (its canvas comes in or fades up, its stand-in is set) or is cleared for a new
   // bake: the own paper goes or comes back
   if (ground) {
-    el.style.transition = 'background-color 320ms ease';
-    paperMo = new MutationObserver(ms => { if (ms.some(m => m.target !== el && !el.contains(m.target))) applyPalette(); });
-    paperMo.observe(ground, { attributes: true, attributeFilter: ['style', 'class', 'data-fx-fallback'], childList: true, subtree: true });
+    el.style.transition = "background-color 320ms ease";
+    paperMo = new MutationObserver((ms) => {
+      if (ms.some((m) => m.target !== el && !el.contains(m.target))) applyPalette();
+    });
+    paperMo.observe(ground, {
+      attributes: true,
+      attributeFilter: ["style", "class", "data-fx-fallback"],
+      childList: true,
+      subtree: true,
+    });
   }
 
   const ctrl = {
-    get canvas() { return canvas; },
+    get canvas() {
+      return canvas;
+    },
     /** stops the object's own turn (the pointer and a click still answer); the pause button calls it */
-    pause() { userPaused = true; syncPause(); sync(); },
-    resume() { userPaused = false; syncPause(); sync(); },
-    get paused() { return userPaused; },
-    get params() { return { ...params }; },
+    pause() {
+      userPaused = true;
+      syncPause();
+      sync();
+    },
+    resume() {
+      userPaused = false;
+      syncPause();
+      sync();
+    },
+    get paused() {
+      return userPaused;
+    },
+    get params() {
+      return { ...params };
+    },
     set(next) {
-      params = resolve(schema, { ...params, ...next }); state.params = params;
-      setRole(); applyPalette(); syncPause(); fit();
-      if (stillKind === 'poster') drawPoster();
-      dirty = true; sync();
+      params = resolve(schema, { ...params, ...next });
+      state.params = params;
+      setRole();
+      applyPalette();
+      syncPause();
+      fit();
+      if (stillKind === "poster") drawPoster();
+      dirty = true;
+      sync();
       return params;
     },
     /** a palette { bg, surface, ink, muted, accent, accentInk }, or null to read it again from the page or the ground */
     setPalette(p) {
       if (p) opts = { ...opts, palette: p };
       const next = normalizePalette(p || pagePalette());
-      if (JSON.stringify(next) === JSON.stringify(palette)) return;   // the same colours: keep the frame
+      if (JSON.stringify(next) === JSON.stringify(palette)) return; // the same colours: keep the frame
       palette = next;
       applyPalette();
       if (!shown) loadPoster(true);
-      dirty = true; sync();
+      dirty = true;
+      sync();
     },
-    step(on) { act(on); },
+    step(on) {
+      act(on);
+    },
     /** keeps a live context until release() (tests, make-fallbacks.html); resolves once it can draw */
     ready() {
-      hold = true; sync();
-      return new Promise(res => { const t = () => ((gl && print && !starting) || failed || destroyed ? res(ctrl) : setTimeout(t, 30)); t(); });
+      hold = true;
+      sync();
+      return new Promise((res) => {
+        const t = () =>
+          (gl && print && !starting) || failed || destroyed ? res(ctrl) : setTimeout(t, 30);
+        t();
+      });
     },
-    release() { hold = false; sync(); },
+    release() {
+      hold = false;
+      sync();
+    },
     /** a still frame at time t (seconds) with the pointer at (mx, my) -1..1 and hover 0..1, for tests (after ready()) */
     pose({ t = state.t, mx = 0, my = 0, hover = 0, step, kick } = {}) {
-      userPaused = true; syncPause();
-      state.t = 0; state.time = 0; state.yaw = params.angle * DEG; state.spin = 0; state.own = null; state.kick = 99; state.turnK = params.turn > 0 ? 1 : 0;
-      if (step != null) { state.stepT = step; state.step = step; }
-      state.mx = state.mxT = mx; state.my = state.myT = my; state.hover = state.hoverT = hover;
+      userPaused = true;
+      syncPause();
+      state.t = 0;
+      state.time = 0;
+      state.yaw = params.angle * DEG;
+      state.spin = 0;
+      state.own = null;
+      state.kick = 99;
+      state.turnK = params.turn > 0 ? 1 : 0;
+      if (step != null) {
+        state.stepT = step;
+        state.step = step;
+      }
+      state.mx = state.mxT = mx;
+      state.my = state.myT = my;
+      state.hover = state.hoverT = hover;
       const n = Math.max(1, Math.round(t * 30));
-      for (let i = 0; i < n; i++) { state.turnK = params.turn > 0 ? 1 : 0; advance(t / n); }
-      if (kick != null) { state.kick = kick; state.kicks = 1; if (def.update) Object.assign(state, def.update(state, 0) || {}); }
-      state.mx = mx; state.my = my; state.hover = hover;
-      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      for (let i = 0; i < n; i++) {
+        state.turnK = params.turn > 0 ? 1 : 0;
+        advance(t / n);
+      }
+      if (kick != null) {
+        state.kick = kick;
+        state.kicks = 1;
+        if (def.update) Object.assign(state, def.update(state, 0) || {});
+      }
+      state.mx = mx;
+      state.my = my;
+      state.hover = hover;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
       render();
     },
     /** the canvas as a PNG data URL, drawn now (after ready()); plate: the poster's plates (make-fallbacks.html) */
-    snapshot(plate = false) { if (!gl) return ''; render(plate); const u = canvas.toDataURL('image/png'); if (plate) render(); return u; },
+    snapshot(plate = false) {
+      if (!gl) return "";
+      render(plate);
+      const u = canvas.toDataURL("image/png");
+      if (plate) render();
+      return u;
+    },
     get info() {
-      return { webgl: gl ? 2 : 0, live: !!gl, pool: pool.live.size, fallback: el.dataset.printFallback || null, size: [W, H], css: [cssW, cssH], dpr, form: [texW, texH], steps, half,
-        fps: perf.fps, compileMs: state.compileMs, running: running(), turning: turnOn(), shown, still: stillKind, palette,
-        near, inView, dirty, starting, waiting: pool.waiting.includes(slot), wants: wants() };
+      return {
+        webgl: gl ? 2 : 0,
+        live: !!gl,
+        pool: pool.live.size,
+        fallback: el.dataset.printFallback || null,
+        size: [W, H],
+        css: [cssW, cssH],
+        dpr,
+        form: [texW, texH],
+        steps,
+        half,
+        fps: perf.fps,
+        compileMs: state.compileMs,
+        running: running(),
+        turning: turnOn(),
+        shown,
+        still: stillKind,
+        palette,
+        near,
+        inView,
+        dirty,
+        starting,
+        waiting: pool.waiting.includes(slot),
+        wants: wants(),
+      };
     },
     destroy() {
       destroyed = true;
       stop(false);
       release(slot);
       clearTimeout(warmT);
-      io.disconnect(); nearIO.disconnect(); ro.disconnect(); mo?.disconnect(); paperMo?.disconnect();
+      io.disconnect();
+      nearIO.disconnect();
+      ro.disconnect();
+      mo?.disconnect();
+      paperMo?.disconnect();
       atlas.listeners.delete(onAtlas);
-      document.removeEventListener('visibilitychange', onVis);
-      reducedQuery?.removeEventListener?.('change', onReduced);
-      card.removeEventListener('pointerenter', onWarm);
-      still.remove(); hit.remove(); pauseBtn?.remove();
-      el.classList.remove('print3d');
-      el.style.backgroundColor = ''; el.style.transition = ''; delete el.dataset.printPaper;
-      el.setAttribute('aria-label', label);
+      document.removeEventListener("visibilitychange", onVis);
+      reducedQuery?.removeEventListener?.("change", onReduced);
+      card.removeEventListener("pointerenter", onWarm);
+      still.remove();
+      hit.remove();
+      pauseBtn?.remove();
+      el.classList.remove("print3d");
+      el.style.backgroundColor = "";
+      el.style.transition = "";
+      delete el.dataset.printPaper;
+      el.setAttribute("aria-label", label);
     },
   };
   return ctrl;

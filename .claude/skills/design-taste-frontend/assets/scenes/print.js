@@ -10,37 +10,87 @@
     const obj = attachPrint(host, { object: 'print-globe', effect: 'render', params: {...} });
     obj.wake(); obj.turnTo(90); obj.sleep(); obj.destroy();
 */
-import { reduced } from './lib.js';
+import { reduced } from "./lib.js";
 
-const OBJECTS = new URL('../objects/', import.meta.url);
+const OBJECTS = new URL("../objects/", import.meta.url);
 
 export function attachPrint(host, { object, effect, params = {}, palette } = {}) {
-  let print = null, last = 0, dead = false, awake = false, loading = null;
-  const mod = () => (loading ??= import(new URL(`${object}/object.js`, OBJECTS).href).catch(e => { console.warn('scenes: no object', object, e); host.classList.add('is-failed'); return null; }));
+  let print = null,
+    last = 0,
+    dead = false,
+    awake = false,
+    loading = null;
+  const mod = () =>
+    (loading ??= import(new URL(`${object}/object.js`, OBJECTS).href).catch((e) => {
+      console.warn("scenes: no object", object, e);
+      host.classList.add("is-failed");
+      return null;
+    }));
   function turnTo(deg, force) {
-    if (!print) { last = deg; return; }
+    if (!print) {
+      last = deg;
+      return;
+    }
     if (!force && Math.abs(deg - last) < 0.8) return;
     last = deg;
-    const a = ((deg + 180) % 360 + 360) % 360 - 180;
-    try { print.set({ angle: a }); print.pose && print.pose({ t: 0 }); } catch (e) { /* the object draws its fallback */ }
+    const a = ((((deg + 180) % 360) + 360) % 360) - 180;
+    try {
+      print.set({ angle: a });
+      print.pose && print.pose({ t: 0 });
+    } catch (e) {
+      /* the object draws its fallback */
+    }
   }
   async function wake() {
     if (dead || awake || reduced() || !host.isConnected) return;
     awake = true;
     const m = await mod();
     if (!m || dead || !awake) return;
-    const p = { transparent: 1, turn: 0, interactive: 0, shadow: 0.55, size: 0.96, angle: 0, ...(effect ? { effect } : {}), ...params };
-    try { print = m.default.mount(host, { place: 'none', params: p, palette }); host.classList.add('is-awake'); turnTo(last, true); }
-    catch (e) { console.warn('scenes: object failed', object, e); host.classList.add('is-failed'); awake = false; }
+    const p = {
+      transparent: 1,
+      turn: 0,
+      interactive: 0,
+      shadow: 0.55,
+      size: 0.96,
+      angle: 0,
+      ...(effect ? { effect } : {}),
+      ...params,
+    };
+    try {
+      print = m.default.mount(host, { place: "none", params: p, palette });
+      host.classList.add("is-awake");
+      turnTo(last, true);
+    } catch (e) {
+      console.warn("scenes: object failed", object, e);
+      host.classList.add("is-failed");
+      awake = false;
+    }
   }
   function sleep() {
     awake = false;
-    if (print) { try { print.destroy(); } catch (_) { /* gone */ } print = null; host.classList.remove('is-awake'); }
+    if (print) {
+      try {
+        print.destroy();
+      } catch (_) {
+        /* gone */
+      }
+      print = null;
+      host.classList.remove("is-awake");
+    }
   }
   return {
-    wake, sleep, turnTo,
-    get print() { return print; },
-    get awake() { return !!print; },
-    destroy() { dead = true; sleep(); },
+    wake,
+    sleep,
+    turnTo,
+    get print() {
+      return print;
+    },
+    get awake() {
+      return !!print;
+    },
+    destroy() {
+      dead = true;
+      sleep();
+    },
   };
 }

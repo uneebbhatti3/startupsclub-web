@@ -4,20 +4,20 @@
 // wash of its colour into the box as it passes. By default the element itself is the card (inset 0):
 // put the content straight inside it. With inset > 0 the effect draws its own card that many px inside
 // the element and the glow also blooms outward into that margin.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  radius:      { default: 14,   min: 0,    max: 48,  step: 1 },     // corner radius, CSS px (match the element's)
-  width:       { default: 1.4,  min: 0.5,  max: 3,   step: 0.1 },   // border width, CSS px
-  glow:        { default: 26,   min: 0,    max: 48,  step: 1 },     // glow spread, CSS px
-  bloom:       { default: 0.6,  min: 0,    max: 1,   step: 0.01 },  // glow strength
-  segment:     { default: 0.4,  min: 0.1,  max: 0.7, step: 0.01 },  // length of the tail, share of the edge
-  speed:       { default: 140,  min: 20,   max: 400, step: 5 },     // CSS px per second (at most a quarter lap per second)
-  count:       { default: 1,    min: 1,    max: 2,   step: 1 },     // one head, or two on opposite sides
-  idle:        { default: 0.35, min: 0,    max: 1,   step: 0.01 },  // the faint glow along the rest of the border
-  wash:        { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // light the head throws into the box
-  inset:       { default: 0,    min: 0,    max: 80,  step: 1 },     // 0: the element is the card; else the card edge, CSS px inside
-  fill:        { default: 0,    min: 0,    max: 1,   step: 1 },     // 1 fills the card with the surface colour, 0 with the page colour
+  radius: { default: 14, min: 0, max: 48, step: 1 }, // corner radius, CSS px (match the element's)
+  width: { default: 1.4, min: 0.5, max: 3, step: 0.1 }, // border width, CSS px
+  glow: { default: 26, min: 0, max: 48, step: 1 }, // glow spread, CSS px
+  bloom: { default: 0.6, min: 0, max: 1, step: 0.01 }, // glow strength
+  segment: { default: 0.4, min: 0.1, max: 0.7, step: 0.01 }, // length of the tail, share of the edge
+  speed: { default: 140, min: 20, max: 400, step: 5 }, // CSS px per second (at most a quarter lap per second)
+  count: { default: 1, min: 1, max: 2, step: 1 }, // one head, or two on opposite sides
+  idle: { default: 0.35, min: 0, max: 1, step: 0.01 }, // the faint glow along the rest of the border
+  wash: { default: 0.5, min: 0, max: 1, step: 0.01 }, // light the head throws into the box
+  inset: { default: 0, min: 0, max: 80, step: 1 }, // 0: the element is the card; else the card edge, CSS px inside
+  fill: { default: 0, min: 0, max: 1, step: 1 }, // 1 fills the card with the surface colour, 0 with the page colour
 };
 
 const frag = /* glsl */ `
@@ -135,7 +135,10 @@ void main() {
 // a neighbour hue of c, turned away from violet
 function neighbour(c, deg = 40) {
   const h = color.lch(c)[2];
-  const dist = x => { const d = Math.abs(((x % 360) + 360) % 360 - 305) % 360; return d > 180 ? 360 - d : d; };
+  const dist = (x) => {
+    const d = Math.abs((((x % 360) + 360) % 360) - 305) % 360;
+    return d > 180 ? 360 - d : d;
+  };
   const turn = dist(h + deg) >= dist(h - deg) ? deg : -deg;
   return color.adjust(c, { h: turn });
 }
@@ -162,13 +165,19 @@ export function tones(P, prm) {
   const fill = prm.fill >= 0.5 ? surface : bg;
   // a grey accent: the light takes the ink instead, so it still reads as light, not as a smudge;
   // an accent whose mix with the ground would pass through lavender is turned a little away from it
-  const src = clearOfViolet(fill, color.chroma(accent) < 0.03 ? color.withLightness(ink, 0.75) : accent);
+  const src = clearOfViolet(
+    fill,
+    color.chroma(accent) < 0.03 ? color.withLightness(ink, 0.75) : accent,
+  );
   if (Lb < 0.6) {
     // dark: the tail is the accent, the head a lighter neighbour, white-hot at the tip
     const a = color.withLightness(color.saturate(src, 1.1), Math.max(0.68, color.lab(src)[0]));
     const b2 = clearOfViolet(fill, color.lighten(neighbour(a), 0.1));
     return {
-      bg, fill, a, b: b2,
+      bg,
+      fill,
+      a,
+      b: b2,
       line: color.mix(fill, ink, 0.3),
       hot: color.mix(b2, color.withLightness(ink, 0.98), 0.6),
       glow: color.mix(a, b2, 0.5),
@@ -181,9 +190,16 @@ export function tones(P, prm) {
   const Cl = Math.min(0.2, Math.max(Cs * 1.4, 0.13));
   const a = color.fromLch([0.6, Cl, hs]);
   const b2 = clearOfViolet(fill, color.withLightness(neighbour(a), 0.7));
-  const tint = color.fromLch([Math.min(0.96, Math.max(Lb - 0.02, 0.8)), Math.min(0.13, Cl * 0.7), hs]);
+  const tint = color.fromLch([
+    Math.min(0.96, Math.max(Lb - 0.02, 0.8)),
+    Math.min(0.13, Cl * 0.7),
+    hs,
+  ]);
   return {
-    bg, fill, a: b2, b: a,
+    bg,
+    fill,
+    a: b2,
+    b: a,
     line: color.mix(fill, ink, 0.22),
     hot: color.withLightness(color.saturate(a, 1.1), 0.6),
     glow: clearOfViolet(fill, tint),
@@ -194,15 +210,21 @@ export function tones(P, prm) {
 function uniforms({ palette, params }) {
   const k = tones(palette, params);
   return {
-    u_bg: color.labVec(k.bg), u_cardFill: color.labVec(k.fill), u_line: color.labVec(k.line),
-    u_cA: color.labVec(k.a), u_cB: color.labVec(k.b), u_hot: color.labVec(k.hot), u_glowC: color.labVec(k.glow), u_glowK: k.glowK,
+    u_bg: color.labVec(k.bg),
+    u_cardFill: color.labVec(k.fill),
+    u_line: color.labVec(k.line),
+    u_cA: color.labVec(k.a),
+    u_cB: color.labVec(k.b),
+    u_hot: color.labVec(k.hot),
+    u_glowC: color.labVec(k.glow),
+    u_glowK: k.glowK,
   };
 }
 
 export default {
-  id: 'edge-glow',
-  name: 'Edge glow',
-  family: 'light',
+  id: "edge-glow",
+  name: "Edge glow",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -219,8 +241,10 @@ export default {
         const glow = `radial-gradient(45% 55% at 26% ${i}px, ${color.mix(k.fill, k.glow, 0.7)}, transparent 70%)`;
         // inset 0: the element (and its own rounded corners) is the card; otherwise a flat inner card
         if (!i) return `${glow}, ${k.fill}`;
-        return `${glow}, linear-gradient(${k.fill}, ${k.fill}) center / calc(100% - ${2 * i}px) calc(100% - ${2 * i}px) no-repeat, `
-          + `linear-gradient(${k.line}, ${k.line}) center / calc(100% - ${2 * i - 2}px) calc(100% - ${2 * i - 2}px) no-repeat, ${k.bg}`;
+        return (
+          `${glow}, linear-gradient(${k.fill}, ${k.fill}) center / calc(100% - ${2 * i}px) calc(100% - ${2 * i}px) no-repeat, ` +
+          `linear-gradient(${k.line}, ${k.line}) center / calc(100% - ${2 * i - 2}px) calc(100% - ${2 * i - 2}px) no-repeat, ${k.bg}`
+        );
       },
     });
   },

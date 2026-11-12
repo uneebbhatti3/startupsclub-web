@@ -37,20 +37,22 @@ in-flow child (`z-index: 1`); a layer sits beside it. Never `min-height` alone, 
 third screen, never a height set by script.
 
 ```html
-<section class="section" id="features" style="--h: 2"><div class="wrap"> the h2 first, then the content </div></section>
+<section class="section" id="features" style="--h: 2">
+  <div class="wrap">the h2 first, then the content</div>
+</section>
 ```
 
 **Content windows** (content height c, the h2's top to the last content's bottom; one screen holds
 708px at 1440x900, y 120 to 828):
 
-| c at 1440x900 | Screens |
-|---|---|
-| under 360 | merge into the section above, or add the picture it lacks |
-| 360 to 495 | one screen, a warning: give it its picture |
-| 495 to 708 | one screen |
-| 708 to 1,320 | no height fits: cut to 708, split into two sections (each 495+ with its own h2), or `.g2` |
-| 1,320 to 1,608 | two screens (1,200 to 1,320 warns) |
-| over 1,608 | split |
+| c at 1440x900  | Screens                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| under 360      | merge into the section above, or add the picture it lacks                                 |
+| 360 to 495     | one screen, a warning: give it its picture                                                |
+| 495 to 708     | one screen                                                                                |
+| 708 to 1,320   | no height fits: cut to 708, split into two sections (each 495+ with its own h2), or `.g2` |
+| 1,320 to 1,608 | two screens (1,200 to 1,320 warns)                                                        |
+| over 1,608     | split                                                                                     |
 
 At 390 (`--padt` 96, `--padb` 48 plus the bar): one screen holds 464 to 700 - bar, two hold 1,268
 to 1,544 - bar; between, use `.g2m` or cut the phone copy. Split or cut a long feature grid; never
@@ -61,10 +63,10 @@ grows past its screens rather than overlap, so a section a little too tall pushe
 section off the screen grid and each tile shows one section's tail and the next one's head, cards
 cut by the tile's edge (seen at 768). Stacked content c at 768x1024 (the stricter):
 
-| c at 768x1024 | Do |
-|---|---|
-| up to 832 | one screen |
-| 832 to 1,130 | cut to one screen: a lower `--p-h` for the group at tablet, the split's frame as `.fill` (it takes what is left), the grey line or a fourth card out |
+| c at 768x1024  | Do                                                                                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| up to 832      | one screen                                                                                                                                                                   |
+| 832 to 1,130   | cut to one screen: a lower `--p-h` for the group at tablet, the split's frame as `.fill` (it takes what is left), the grey line or a fourth card out                         |
 | 1,130 to 1,856 | two screens there, `@media (min-width: 640px) and (max-width: 1023px) { #<id> { --h: 2 } }` (the one page-CSS rule on a section), no card row across the screen line at 1024 |
 
 Run `consistency.mjs` with `--rhythm-widths 1440,820,768,390`: its SR-2 `section-height` then
@@ -99,7 +101,7 @@ fails a section that is not one or two screens at the tablet too (the default ru
 
 - **Exactly the first screen,** `100svh`, `--h: 1; --hm: 1`, the fixed header over its top:
   padding-top `--nav + --photo + --hgap` (120 at 1440, 96 on a phone), padding-bottom `--hpadb +
-  --bar` (64, 24 + bar on a phone). Content ends by y 836 at 1440x900. Nothing of the next section
+--bar` (64, 24 + bar on a phone). Content ends by y 836 at 1440x900. Nothing of the next section
   shows at 1440, 1280, 1024, 820, 768 and 390.
 - **Content:** `.wrap > .hero-text` holds the composition: an optional notice line, the h1, the
   sub-line (`p.hero__lead`, layout.css), at most two buttons (a place one), and the picture. One plain claim, never a slogan;
@@ -118,10 +120,10 @@ fails a section that is not one or two screens at the tablet too (the default ru
   - a bleed: a photograph or ground filling its frame (`.frame--photo`, `object-fit: cover`), or a
     fragment in `.frame > .stage` cut by the frame's bottom through 96px or more of its rows under
     `.stage--fade-b`, the point (the comment, the button, the row worked on) above the fade.
-  Never a card, window or diff in a wrapper of your own whose lower edge the fold slices (in testing:
-  a 480x688 diff in `div.hero__art` lost its lower edge at 820, `fold-card` FAIL); never 1 to 95px
-  of a box under the fold. Below 1024 `.at-over` pieces hide; give the main piece a `.fit` width
-  (it narrows), never a fixed one. Shoot 820x1180 and 768x1024 and read the first screen's foot.
+    Never a card, window or diff in a wrapper of your own whose lower edge the fold slices (in testing:
+    a 480x688 diff in `div.hero__art` lost its lower edge at 820, `fold-card` FAIL); never 1 to 95px
+    of a box under the fold. Below 1024 `.at-over` pieces hide; give the main piece a `.fit` width
+    (it narrows), never a fixed one. Shoot 820x1180 and 768x1024 and read the first screen's foot.
 - **Docked strip:** software and product may dock one row under the hero's content (real customer
   logos with permission, a rating line the brief gives, or three facts), at most 96px, still, hidden
   on a phone unless it ends by H - 24 - bar. Service and place dock nothing.
@@ -164,18 +166,18 @@ and credit line (which names photographers, against `copy.md` Credits) never com
 `hero-place.html`'s latte close-up is a demo, never the place hero. `word` and `statement` are
 dealt only without a strong photograph.
 
-| id | composition at 1440 | at 390 | its motion |
-|---|---|---|---|
-| `split` | text span-5; the picture span-6 start-7, top-aligned with the h1, ending on the right line; one opaque float card on its lower left | text, then the picture (at least 240 tall) | the float card's dot (tech) |
-| `photo` | a full-bleed photograph layer, the words on its calm, dark side on six columns (h1 80, two lines), four facts at the foot | the photograph cut to the top, the words under it on the ground | none |
-| `product` | a head row (h1 cols 1-7 on two lines; the lead and the buttons stacked on cols 9-12, their foot on the h1's), then the product itself big, nothing on it (hotspots only when the brief asks for them): a product photograph edge to edge down to the fold, square corners; a cut-out or a render (its widest view, `data-product-place="stage"`, only when the brief asks for 3D) on the page's ground across the wrap, no box, gradient or radius, the stage down to 24 above the fold (1280x566 at 1440x900: the city bike's side 1046 wide, 82% of the wrap). A game names itself in the h1; a `[data-print]` or `[data-scene]` on the stage keeps the lit, rounded stage | stacked; the photograph the screen width, a render 86% of the column (294 of 342) | none; a render is a still (live only when asked, `data-product-mode="live"`) |
-| `editorial` | the headline is the picture: 156px on three lines across the wrap, one or two photographs set in the line as pills | 56px on four lines | the pills open once on load (tech); still elsewhere |
-| `collage` | text span-5; a lit frame span-6 start-7 with the product window cut by its bottom, one result card that loops | the window alone | one card loop (tech) |
-| `word` | an oversized h1 (144px, two lines) with one live word last, underlined; lead and buttons span-6, four facts span-5 start-8 | 54px on three lines | the live word, two rounds then rest (tech only) |
-| `film` | a cinema frame on the lines holding the poster, h1 white on a calm part, the play disc at its foot | the frame, then the words | plays on a click |
-| `statement` | one calm sentence (56px, two lines) over the page ground (tech: a dark ground on a dark page), lead, buttons, four facts | 34px on three lines | none |
-| `triptych` | h1 52 on span-3, a collage of three to five pieces on span-6 start-4 whose sets change every 2.8 s, one large button ending on the right line | collage 342 wide, button full width | set change (tech only; still elsewhere) |
-| `centred` | pill, centred h1 72 with the mark inline, lead, two pill buttons, then a lit frame across the wrap holding the product window, fading over its last 18% | the window less its list column | the window's story (tech) |
+| id          | composition at 1440                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | at 390                                                                            | its motion                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `split`     | text span-5; the picture span-6 start-7, top-aligned with the h1, ending on the right line; one opaque float card on its lower left                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | text, then the picture (at least 240 tall)                                        | the float card's dot (tech)                                                  |
+| `photo`     | a full-bleed photograph layer, the words on its calm, dark side on six columns (h1 80, two lines), four facts at the foot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | the photograph cut to the top, the words under it on the ground                   | none                                                                         |
+| `product`   | a head row (h1 cols 1-7 on two lines; the lead and the buttons stacked on cols 9-12, their foot on the h1's), then the product itself big, nothing on it (hotspots only when the brief asks for them): a product photograph edge to edge down to the fold, square corners; a cut-out or a render (its widest view, `data-product-place="stage"`, only when the brief asks for 3D) on the page's ground across the wrap, no box, gradient or radius, the stage down to 24 above the fold (1280x566 at 1440x900: the city bike's side 1046 wide, 82% of the wrap). A game names itself in the h1; a `[data-print]` or `[data-scene]` on the stage keeps the lit, rounded stage | stacked; the photograph the screen width, a render 86% of the column (294 of 342) | none; a render is a still (live only when asked, `data-product-mode="live"`) |
+| `editorial` | the headline is the picture: 156px on three lines across the wrap, one or two photographs set in the line as pills                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 56px on four lines                                                                | the pills open once on load (tech); still elsewhere                          |
+| `collage`   | text span-5; a lit frame span-6 start-7 with the product window cut by its bottom, one result card that loops                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | the window alone                                                                  | one card loop (tech)                                                         |
+| `word`      | an oversized h1 (144px, two lines) with one live word last, underlined; lead and buttons span-6, four facts span-5 start-8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 54px on three lines                                                               | the live word, two rounds then rest (tech only)                              |
+| `film`      | a cinema frame on the lines holding the poster, h1 white on a calm part, the play disc at its foot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | the frame, then the words                                                         | plays on a click                                                             |
+| `statement` | one calm sentence (56px, two lines) over the page ground (tech: a dark ground on a dark page), lead, buttons, four facts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 34px on three lines                                                               | none                                                                         |
+| `triptych`  | h1 52 on span-3, a collage of three to five pieces on span-6 start-4 whose sets change every 2.8 s, one large button ending on the right line                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | collage 342 wide, button full width                                               | set change (tech only; still elsewhere)                                      |
+| `centred`   | pill, centred h1 72 with the mark inline, lead, two pill buttons, then a lit frame across the wrap holding the product window, fading over its last 18%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | the window less its list column                                                   | the window's story (tech)                                                    |
 
 Every hero is one screen, stands on the edge lines, has one h1 within its `maxChars`
 (`heroes.json`) and one motion of its own at most, which rests under reduced motion and on a phone.
@@ -211,7 +213,7 @@ once on load like every hero (`motion.md`, The hero's entrance); no moment in th
 ## 4. Equal edges and the grid
 
 - **One `.wrap`** for the header, every section and the footer: `width: min(100% - 2 * var(--gut),
-  1280px)`. Lines at x 80 and 1360 at 1440 (a place: 1200 at x 120 to 1320), x 24 and 366 at 390.
+1280px)`. Lines at x 80 and 1360 at 1440 (a place: 1200 at x 120 to 1320), x 24 and 366 at 390.
   The same all the way down.
 - **12 columns, 24px gutter** (12 on a phone). Column starts at 1440: 80, 189, 297, 406, 515, 623,
   732, 841, 949, 1058, 1167, 1275; spans 3 = 302, 4 = 410, 5 = 519, 6 = 628, 7 = 737. On a place
@@ -282,16 +284,16 @@ node <skill>/assets/layout/check.mjs --url index.html --profile <own dir> \
      --sizes 1440x900,1024x768,820x1180,768x1024,390x844 [--shots <dir>] [--json]     # pass these five: the judges shoot the tablet at 768x1024 and 820x1180
 ```
 
-| Finding | Means |
-|---|---|
-| `hero-fold` | the hero does not fill the first screen, runs past it, or the next section shows |
-| `hero-maxchars`, `hero-lines` | with the h1 lengthened to its `maxChars`, the hero runs past the screen or the h1 takes too many lines |
-| `screen-short`, `screen-height` | a section shorter than one screen, or not exactly one or two |
-| `sparse` | content fills under half the section (a picture's own frame counts whole) |
-| `neighbour`, `neighbour-ground` | another section's ink or ground shows in a section's tile |
+| Finding                                                           | Means                                                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `hero-fold`                                                       | the hero does not fill the first screen, runs past it, or the next section shows                        |
+| `hero-maxchars`, `hero-lines`                                     | with the h1 lengthened to its `maxChars`, the hero runs past the screen or the h1 takes too many lines  |
+| `screen-short`, `screen-height`                                   | a section shorter than one screen, or not exactly one or two                                            |
+| `sparse`                                                          | content fills under half the section (a picture's own frame counts whole)                               |
+| `neighbour`, `neighbour-ground`                                   | another section's ink or ground shows in a section's tile                                               |
 | `edge-left`, `edge-right`, `spill`, `bleed-one-side`, `one-sided` | a block off the lines, past them, out to one viewport edge, or visuals stopping short of the right line |
-| `lines` | text starts on more than two left lines |
-| `overflow-x` | the page scrolls sideways |
+| `lines`                                                           | text starts on more than two left lines                                                                 |
+| `overflow-x`                                                      | the page scrolls sideways                                                                               |
 
 Run it without `--no-stress`; every finding fails the page. In another script:
 `await page.evaluate(src + ';window.lyCheck()')` returns `{ vw, vh, L, R, nav, screen, hero, sections, findings }`.

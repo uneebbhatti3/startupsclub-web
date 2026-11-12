@@ -3,22 +3,22 @@
 // fade with distance, drift slowly without turning, and a few soft out-of-focus motes float in the
 // light. The light is a little warmer near its source. On light pages the room stays at the page's
 // lightness and the gaps between the shafts fall into a soft shade. Text sits in a calm area.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  originX:   { default: 0.3,  min: -0.2, max: 1.2, step: 0.01 },  // light source, 0 left .. 1 right
-  originY:   { default: -0.2, min: -0.8, max: 0.2, step: 0.01 },  // source height; below 0 is above the frame
-  tilt:      { default: 22,   min: -60,  max: 60,  step: 1 },     // fan direction, degrees from straight down (+ right)
-  spread:    { default: 60,   min: 10,   max: 140, step: 1 },     // fan width in degrees
-  density:   { default: 0.35, min: 0,    max: 1,   step: 0.01 },  // how many rays
-  intensity: { default: 0.7,  min: 0,    max: 1.5, step: 0.01 },  // brightness of the light
-  falloff:   { default: 1.2,  min: 0,    max: 4,   step: 0.01 },  // how fast the light fades with distance
-  speed:     { default: 0.04, min: 0,    max: 0.4, step: 0.005 }, // how fast the rays change
-  dust:      { default: 0.3,  min: 0,    max: 1,   step: 0.01 },  // soft motes floating in the light
-  tint:      { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // how much the accent colours the light
-  calm:      { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // dim the light where text sits
-  calmX:     { default: 0.22, min: 0,    max: 1,   step: 0.01 },
-  calmY:     { default: 0.72, min: 0,    max: 1,   step: 0.01 },
+  originX: { default: 0.3, min: -0.2, max: 1.2, step: 0.01 }, // light source, 0 left .. 1 right
+  originY: { default: -0.2, min: -0.8, max: 0.2, step: 0.01 }, // source height; below 0 is above the frame
+  tilt: { default: 22, min: -60, max: 60, step: 1 }, // fan direction, degrees from straight down (+ right)
+  spread: { default: 60, min: 10, max: 140, step: 1 }, // fan width in degrees
+  density: { default: 0.35, min: 0, max: 1, step: 0.01 }, // how many rays
+  intensity: { default: 0.7, min: 0, max: 1.5, step: 0.01 }, // brightness of the light
+  falloff: { default: 1.2, min: 0, max: 4, step: 0.01 }, // how fast the light fades with distance
+  speed: { default: 0.04, min: 0, max: 0.4, step: 0.005 }, // how fast the rays change
+  dust: { default: 0.3, min: 0, max: 1, step: 0.01 }, // soft motes floating in the light
+  tint: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how much the accent colours the light
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // dim the light where text sits
+  calmX: { default: 0.22, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.72, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -102,8 +102,12 @@ void main() {
 `;
 
 // the accent only when it will not turn muddy against the background
-const fits = (bg, c) => color.chroma(bg) < 0.035 || color.chroma(c) < 0.035 || color.hueDistance(bg, c) < 55;
-const warm = c => { const [, C, h] = color.lch(c); return C > 0.035 && h >= 25 && h <= 115; };
+const fits = (bg, c) =>
+  color.chroma(bg) < 0.035 || color.chroma(c) < 0.035 || color.hueDistance(bg, c) < 55;
+const warm = (c) => {
+  const [, C, h] = color.lch(c);
+  return C > 0.035 && h >= 25 && h <= 115;
+};
 
 export function tones(P, prm) {
   const { bg, ink, accent } = P;
@@ -115,14 +119,18 @@ export function tones(P, prm) {
   if (Lb < 0.6) {
     // dark or deep ground: pale light tinted by the accent
     const base = color.adjust(bg, { l: 0.92 - Lb, c: 0.35 });
-    const light = acc ? color.mix(base, color.withLightness(acc, 0.84), 0.2 + 0.6 * prm.tint) : base;
+    const light = acc
+      ? color.mix(base, color.withLightness(acc, 0.84), 0.2 + 0.6 * prm.tint)
+      : base;
     return {
       gFar: color.darken(bg, Math.min(0.06, Lb * 0.18)),
       gNear: acc ? color.mix(bg, acc, 0.05 + 0.06 * prm.tint) : color.lighten(bg, 0.02),
       lightFar: light,
       lightNear: color.mix(light, color.fromLch([0.95, Math.min(0.035, Cw), hw]), 0.45),
       hot: color.mix(light, color.withLightness(ink, 0.97), 0.55),
-      shade: bg, shadeK: 0, air: 0.022,
+      shade: bg,
+      shadeK: 0,
+      air: 0.022,
       gain: 1,
     };
   }
@@ -134,10 +142,15 @@ export function tones(P, prm) {
     gFar: color.darken(bg, 0.012),
     gNear: bg,
     lightFar: light,
-    lightNear: color.mix(light, color.fromLch([Math.min(0.995, Lb + 0.1), Math.min(0.05, Cw * 0.5), hw]), 0.35),
+    lightNear: color.mix(
+      light,
+      color.fromLch([Math.min(0.995, Lb + 0.1), Math.min(0.05, Cw * 0.5), hw]),
+      0.35,
+    ),
     hot: color.fromLch([Math.min(0.998, Lb + 0.12), Cb * 0.3, hb]),
     shade: color.fromLch([Lb - 0.12, Cb * 1.1 + 0.004, hb]),
-    shadeK: 1, air: 0.008,
+    shadeK: 1,
+    air: 0.008,
     gain: 1.6,
   };
 }
@@ -145,7 +158,8 @@ export function tones(P, prm) {
 // the source keeps away from a text block near the top, and the fan leans into the frame
 export function aim(prm) {
   let ox = prm.originX;
-  if (prm.calm > 0.05 && prm.calmY < 0.45 && Math.abs(ox - prm.calmX) < 0.35) ox = prm.calmX < 0.5 ? Math.max(ox, prm.calmX + 0.45) : Math.min(ox, prm.calmX - 0.45);
+  if (prm.calm > 0.05 && prm.calmY < 0.45 && Math.abs(ox - prm.calmX) < 0.35)
+    ox = prm.calmX < 0.5 ? Math.max(ox, prm.calmX + 0.45) : Math.min(ox, prm.calmX - 0.45);
   const tilt = ox > 0.6 ? -Math.abs(prm.tilt) : ox < 0.4 ? Math.abs(prm.tilt) : prm.tilt;
   return { ox, tilt };
 }
@@ -154,16 +168,24 @@ function uniforms({ palette, params }) {
   const k = tones(palette, params);
   const g = aim(params);
   return {
-    u_ox: g.ox, u_tiltE: g.tilt,
-    u_gFar: color.labVec(k.gFar), u_gNear: color.labVec(k.gNear), u_lightFar: color.labVec(k.lightFar), u_lightNear: color.labVec(k.lightNear),
-    u_hot: color.labVec(k.hot), u_shade: color.labVec(k.shade), u_shadeK: k.shadeK, u_air: k.air, u_gain: k.gain,
+    u_ox: g.ox,
+    u_tiltE: g.tilt,
+    u_gFar: color.labVec(k.gFar),
+    u_gNear: color.labVec(k.gNear),
+    u_lightFar: color.labVec(k.lightFar),
+    u_lightNear: color.labVec(k.lightNear),
+    u_hot: color.labVec(k.hot),
+    u_shade: color.labVec(k.shade),
+    u_shadeK: k.shadeK,
+    u_air: k.air,
+    u_gain: k.gain,
   };
 }
 
 export default {
-  id: 'god-rays',
-  name: 'God rays',
-  family: 'light',
+  id: "god-rays",
+  name: "God rays",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

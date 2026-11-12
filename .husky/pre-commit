@@ -12,4 +12,23 @@ if ! echo "$branch" | grep -Eq '^dev/[a-z0-9]+(-[a-z0-9]+)*$'; then
   exit 1
 fi
 
-npx lint-staged
+# Step 1 and 2 run on staged files only (see .lintstagedrc.json):
+#   - Prettier checks every staged file type it supports and, if anything is off, rewrites and
+#     re-stages it (unsupported files such as images are skipped by --ignore-unknown).
+#   - ESLint rejects explicit `any`, `as any` and @ts-ignore (no-explicit-any, ban-ts-comment).
+# --concurrent false makes Prettier finish before ESLint reads the same file.
+echo "Checking formatting (auto-fixing if needed) and linting staged files..."
+if ! npx lint-staged --concurrent false; then
+  echo ""
+  echo "Commit blocked: ESLint found problems in the staged files (for example a use of the type 'any')."
+  echo "Fix them, stage the files again and commit."
+  exit 1
+fi
+
+# Step 3: whole-project type check. Strict mode rejects implicit `any` and every other type error.
+echo "Running type check..."
+if ! npm run typecheck; then
+  echo ""
+  echo "Commit blocked: the type check failed (for example an implicit 'any'). Fix the errors and commit again."
+  exit 1
+fi

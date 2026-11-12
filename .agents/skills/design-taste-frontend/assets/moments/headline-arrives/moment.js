@@ -17,24 +17,64 @@
   file in <head> so the headline waits for one round trip, not four.
 */
 export default function (root, opts, lib) {
-  const heading = root.matches('h1, h2') ? root : root.querySelector(opts.heading || 'h1, h2');
-  if (!heading || lib.reduced() || document.documentElement.classList.contains('mo-safe')) { root.classList.add('is-done'); return {}; }
-  const unit = opts.unit === 'chars' ? 'chars' : 'words';
+  const heading = root.matches("h1, h2") ? root : root.querySelector(opts.heading || "h1, h2");
+  if (!heading || lib.reduced() || document.documentElement.classList.contains("mo-safe")) {
+    root.classList.add("is-done");
+    return {};
+  }
+  const unit = opts.unit === "chars" ? "chars" : "words";
   const inners = lib.split(heading, unit);
-  const rest = root === heading ? [] : [...root.children].filter(c => c !== heading);
-  root.classList.add('is-live');
-  const dur = opts.duration || 900, delay = opts.delay ?? 120, step = opts.stagger ?? (unit === 'chars' ? 22 : 38);
-  const EASE = 'cubic-bezier(.16, 1, .3, 1)';
+  const rest = root === heading ? [] : [...root.children].filter((c) => c !== heading);
+  root.classList.add("is-live");
+  const dur = opts.duration || 900,
+    delay = opts.delay ?? 120,
+    step = opts.stagger ?? (unit === "chars" ? 22 : 38);
+  const EASE = "cubic-bezier(.16, 1, .3, 1)";
   const anims = [];
   let done = false;
-  const finish = () => { if (done) return; done = true; root.classList.add('is-done'); root.classList.remove('is-live'); anims.forEach(a => { try { a.cancel(); } catch { /* finished */ } }); };
-  lib.fontsReady(500).then(() => {
+  const finish = () => {
     if (done) return;
-    inners.forEach((i, k) => anims.push(i.animate([{ transform: 'translateY(108%)', opacity: 0.001 }, { transform: 'none', opacity: 1 }], { duration: dur, delay: delay + k * step, easing: EASE, fill: 'both' })));
-    const after = delay + Math.min(inners.length, 14) * step + 160;
-    rest.forEach((el, k) => anims.push(el.animate([{ transform: 'translateY(14px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 700, delay: after + k * 110, easing: EASE, fill: 'both' })));
-    Promise.all(anims.map(a => a.finished)).then(finish, finish);
-  }).catch(finish);
-  setTimeout(finish, 8000);   // failsafe: whatever stalled, the headline stands after 8 s
+    done = true;
+    root.classList.add("is-done");
+    root.classList.remove("is-live");
+    anims.forEach((a) => {
+      try {
+        a.cancel();
+      } catch {
+        /* finished */
+      }
+    });
+  };
+  lib
+    .fontsReady(500)
+    .then(() => {
+      if (done) return;
+      inners.forEach((i, k) =>
+        anims.push(
+          i.animate(
+            [
+              { transform: "translateY(108%)", opacity: 0.001 },
+              { transform: "none", opacity: 1 },
+            ],
+            { duration: dur, delay: delay + k * step, easing: EASE, fill: "both" },
+          ),
+        ),
+      );
+      const after = delay + Math.min(inners.length, 14) * step + 160;
+      rest.forEach((el, k) =>
+        anims.push(
+          el.animate(
+            [
+              { transform: "translateY(14px)", opacity: 0 },
+              { transform: "none", opacity: 1 },
+            ],
+            { duration: 700, delay: after + k * 110, easing: EASE, fill: "both" },
+          ),
+        ),
+      );
+      Promise.all(anims.map((a) => a.finished)).then(finish, finish);
+    })
+    .catch(finish);
+  setTimeout(finish, 8000); // failsafe: whatever stalled, the headline stands after 8 s
   return { destroy: finish };
 }

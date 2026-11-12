@@ -63,13 +63,20 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   A file whose text is a kit file's is the kit's, wherever it sits. The two checkers' ids for one fault of
   one section (section-height / screen-height / screen-short, one-section / neighbour) are one finding.
   A full run takes a few minutes on a CPU Chrome.
+
 - **WARNs never block,** but for two house rules the checker only WARNs and the gate holds as FAILs:
   `hero-enter` (the hero has no `data-enter`, or the head line that sets `html.m-enter` is missing) and
   `moment-none` (the page deals no moment). The first few WARNs are listed.
 - **Waivers.** A FAIL you judge false goes in `.taste-skill/waivers.json`:
 
   ```json
-  [{ "check": "one-section", "target": "section#visit", "reason": "the hours list is one screen at 390; the check counts the phone bar" }]
+  [
+    {
+      "check": "one-section",
+      "target": "section#visit",
+      "reason": "the hours list is one screen at 390; the check counts the phone bar"
+    }
+  ]
   ```
 
   `check` is the finding's id, `target` a part of where it is (3+ characters, or the whole of a short
@@ -81,6 +88,7 @@ node <skill>/scripts/gate.mjs --start index.html --kind <kind> --category "<what
   is waived hit by hit with the brief as the reason. A waived
   FAIL is printed as WAIVED: it goes in the report. kit-edited and checker-gaming cannot be waived. More
   than 5 waivers is itself a FAIL: "too many waivers: fix instead".
+
 - **Rounds** (`.taste-skill/gate.json`). A run whose page or waivers changed since the last round is a
   round; a manual rerun of an unchanged page is not. A hook stop before the gate's first run by hand in
   the build is no round either: it lists the FAILs and blocks (its blocks are counted apart), and the
@@ -158,7 +166,15 @@ whose builds sit in two or more folders below stop, and ignores a build idle for
 {
   "hooks": {
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook claude", "timeout": 600 } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook claude",
+            "timeout": 600
+          }
+        ]
+      }
     ]
   }
 }
@@ -170,7 +186,15 @@ whose builds sit in two or more folders below stop, and ignores a build idle for
 {
   "hooks": {
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook codex", "timeout": 600 } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook codex",
+            "timeout": 600
+          }
+        ]
+      }
     ]
   }
 }
@@ -182,7 +206,15 @@ whose builds sit in two or more folders below stop, and ignores a build idle for
 {
   "hooks": {
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook antigravity", "timeout": 600 } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/path/to/skill/scripts/gate.mjs\" --hook antigravity",
+            "timeout": 600
+          }
+        ]
+      }
     ]
   }
 }

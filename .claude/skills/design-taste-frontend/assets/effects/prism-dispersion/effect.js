@@ -3,21 +3,21 @@
 // The spectrum is a band of hues around the page accent (never violet), seen faintly in the hazy air
 // and brightly where it lands. The split sits in an upper side of the frame and the light lands on the
 // opposite, lower side, so centred content never hides both; a text block (calm) dims the light.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  splitX:    { default: 0.28, min: 0.05,  max: 0.95, step: 0.01 },  // where the beam splits, 0 left .. 1 right (the middle is skipped)
-  splitY:    { default: 0.4,  min: 0,     max: 1,    step: 0.01 },  // height of the split in the upper half, 0 high .. 1 lower
-  bend:      { default: 30,   min: 0,     max: 60,   step: 1 },     // how far the prism turns the light, degrees
-  fanSpread: { default: 0.42, min: 0.2,   max: 0.7,  step: 0.01 },  // fan width in radians
-  hueSpread: { default: 55,   min: 20,    max: 70,   step: 1 },     // the spectrum spans the accent hue +- this, degrees
+  splitX: { default: 0.28, min: 0.05, max: 0.95, step: 0.01 }, // where the beam splits, 0 left .. 1 right (the middle is skipped)
+  splitY: { default: 0.4, min: 0, max: 1, step: 0.01 }, // height of the split in the upper half, 0 high .. 1 lower
+  bend: { default: 30, min: 0, max: 60, step: 1 }, // how far the prism turns the light, degrees
+  fanSpread: { default: 0.42, min: 0.2, max: 0.7, step: 0.01 }, // fan width in radians
+  hueSpread: { default: 55, min: 20, max: 70, step: 1 }, // the spectrum spans the accent hue +- this, degrees
   beamWidth: { default: 0.006, min: 0.002, max: 0.03, step: 0.001 }, // beam width (height units)
-  haze:      { default: 0.5,  min: 0,     max: 1,    step: 0.01 },  // how much the light shows in the air
-  intensity: { default: 1,    min: 0,     max: 1.5,  step: 0.01 },
-  sway:      { default: 0.02, min: 0,     max: 0.08, step: 0.005 }, // slow sway of the light, radians
-  calm:      { default: 0.4,  min: 0,     max: 1,    step: 0.01 },  // dim the light where text sits
-  calmX:     { default: 0.25, min: 0,     max: 1,    step: 0.01 },
-  calmY:     { default: 0.78, min: 0,     max: 1,    step: 0.01 },
+  haze: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how much the light shows in the air
+  intensity: { default: 1, min: 0, max: 1.5, step: 0.01 },
+  sway: { default: 0.02, min: 0, max: 0.08, step: 0.005 }, // slow sway of the light, radians
+  calm: { default: 0.4, min: 0, max: 1, step: 0.01 }, // dim the light where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.78, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -107,13 +107,24 @@ void main() {
 }
 `;
 
-const hd = (a, b) => { const d = Math.abs((((a - b) % 360) + 360) % 360); return d > 180 ? 360 - d : d; };
+const hd = (a, b) => {
+  const d = Math.abs((((a - b) % 360) + 360) % 360);
+  return d > 180 ? 360 - d : d;
+};
 // the centre hue nearest the accent whose span (centre +- s) stays clear of violet and lavender (262..338 in OKLCH)
 function spectrumCentre(h, s) {
-  const lo = 262, hi = 338;
-  const clear = c => { for (let k = -s; k <= s; k += 2) { const x = (((c + k) % 360) + 360) % 360; if (x >= lo && x <= hi) return false; } return true; };
+  const lo = 262,
+    hi = 338;
+  const clear = (c) => {
+    for (let k = -s; k <= s; k += 2) {
+      const x = (((c + k) % 360) + 360) % 360;
+      if (x >= lo && x <= hi) return false;
+    }
+    return true;
+  };
   if (clear(h)) return h;
-  const a = lo - s - 1, b = hi + s + 1;
+  const a = lo - s - 1,
+    b = hi + s + 1;
   return hd(h, a) <= hd(h, b) ? a : b;
 }
 
@@ -128,24 +139,38 @@ export function tones(P, prm) {
   const centre = spectrumCentre(grey ? hb : ha, grey ? Math.min(s, 30) : s);
   const C = grey ? 0.06 : Math.min(0.15, Math.max(0.085, Ca * 1.3));
   const Lmid = dark ? 0.82 : Math.max(0.45, Lb - 0.14);
-  const ramp = [-1, -0.5, 0, 0.5, 1].map(u => color.fromLch([Lmid - (dark ? 0.06 : 0.03) * Math.abs(u), C * (1 - 0.15 * Math.abs(u)), centre + u * s]));
+  const ramp = [-1, -0.5, 0, 0.5, 1].map((u) =>
+    color.fromLch([
+      Lmid - (dark ? 0.06 : 0.03) * Math.abs(u),
+      C * (1 - 0.15 * Math.abs(u)),
+      centre + u * s,
+    ]),
+  );
   if (dark) {
     const ground = color.darken(bg, Math.min(0.03, Lb * 0.1));
     const pale = color.adjust(bg, { l: 0.95 - Lb, c: 0.2 });
     return {
-      ground, ramp, dark,
+      ground,
+      ramp,
+      dark,
       beam: color.mix(pale, color.withLightness(ink, 0.97), 0.5),
       hot: color.withLightness(color.mix(pale, ramp[2], 0.15), 0.97),
       glowA: color.mix(ground, color.mix(pale, ramp[2], 0.3), 0.35),
-      amb: 0.02, lit: 1,
+      amb: 0.02,
+      lit: 1,
     };
   }
   // a light ground (not what it is made for): the beam does not show on a pale wall, only the
   // spectrum it throws, a shade darker than the page so text in the page ink stays readable
   return {
-    ground: bg, ramp, dark,
-    beam: bg, hot: color.mix(bg, ramp[2], 0.4), glowA: color.mix(bg, ramp[2], 0.25),
-    amb: 0.006, lit: 0,
+    ground: bg,
+    ramp,
+    dark,
+    beam: bg,
+    hot: color.mix(bg, ramp[2], 0.4),
+    glowA: color.mix(bg, ramp[2], 0.25),
+    amb: 0.006,
+    lit: 0,
   };
 }
 
@@ -166,16 +191,27 @@ function uniforms({ palette, params: prm }) {
   const k = tones(palette, prm);
   const g = layout(prm);
   return {
-    u_ground: color.labVec(k.ground), u_beam: color.labVec(k.beam), u_hot: color.labVec(k.hot), u_glowA: color.labVec(k.glowA),
-    u_r0: color.labVec(k.ramp[0]), u_r1: color.labVec(k.ramp[1]), u_r2: color.labVec(k.ramp[2]), u_r3: color.labVec(k.ramp[3]), u_r4: color.labVec(k.ramp[4]),
-    u_amb: k.amb, u_lit: k.lit, u_S: g.S, u_L: g.L, u_side: g.side,
+    u_ground: color.labVec(k.ground),
+    u_beam: color.labVec(k.beam),
+    u_hot: color.labVec(k.hot),
+    u_glowA: color.labVec(k.glowA),
+    u_r0: color.labVec(k.ramp[0]),
+    u_r1: color.labVec(k.ramp[1]),
+    u_r2: color.labVec(k.ramp[2]),
+    u_r3: color.labVec(k.ramp[3]),
+    u_r4: color.labVec(k.ramp[4]),
+    u_amb: k.amb,
+    u_lit: k.lit,
+    u_S: g.S,
+    u_L: g.L,
+    u_side: g.side,
   };
 }
 
 export default {
-  id: 'prism-dispersion',
-  name: 'Prism light',
-  family: 'light',
+  id: "prism-dispersion",
+  name: "Prism light",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -189,11 +225,14 @@ export default {
       fallback: ({ palette: P, params: prm }) => {
         const k = tones(P, prm);
         const g = layout(prm);
-        const [sx, sy] = g.S.map(v => v * 100), [lx, ly] = g.L.map(v => v * 100);
-        return `radial-gradient(5% 8% at ${sx}% ${sy}%, ${k.hot}, transparent 70%), `
-          + `radial-gradient(11% 20% at ${lx + 2.5 * g.side}% ${ly - 3}%, ${k.ramp[1]}, transparent 80%), `
-          + `radial-gradient(11% 20% at ${lx - 2.5 * g.side}% ${ly + 3}%, ${k.ramp[3]}, transparent 80%), `
-          + `radial-gradient(30% 40% at ${lx}% ${ly}%, ${k.glowA}, transparent 75%), ${k.ground}`;
+        const [sx, sy] = g.S.map((v) => v * 100),
+          [lx, ly] = g.L.map((v) => v * 100);
+        return (
+          `radial-gradient(5% 8% at ${sx}% ${sy}%, ${k.hot}, transparent 70%), ` +
+          `radial-gradient(11% 20% at ${lx + 2.5 * g.side}% ${ly - 3}%, ${k.ramp[1]}, transparent 80%), ` +
+          `radial-gradient(11% 20% at ${lx - 2.5 * g.side}% ${ly + 3}%, ${k.ramp[3]}, transparent 80%), ` +
+          `radial-gradient(30% 40% at ${lx}% ${ly}%, ${k.glowA}, transparent 75%), ${k.ground}`
+        );
       },
     });
   },

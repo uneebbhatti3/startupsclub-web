@@ -9,7 +9,7 @@
   rim, the rim and the inside of the shade light up, and a pool of warm light falls on the desk in
   front of the base; click again to switch it off.
 */
-import { definePrint } from '../_print-core/print3d.js';
+import { definePrint } from "../_print-core/print3d.js";
 
 const glsl = /* glsl */ `
 const vec3 BASE = vec3(-0.08, 0.0, 0.0);
@@ -175,9 +175,9 @@ float floorEmit(vec3 w) {
 `;
 
 export default definePrint({
-  id: 'print-lamp',
-  name: 'Desk lamp',
-  label: 'A balanced-arm desk lamp; it switches on when chosen',
+  id: "print-lamp",
+  name: "Desk lamp",
+  label: "A balanced-arm desk lamp; it switches on when chosen",
   base: import.meta.url,
   glsl,
   pivot: [0.02, 0.37, 0],
@@ -185,18 +185,24 @@ export default definePrint({
   extent: [0.34, 0.41],
   camera: { elev: 13, dist: 6, target: 0.37 },
   light: [-0.22, 1.45, 0.85],
-  turn: { mode: 'sway', amp: 34, period: 22 },
-  step: 'toggle',
+  turn: { mode: "sway", amp: 34, period: 22 },
+  step: "toggle",
   stepTime: 0.7,
   budget: 420000,
-  press: 'Press to switch it on.',
-  params: { effect: { default: 'render' }, angle: { default: 8 }, size: { default: 0.8 } },
+  press: "Press to switch it on.",
+  params: { effect: { default: "render" }, angle: { default: 8 }, size: { default: 0.8 } },
   // card: whole but for the base's foot, cut by the panel's bottom edge (a lamp without its base reads
   // as a stray arm), the shade toward the top right, the bottom-right corner clear for the pause
   // button; in a panel about as tall as wide (a phone) a little smaller; tile: whole, low; hero: right
   // of the text, smaller and under it in a phone-shaped frame
   place: {
-    card: { transparent: 1, size: 0.98, x: -0.1, y: -0.06, narrow: { size: 0.94, x: -0.04, y: -0.04 } },
+    card: {
+      transparent: 1,
+      size: 0.98,
+      x: -0.1,
+      y: -0.06,
+      narrow: { size: 0.94, x: -0.04, y: -0.04 },
+    },
     tile: { transparent: 1, size: 0.78, y: -0.01 },
     hero: { transparent: 1, size: 1.0, x: 0.22, y: -0.06, narrow: { size: 0.72, x: 0.1, y: -0.2 } },
   },

@@ -60,12 +60,12 @@ page as a static check: its FAILs block like the checker's (ids `copy-*`), its W
 When a line is vague: the category noun first, then one count, place or price from the brief, no
 figure of speech.
 
-| Vague | Plain |
-| --- | --- |
-| "Every shift, sorted" | Shift planning for restaurant teams |
-| "Where the city climbs" | Climbing gym with 180 routes in Leipzig-Plagwitz |
-| "Come climb" | Day pass 14 €, shoes included |
-| "A second read of every word" | AI proofreader for book publishers |
+| Vague                         | Plain                                            |
+| ----------------------------- | ------------------------------------------------ |
+| "Every shift, sorted"         | Shift planning for restaurant teams              |
+| "Where the city climbs"       | Climbing gym with 180 routes in Leipzig-Plagwitz |
+| "Come climb"                  | Day pass 14 €, shoes included                    |
+| "A second read of every word" | AI proofreader for book publishers               |
 
 ## Headlines and text
 
@@ -83,8 +83,7 @@ figure of speech.
   with a full stop before the `.muted` span ("Rooms and prices. <span class="muted">Breakfast
   included.</span>"), never two phrases that run into one [run-on].
 - **Under a heading** one line to two sentences (10 to 40 words); a card body 1 or 2 sentences, 25
-  words at most, in the buyer's words with one concrete detail; no paragraph over five lines at
-  1440. A price does the selling, not a mood heading ("Rooms from 140 € a night, breakfast
+  words at most, in the buyer's words with one concrete detail; no paragraph over five lines at 1440. A price does the selling, not a mood heading ("Rooms from 140 € a night, breakfast
   included").
 - **Words per screen** stay low: product 47, place 44, service 34; a page about 900 words at most,
   the footer aside. Long copy goes to sub-pages.
@@ -113,7 +112,7 @@ figure of speech.
   Nothing else is invented: a product or service with no price in the brief says "Price on
   request" or shows none. Each assumed price, hour, date or place carries `data-assumed` on its own
   element (`<span class="rows__value" data-assumed>3.60 €</span>`, `<dl class="hours"
-  data-assumed>`); the checker lists every one for the report [assumed], and assumed hours never
+data-assumed>`); the checker lists every one for the report [assumed], and assumed hours never
   drive an open-now line [open-now].
 - **No invented proof:** no invented reviews, ratings, review counts, quotes, testimonials,
   statistics, customer counts, customer names, portraits, clients, awards, press lines or products.

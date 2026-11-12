@@ -2,19 +2,19 @@
 // light gathers in bright creases; it is brightest at the hem, glows a little below it and fades upward
 // in long rays, and the sky around it is lit faintly. Two palette hues, mixed in as light.
 // On a light palette (not what it is made for) it turns into soft veils of the accent on the page ground.
-import { shader, color, grainCSS } from '../fx.js';
+import { shader, color, grainCSS } from "../fx.js";
 
 const params = {
-  speed:     { default: 0.05, min: 0,    max: 0.3,  step: 0.01 }, // sway speed
-  bands:     { default: 3,    min: 1,    max: 4,    step: 1 },    // curtains
-  height:    { default: 0.66, min: 0.3,  max: 0.85, step: 0.01 }, // where the lowest hem hangs, 0 top .. 1 bottom
-  rayDetail: { default: 0.6,  min: 0,    max: 1,    step: 0.01 }, // fine vertical rays inside the curtains
-  waviness:  { default: 0.55, min: 0,    max: 1,    step: 0.01 }, // how deeply the curtains fold
-  intensity: { default: 1.3,  min: 0,    max: 2,    step: 0.01 }, // brightness of the light
-  stars:     { default: 0.25, min: 0,    max: 1,    step: 0.01 }, // a few still stars, 0 for none
-  calm:      { default: 0.6,  min: 0,    max: 1,    step: 0.01 }, // keep the text area dark
-  calmX:     { default: 0.3,  min: 0,    max: 1,    step: 0.01 },
-  calmY:     { default: 0.78, min: 0,    max: 1,    step: 0.01 },
+  speed: { default: 0.05, min: 0, max: 0.3, step: 0.01 }, // sway speed
+  bands: { default: 3, min: 1, max: 4, step: 1 }, // curtains
+  height: { default: 0.66, min: 0.3, max: 0.85, step: 0.01 }, // where the lowest hem hangs, 0 top .. 1 bottom
+  rayDetail: { default: 0.6, min: 0, max: 1, step: 0.01 }, // fine vertical rays inside the curtains
+  waviness: { default: 0.55, min: 0, max: 1, step: 0.01 }, // how deeply the curtains fold
+  intensity: { default: 1.3, min: 0, max: 2, step: 0.01 }, // brightness of the light
+  stars: { default: 0.25, min: 0, max: 1, step: 0.01 }, // a few still stars, 0 for none
+  calm: { default: 0.6, min: 0, max: 1, step: 0.01 }, // keep the text area dark
+  calmX: { default: 0.3, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.78, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -99,7 +99,7 @@ void main() {
 }
 `;
 
-const L = c => color.lab(c)[0];
+const L = (c) => color.lab(c)[0];
 const at = (c, l) => color.withLightness(c, Math.min(0.97, Math.max(0.03, l)));
 
 // hem: the bright hue at the lower edge; top: the hue the light fades into; skyTop/skyLow: the ground;
@@ -107,7 +107,7 @@ const at = (c, l) => color.withLightness(c, Math.min(0.97, Math.max(0.03, l)));
 function tones(P, kind) {
   const { bg, surface, ink, muted, accent } = P;
   const acc = color.chroma(accent) > 0.03 ? accent : color.mix(ink, muted, 0.3);
-  if (kind === 'light') {
+  if (kind === "light") {
     // veils of the accent on the page ground: darker where they are dense
     return {
       skyTop: color.lighten(bg, 0.01),
@@ -118,7 +118,7 @@ function tones(P, kind) {
       star: bg,
     };
   }
-  if (kind === 'colour') {
+  if (kind === "colour") {
     // a deep night of the page colour; white-blue light (a far-hued accent would turn grey when added)
     const deep = color.lighten(bg, -0.24);
     const near = color.hueDistance(bg, acc) < 55;
@@ -153,24 +153,29 @@ function uniforms({ palette, params, rng, kind, width, height }) {
     u_top: color.labVec(k.top),
     u_glowC: color.labVec(k.glow),
     u_starC: color.vec3(k.star),
-    u_night: kind === 'light' ? 0 : 1,
+    u_night: kind === "light" ? 0 : 1,
   };
   // curtains of different lengths and heights, spread across the frame, the nearest hanging lowest
-  const spots = [-0.32, 0.3, -0.05, 0.42].map(v => v + (r() - 0.5) * 0.2);
+  const spots = [-0.32, 0.3, -0.05, 0.42].map((v) => v + (r() - 0.5) * 0.2);
   if (r() < 0.5) spots.reverse();
   for (let i = 0; i < 4; i++) {
     const half = asp * (0.24 + 0.16 * r()) * (1 - 0.08 * i);
-    u['u_a' + i] = [spots[i] * asp, half, params.height - i * 0.1 - 0.06 * r(), (0.2 + 0.08 * r()) * (1 + 0.15 * i)];
+    u["u_a" + i] = [
+      spots[i] * asp,
+      half,
+      params.height - i * 0.1 - 0.06 * r(),
+      (0.2 + 0.08 * r()) * (1 + 0.15 * i),
+    ];
     const freq = 5.5 + 5 * r();
-    u['u_b' + i] = [(0.85 + 0.35 * r()) / freq, freq, r() * 6.283, [1, 0.82, 0.68, 0.58][i]];
+    u["u_b" + i] = [(0.85 + 0.35 * r()) / freq, freq, r() * 6.283, [1, 0.82, 0.68, 0.58][i]];
   }
   return u;
 }
 
 export default {
-  id: 'aurora-curtains',
-  name: 'Aurora curtains',
-  family: 'mesh',
+  id: "aurora-curtains",
+  name: "Aurora curtains",
+  family: "mesh",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

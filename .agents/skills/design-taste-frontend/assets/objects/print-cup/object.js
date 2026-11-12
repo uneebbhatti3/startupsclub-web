@@ -6,7 +6,7 @@
   Turns slowly on the saucer's axis. Hover: the light follows the pointer and the cup leans toward
   it. Click or Enter: rings run out across the coffee, catch the light and settle.
 */
-import { definePrint } from '../_print-core/print3d.js';
+import { definePrint } from "../_print-core/print3d.js";
 
 const glsl = /* glsl */ `
 // revolved profiles in (radius, height); every line has its own thickness, so lips and rims are round
@@ -111,10 +111,10 @@ void surf(float id, vec3 p, vec3 n, inout Surf s) {
 `;
 
 export default definePrint({
-  id: 'print-cup',
-  name: 'Cup and saucer',
-  label: 'A cup of coffee on its saucer',
-  press: 'Press to stir the coffee.',
+  id: "print-cup",
+  name: "Cup and saucer",
+  label: "A cup of coffee on its saucer",
+  press: "Press to stir the coffee.",
   base: import.meta.url,
   glsl,
   pivot: [0, 0.18, 0],
@@ -122,16 +122,22 @@ export default definePrint({
   extent: [0.47, 0.36],
   foot: 0.45,
   camera: { elev: 27, dist: 6 },
-  turn: { mode: 'spin', speed: 10 },
-  step: 'impulse',
+  turn: { mode: "spin", speed: 10 },
+  step: "impulse",
   kickTime: 5,
   kickStill: 0.9,
-  params: { effect: { default: 'render' }, angle: { default: -32 }, size: { default: 0.72 } },
+  params: { effect: { default: "render" }, angle: { default: -32 }, size: { default: 0.72 } },
   // card: cut by the bottom-left (the bottom-right corner stays clear for the pause button), and in a
   // panel about as tall as wide (a phone) less cut, so the thing still reads; tile: whole, low; hero:
   // right of the text, smaller and under it in a phone-shaped frame
   place: {
-    card: { transparent: 1, size: 1.12, x: -0.2, y: -0.22, narrow: { size: 0.92, x: -0.1, y: -0.24 } },
+    card: {
+      transparent: 1,
+      size: 1.12,
+      x: -0.2,
+      y: -0.22,
+      narrow: { size: 0.92, x: -0.1, y: -0.24 },
+    },
     tile: { transparent: 1, size: 0.92, y: -0.1 },
     hero: { transparent: 1, size: 1.0, x: 0.2, y: -0.1, narrow: { size: 0.8, x: 0.05, y: -0.26 } },
   },

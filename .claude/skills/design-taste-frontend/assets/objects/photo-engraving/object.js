@@ -7,23 +7,23 @@
 // still (no frames run) and there is no entry: the plate is finished from its first frame. colour 0
 // leaves out the wash. Lines thinner than a device pixel are drawn a pixel wide and lighter, so they
 // taper instead of breaking into dashes.
-import { photoGL } from '../photo-kit/photo.js';
+import { photoGL } from "../photo-kit/photo.js";
 
 const params = {
-  ground:   { default: 1,    min: 0,   max: 1,   step: 1 },    // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
-  colour:   { default: 1,    min: 0,   max: 1,   step: 0.01 }, // the wash of the photograph's own colours under the lines (0: ink lines on bare paper)
-  pitch:    { default: 4.5,  min: 3,   max: 12,  step: 0.5 },  // line spacing, CSS px (finer in small frames; never under 3.5 canvas px)
-  angle:    { default: 30,   min: -90, max: 90,  step: 1 },    // degrees from horizontal
-  bend:     { default: 0.6,  min: 0,   max: 1,   step: 0.01 }, // how far the forms bend the lines (1: up to about twelve line widths)
-  push:     { default: 0.7,  min: 0,   max: 1,   step: 0.01 }, // how far the lines part around the cursor
-  radius:   { default: 160,  min: 60,  max: 420, step: 1 },    // the lens, CSS px (smaller in small frames)
-  light:    { default: 0,    min: 0,   max: 1,   step: 0.01 }, // a slow light passing over the plate at rest (0: still, no frames at rest)
-  speed:    { default: 1,    min: 0,   max: 2,   step: 0.01 },
-  clarity:  { default: 0.2,  min: 0,   max: 1,   step: 0.01 }, // local contrast in the lines, so a pale object parts from a pale wall
-  contrast: { default: 0.1,  min: 0,   max: 1,   step: 0.01 },
-  exposure: { default: 0,    min: -1,  max: 1,   step: 0.01 },
-  focusX:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 },
-  focusY:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 },
+  ground: { default: 1, min: 0, max: 1, step: 1 }, // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
+  colour: { default: 1, min: 0, max: 1, step: 0.01 }, // the wash of the photograph's own colours under the lines (0: ink lines on bare paper)
+  pitch: { default: 4.5, min: 3, max: 12, step: 0.5 }, // line spacing, CSS px (finer in small frames; never under 3.5 canvas px)
+  angle: { default: 30, min: -90, max: 90, step: 1 }, // degrees from horizontal
+  bend: { default: 0.6, min: 0, max: 1, step: 0.01 }, // how far the forms bend the lines (1: up to about twelve line widths)
+  push: { default: 0.7, min: 0, max: 1, step: 0.01 }, // how far the lines part around the cursor
+  radius: { default: 160, min: 60, max: 420, step: 1 }, // the lens, CSS px (smaller in small frames)
+  light: { default: 0, min: 0, max: 1, step: 0.01 }, // a slow light passing over the plate at rest (0: still, no frames at rest)
+  speed: { default: 1, min: 0, max: 2, step: 0.01 },
+  clarity: { default: 0.2, min: 0, max: 1, step: 0.01 }, // local contrast in the lines, so a pale object parts from a pale wall
+  contrast: { default: 0.1, min: 0, max: 1, step: 0.01 },
+  exposure: { default: 0, min: -1, max: 1, step: 0.01 },
+  focusX: { default: 0.5, min: 0, max: 1, step: 0.01 },
+  focusY: { default: 0.5, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -100,16 +100,26 @@ void main() {
 `;
 
 export default {
-  id: 'photo-engraving',
-  name: 'Engraved photograph',
-  kind: 'photo',
+  id: "photo-engraving",
+  name: "Engraved photograph",
+  kind: "photo",
   params,
   frag,
   mount(el, { palette, src, params: given, seed } = {}) {
     return photoGL(el, {
-      name: 'photo-engraving', frag, schema: params, params: given, palette, src, seed, entry: 0, maxScale: 2,
-      uniforms: ({ palette: P, params: p, color }) => ({ u_paperLab: color.lab(p.ground > 0.5 ? P.surface : P.bg) }),
-      restMotion: p => p.light > 0 && p.speed > 0,
+      name: "photo-engraving",
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      src,
+      seed,
+      entry: 0,
+      maxScale: 2,
+      uniforms: ({ palette: P, params: p, color }) => ({
+        u_paperLab: color.lab(p.ground > 0.5 ? P.surface : P.bg),
+      }),
+      restMotion: (p) => p.light > 0 && p.speed > 0,
     });
   },
 };

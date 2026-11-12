@@ -3,12 +3,12 @@
 Thirteen objects in three families and one builder; each family's README is the contract, each `meta.json` the params.
 `assets/objects/index.html` shows the objects; `product-render/views.html` the builder's three worked specs, every view at anchor scale.
 
-| Family | Objects | What it is |
-|---|---|---|
-| Print objects | `print-cup`, `print-wheel`, `print-lamp`, `print-globe`, `print-cards` | a thing modelled in code: a studio render (default) or a print of it (halftone, engraving, dither); `_print-core/README.md` |
-| Photo prints | `photo-halftone`, `photo-engraving`, `photo-dither` | one real photograph printed by a shader, the photograph under the pointer; `photo-kit/README.md` |
-| Scenes | `split-reveal`, `dither-sequence`, `dot-object`, `exploded-layers`, `product-turntable` | photographs (the turntable: a generic form) through a print, alive under the pointer; `_scenes/README.md` |
-| Product render | `product-render` (a builder, no fixed object) | any physical product composed from a JSON spec of its parts, rendered in real materials as a studio still (live only when asked); `product-render/README.md` |
+| Family         | Objects                                                                                 | What it is                                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Print objects  | `print-cup`, `print-wheel`, `print-lamp`, `print-globe`, `print-cards`                  | a thing modelled in code: a studio render (default) or a print of it (halftone, engraving, dither); `_print-core/README.md`                                  |
+| Photo prints   | `photo-halftone`, `photo-engraving`, `photo-dither`                                     | one real photograph printed by a shader, the photograph under the pointer; `photo-kit/README.md`                                                             |
+| Scenes         | `split-reveal`, `dither-sequence`, `dot-object`, `exploded-layers`, `product-turntable` | photographs (the turntable: a generic form) through a print, alive under the pointer; `_scenes/README.md`                                                    |
+| Product render | `product-render` (a builder, no fixed object)                                           | any physical product composed from a JSON spec of its parts, rendered in real materials as a studio still (live only when asked); `product-render/README.md` |
 
 ## When to use one
 
@@ -53,8 +53,13 @@ Thirteen objects in three families and one builder; each family's README is the 
 ## Mount
 
 ```html
-<div class="panel"><div data-print="print-globe" data-print-place="card"
-  data-print-params='{"effect":"engrave"}'></div></div>
+<div class="panel">
+  <div
+    data-print="print-globe"
+    data-print-place="card"
+    data-print-params='{"effect":"engrave"}'
+  ></div>
+</div>
 <script type="module" src="assets/objects/_print-core/auto.js"></script>
 ```
 
@@ -62,7 +67,7 @@ Thirteen objects in three families and one builder; each family's README is the 
 only; `data-scene` here is not a big scene, which is `data-big-scene`, `scenes.md`.)
 
 - **Script**: `obj.mount(el, opts)` from `<id>/object.js`. Print objects take `{ place, params,
-  palette }`; photo prints and scenes `{ src, params, palette }`. Controllers have `pause()`,
+palette }`; photo prints and scenes `{ src, params, palette }`. Controllers have `pause()`,
   `resume()`, `setPalette()`, `destroy()`.
 - **Placement** (print objects): `card` large, cut by the bottom-left edge; `tile` whole, low in a square
   tile; `hero` right of centre in a wide frame. Never centred dead. Photo prints and scenes fill their
@@ -73,7 +78,7 @@ only; `data-scene` here is not a big scene, which is `data-big-scene`, `scenes.m
 - **Pause**: a turning or looping object puts a round pause button in the panel's bottom-right corner
   once it has drawn. Keep that corner clear; one mover per group.
 - **Credits**: photographs a print or scene shows go in the footer's one credit line (`photos.mjs
-  credits --adapted`, `creditsLine()` in `photo.js`, `credits()` in `kit.js`). A render needs none.
+credits --adapted`, `creditsLine()` in `photo.js`, `credits()` in `kit.js`). A render needs none.
 
 ## Product renders
 
@@ -92,8 +97,11 @@ their format, never ship one as the client's product.
 ### Mount
 
 ```html
-<div class="frame" data-product="assets/objects/product-render/specs/<id>.json"
-     data-product-place="stage"></div>
+<div
+  class="frame"
+  data-product="assets/objects/product-render/specs/<id>.json"
+  data-product-place="stage"
+></div>
 <script type="module" src="assets/objects/product-render/auto.js"></script>
 ```
 
@@ -130,14 +138,14 @@ their format, never ship one as the client's product.
 All from the one spec, with the kit's own names (`build.js`, the three worked specs show each);
 write each section's view on its plan line, no two alike (`side` for the hero, `three-quarter`, `detail:<part>` close-ups or an `exploded` scene, a `rear-quarter` of the spec's own; whole views in three sections at most; `sections.md`, Product).
 
-| spec key | what it gives |
-|---|---|
-| (none needed) | the standard views `three-quarter` (the spec's `angle`), `side` (a long product's widest: its hero), `side-left`, `front`, `rear`, `top`, `low` (only those the spec's `supports` lists); `detail:<part>[,<part>]` (or `detail-<part>`) frames the named parts and runs the rest off the frame: a close-up |
-| `views` | the spec's own views, `{ "detail-saddle": { "part": ["saddle*", "seat post"], "angle": -42, "elev": 16, "margin": 1.3 } }` (`from` a standard view; a part name takes the parts it begins, `*` any) |
-| `scenes` | the product in use or loaded: `{ "loaded": { "label", "hide": [parts], "props": [{ "prop", "at", "size", … }], "parts", "lit", "pool", "click" } }`. The props the helper can draw: `crate`, `bag`, `child-seat`, `bench`, `parcel`, `desk`, `book`, `mug`, `sheet`, `tray`; `lit` lights them round a lamp. No scene and no prop by default: one only where a headline's promise needs it (four crates for "takes four crates"), at a size the section can read; a use photograph is better |
-| `colors` | the colourways offered, `[{ "id", "name", "accent", "materials"? }]`: the accent re-lights the parts painted `"color": "accent"`, `materials` swaps others |
-| `make` | what `make-posters.mjs` prints: `{ "variants": ["three-quarter", "side", "front", "detail-saddle", "three-quarter+loaded"], "grounds": ["light", "dark"] }` (`view+scene`) |
-| a lamp's light | the spec's `click: "light"` and `pool`; `{"step":0}` off |
+| spec key       | what it gives                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (none needed)  | the standard views `three-quarter` (the spec's `angle`), `side` (a long product's widest: its hero), `side-left`, `front`, `rear`, `top`, `low` (only those the spec's `supports` lists); `detail:<part>[,<part>]` (or `detail-<part>`) frames the named parts and runs the rest off the frame: a close-up                                                                                                                                                                                   |
+| `views`        | the spec's own views, `{ "detail-saddle": { "part": ["saddle*", "seat post"], "angle": -42, "elev": 16, "margin": 1.3 } }` (`from` a standard view; a part name takes the parts it begins, `*` any)                                                                                                                                                                                                                                                                                          |
+| `scenes`       | the product in use or loaded: `{ "loaded": { "label", "hide": [parts], "props": [{ "prop", "at", "size", … }], "parts", "lit", "pool", "click" } }`. The props the helper can draw: `crate`, `bag`, `child-seat`, `bench`, `parcel`, `desk`, `book`, `mug`, `sheet`, `tray`; `lit` lights them round a lamp. No scene and no prop by default: one only where a headline's promise needs it (four crates for "takes four crates"), at a size the section can read; a use photograph is better |
+| `colors`       | the colourways offered, `[{ "id", "name", "accent", "materials"? }]`: the accent re-lights the parts painted `"color": "accent"`, `materials` swaps others                                                                                                                                                                                                                                                                                                                                   |
+| `make`         | what `make-posters.mjs` prints: `{ "variants": ["three-quarter", "side", "front", "detail-saddle", "three-quarter+loaded"], "grounds": ["light", "dark"] }` (`view+scene`)                                                                                                                                                                                                                                                                                                                   |
+| a lamp's light | the spec's `click: "light"` and `pool`; `{"step":0}` off                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 **Mount a view.** `<div class="frame" data-product="…/specs/<id>.json" data-product-place="stage"
 data-product-view="side" data-product-color="blue">`. Once `make-posters.mjs` has run, every view is
@@ -173,12 +181,23 @@ the same view twice on a page in two sizes.
 
 ```json
 {
-  "id": "city-bike", "name": "City bicycle", "label": "A city bicycle with a front basket",
-  "units": "m", "angle": -34, "turn": { "mode": "sway", "amp": 22, "period": 24 },
+  "id": "city-bike",
+  "name": "City bicycle",
+  "label": "A city bicycle with a front basket",
+  "units": "m",
+  "angle": -34,
+  "turn": { "mode": "sway", "amp": 22, "period": 24 },
   "materials": { "frame": { "kind": "paint", "color": "accent", "finish": "gloss" } },
   "parts": [
     { "type": "wheel", "at": [-0.53, 0.35, 0], "r": 0.35, "spokes": 36, "wall": "#c7a57a" },
-    { "type": "tube", "from": [-0.07, 0.29, 0], "to": [-0.23, 0.81, 0], "r": 0.017, "mat": "frame", "blend": 0.01 }
+    {
+      "type": "tube",
+      "from": [-0.07, 0.29, 0],
+      "to": [-0.23, 0.81, 0],
+      "r": 0.017,
+      "mat": "frame",
+      "blend": 0.01
+    }
   ]
 }
 ```
@@ -198,33 +217,33 @@ the same view twice on a page in two sizes.
   (`"x"`, `"y"`, `"z"` or a vector) and/or `rot` ([x, y, z] degrees). `seams` on a tube, beam, box or
   cylinder (heights -1..1 along its half length, `seamWidth`, `seamDepth`) cut panel lines: a robot's shell, a base's groove.
 
-| type | sizes | for |
-|---|---|---|
-| `tube` | `r`, `r2` (taper), `cap` `flat`/`round`, `round` | frame tubes, posts, rods, a tapered robot link |
-| `beam` | `w`, `d`, `round` | flat bars, cranks, rails, a drone's arms |
-| `box` | `size` [x,y,z], `round` | housings, bodies, pedals, grippers, crates |
-| `panel` | `size` (thin) | plates, lids, a screen's back, a hull's deck |
-| `cylinder` / `disc` | `r`, `h`, `round` | bases, hubs, motors, lenses, rotors |
-| `sphere`, `ellipsoid` | `r` / `size` | a bulb, a bell, a knob, a buoy |
-| `torus` | `R`, `r` | rings, a chainring, a status light |
-| `joint` | `r`, `w`, `capMat` | a hinge knuckle about `axis` (default z) with caps |
-| `wheel` | `r`, `tyre`, `rim`, `hub`, `spokes`, `spokeR`, `style` `spoked`/`disc`/`solid`, `wall`, `rimMat`, `hubMat`, `spin` | bikes, strollers, carts, casters |
-| `shade` | `from` (closed) `to` (open), `r1`, `r2`, `t`, `bulge`, `innerMat` | lamp shades, bells, horns, a speaker cone |
-| `seat` | `size` [length,height,width], `style` `saddle`/`cushion` | saddles, seats, cushions |
-| `basket` | `size`, `style` `wire`/`slats`/`solid`, `pitch`, `wire`, `rimMat` | baskets, crates, bins, trays |
-| `arc` | `R`, `a0`, `a1`, `r` or `size` | mudguards, handles, hoops, bent frames |
-| `spring` | `from`, `to`, `R`, `r`, `turns` | springs, coiled cords |
-| `path` | `points` (2 or more), `r`, `smooth` | handlebars, cables, bent tubes, a crane's rope |
+| type                  | sizes                                                                                                              | for                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `tube`                | `r`, `r2` (taper), `cap` `flat`/`round`, `round`                                                                   | frame tubes, posts, rods, a tapered robot link     |
+| `beam`                | `w`, `d`, `round`                                                                                                  | flat bars, cranks, rails, a drone's arms           |
+| `box`                 | `size` [x,y,z], `round`                                                                                            | housings, bodies, pedals, grippers, crates         |
+| `panel`               | `size` (thin)                                                                                                      | plates, lids, a screen's back, a hull's deck       |
+| `cylinder` / `disc`   | `r`, `h`, `round`                                                                                                  | bases, hubs, motors, lenses, rotors                |
+| `sphere`, `ellipsoid` | `r` / `size`                                                                                                       | a bulb, a bell, a knob, a buoy                     |
+| `torus`               | `R`, `r`                                                                                                           | rings, a chainring, a status light                 |
+| `joint`               | `r`, `w`, `capMat`                                                                                                 | a hinge knuckle about `axis` (default z) with caps |
+| `wheel`               | `r`, `tyre`, `rim`, `hub`, `spokes`, `spokeR`, `style` `spoked`/`disc`/`solid`, `wall`, `rimMat`, `hubMat`, `spin` | bikes, strollers, carts, casters                   |
+| `shade`               | `from` (closed) `to` (open), `r1`, `r2`, `t`, `bulge`, `innerMat`                                                  | lamp shades, bells, horns, a speaker cone          |
+| `seat`                | `size` [length,height,width], `style` `saddle`/`cushion`                                                           | saddles, seats, cushions                           |
+| `basket`              | `size`, `style` `wire`/`slats`/`solid`, `pitch`, `wire`, `rimMat`                                                  | baskets, crates, bins, trays                       |
+| `arc`                 | `R`, `a0`, `a1`, `r` or `size`                                                                                     | mudguards, handles, hoops, bent frames             |
+| `spring`              | `from`, `to`, `R`, `r`, `turns`                                                                                    | springs, coiled cords                              |
+| `path`                | `points` (2 or more), `r`, `smooth`                                                                                | handlebars, cables, bent tubes, a crane's rope     |
 
 - **Materials**: a name from `materials`, a built-in name, or `{ "kind", "color": "#hex" |
-  "accent", "finish": "gloss" | "satin" | "matte" }`. Kinds: `paint` (`color: "accent"` takes the
+"accent", "finish": "gloss" | "satin" | "matte" }`. Kinds: `paint` (`color: "accent"` takes the
   page's accent), `metal` (brushed alloy), `chrome`, `steel` (dark stainless: spokes, wire),
   `rubber`, `plastic`, `wood` (rings; `grain`, `scale`), `fabric` (`weave`), `leather`, `light`
   (gives light; switches with `click`). Any material takes `glow` 0..1 (a lit inner face).
   Built-in names: `accent`, `paint`, `white`, `black`, `graphite`, `alloy`, `aluminium`, `chrome`,
   `steel`, `rubber`, `plastic`, `wood`, `oak`, `walnut`, `fabric`, `leather`, `light`.
 - **Motion**: up to four groups, `{ "id", "parent", "pivot": [x,y,z], "axis", "amp", "period",
-  "phase", "rest" }`; a part joins with `"in"`. Each turns about its pivot (given at rest, in the
+"phase", "rest" }`; a part joins with `"in"`. Each turns about its pivot (given at rest, in the
   spec's units) by `rest` + `amp` x a sine of `period` seconds, after its parent (a robot's yaw,
   shoulder, elbow, wrist). Joints move only while the product turns.
 
@@ -276,12 +295,12 @@ leaves out the file lines.
 
 ## GPU cost
 
-| Family | Class | Contexts |
-|---|---|---|
-| Print objects | high per frame (raymarch), only while it moves near the screen; at rest one sharp frame, kept | share 2 |
-| Photo prints | low, still at rest | 1 each, at most 3 |
-| Scenes | low, drawn only while moved or stepping | at most 2 |
-| Product render | none for its stills (`<img>`); `still` mode one render, then freed; `live`: high per frame (raymarch, cost grows with parts), only while it turns near the screen | 0 (`live`: 1) |
+| Family         | Class                                                                                                                                                             | Contexts          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Print objects  | high per frame (raymarch), only while it moves near the screen; at rest one sharp frame, kept                                                                     | share 2           |
+| Photo prints   | low, still at rest                                                                                                                                                | 1 each, at most 3 |
+| Scenes         | low, drawn only while moved or stepping                                                                                                                           | at most 2         |
+| Product render | none for its stills (`<img>`); `still` mode one render, then freed; `live`: high per frame (raymarch, cost grows with parts), only while it turns near the screen | 0 (`live`: 1)     |
 
 With the page's grounds and effects: **at most 4 live WebGL contexts**. Freed off screen and in a hidden
 tab; one still frame under reduced motion.

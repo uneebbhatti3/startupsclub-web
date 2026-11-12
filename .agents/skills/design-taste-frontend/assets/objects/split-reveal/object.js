@@ -12,14 +12,34 @@
   crop centres; default the entry's focus), labels (1 shows two small chips, never under 480 px; their
   text labelPrint / labelPhoto), alt.
 */
-import { stage, tones, photoURL, loadImage, levels, cover, fallbackImage, softCopy, approach, clamp, smooth, color, paletteOf, MONO } from '../_scenes/kit.js';
+import {
+  stage,
+  tones,
+  photoURL,
+  loadImage,
+  levels,
+  cover,
+  fallbackImage,
+  softCopy,
+  approach,
+  clamp,
+  smooth,
+  color,
+  paletteOf,
+  MONO,
+} from "../_scenes/kit.js";
 
 // a test picture with a clear subject and an open sky (never shipped as a client's)
 export const DEFAULT_PHOTO = {
-  id: 1081, ratio: 1.49, focus: [0.62, 0.5], split: 0.5,
-  alt: 'A stepped white building corner rising into a pale blue sky',
-  by: 'Julien Moreau', licence: 'Unsplash licence', licenceUrl: 'https://unsplash.com/license',
-  page: 'https://unsplash.com/photos/688Fna1pwOQ',
+  id: 1081,
+  ratio: 1.49,
+  focus: [0.62, 0.5],
+  split: 0.5,
+  alt: "A stepped white building corner rising into a pale blue sky",
+  by: "Julien Moreau",
+  licence: "Unsplash licence",
+  licenceUrl: "https://unsplash.com/license",
+  page: "https://unsplash.com/photos/688Fna1pwOQ",
 };
 
 const frag = /* glsl */ `
@@ -74,114 +94,191 @@ void main() {
 `;
 
 function chip(text) {
-  const c = document.createElement('span');
-  c.className = 'scene-label';
+  const c = document.createElement("span");
+  c.className = "scene-label";
   c.textContent = text;
   Object.assign(c.style, {
-    position: 'absolute', bottom: '16px', zIndex: '2', display: 'inline-flex', alignItems: 'center', height: '26px', padding: '0 10px',
-    borderRadius: '999px', font: `500 11.5px/1 ${MONO}`, letterSpacing: '0.03em',
-    pointerEvents: 'none', whiteSpace: 'nowrap', transition: 'opacity .3s ease',
+    position: "absolute",
+    bottom: "16px",
+    zIndex: "2",
+    display: "inline-flex",
+    alignItems: "center",
+    height: "26px",
+    padding: "0 10px",
+    borderRadius: "999px",
+    font: `500 11.5px/1 ${MONO}`,
+    letterSpacing: "0.03em",
+    pointerEvents: "none",
+    whiteSpace: "nowrap",
+    transition: "opacity .3s ease",
   });
   return c;
 }
 
 export default {
-  id: 'split-reveal',
-  name: 'Split reveal',
-  kind: 'scene',
+  id: "split-reveal",
+  name: "Split reveal",
+  kind: "scene",
   mount(el, { palette, src, params = {} } = {}) {
     const photo = src || DEFAULT_PHOTO;
     // a path or URL has no notes; an entry may carry alt, focus and a rest split
-    const meta = typeof photo === 'object' ? photo : {};
-    const alt = params.alt || meta.alt || '';
-    const left = params.side !== 'right';
+    const meta = typeof photo === "object" ? photo : {};
+    const alt = params.alt || meta.alt || "";
+    const left = params.side !== "right";
     let given = palette || null;
     let T = tones(paletteOf(el, given));
-    let img = null, soft = null, lv = [0, 1], prog = null, tex = null, stex = null, softW = 0;
+    let img = null,
+      soft = null,
+      lv = [0, 1],
+      prog = null,
+      tex = null,
+      stex = null,
+      softW = 0;
     const rest = clamp(params.split ?? meta.split ?? 0.5, 0.1, 0.9);
-    let split = rest, dragging = false, keyed = false, drawn = -1;
+    let split = rest,
+      dragging = false,
+      keyed = false,
+      drawn = -1;
     // the screen pitch: coarse enough that a dot is a dot at card size (under about 5 px it turns
     // into a pixel checkerboard), a little coarser on a dark ground, where light tones take the ink
-    const cellOf = st => params.cell || clamp(Math.min(st.cssW, st.cssH) / 84, 5, 8) * (T.dark ? 1.15 : 1);
+    const cellOf = (st) =>
+      params.cell || clamp(Math.min(st.cssW, st.cssH) / 84, 5, 8) * (T.dark ? 1.15 : 1);
     const angle = ((params.angle ?? 45) * Math.PI) / 180;
-    const focus = [params.focusX ?? meta.focus?.[0] ?? 0.5, params.focusY ?? meta.focus?.[1] ?? 0.5];
+    const focus = [
+      params.focusX ?? meta.focus?.[0] ?? 0.5,
+      params.focusY ?? meta.focus?.[1] ?? 0.5,
+    ];
 
     // overlays: the handle (a slider) and, on request, two chips
-    const handle = document.createElement('div');
-    handle.setAttribute('role', 'slider');
-    handle.setAttribute('tabindex', '0');
-    handle.setAttribute('aria-label', params.handleLabel || 'Move the line between the print and the photograph');
-    handle.setAttribute('aria-valuemin', '0');
-    handle.setAttribute('aria-valuemax', '100');
+    const handle = document.createElement("div");
+    handle.setAttribute("role", "slider");
+    handle.setAttribute("tabindex", "0");
+    handle.setAttribute(
+      "aria-label",
+      params.handleLabel || "Move the line between the print and the photograph",
+    );
+    handle.setAttribute("aria-valuemin", "0");
+    handle.setAttribute("aria-valuemax", "100");
     Object.assign(handle.style, {
-      position: 'absolute', top: '50%', left: '0', width: '40px', height: '40px', marginLeft: '-20px', marginTop: '-20px', borderRadius: '50%',
-      zIndex: '3', cursor: 'ew-resize', display: 'grid', placeItems: 'center', touchAction: 'none',
+      position: "absolute",
+      top: "50%",
+      left: "0",
+      width: "40px",
+      height: "40px",
+      marginLeft: "-20px",
+      marginTop: "-20px",
+      borderRadius: "50%",
+      zIndex: "3",
+      cursor: "ew-resize",
+      display: "grid",
+      placeItems: "center",
+      touchAction: "none",
     });
-    handle.innerHTML = '<span style="display:flex;gap:8px;align-items:center"><i style="width:0;height:0;border:4.5px solid transparent;border-right:5.5px solid currentColor;border-left:0"></i><i style="width:0;height:0;border:4.5px solid transparent;border-left:5.5px solid currentColor;border-right:0"></i></span>';
-    const chips = params.labels === 1 ? [chip(params.labelPrint || 'Print'), chip(params.labelPhoto || 'Photograph')] : [];
-    if (chips.length) { chips[0].style[left ? 'left' : 'right'] = '16px'; chips[1].style[left ? 'right' : 'left'] = '16px'; }
+    handle.innerHTML =
+      '<span style="display:flex;gap:8px;align-items:center"><i style="width:0;height:0;border:4.5px solid transparent;border-right:5.5px solid currentColor;border-left:0"></i><i style="width:0;height:0;border:4.5px solid transparent;border-left:5.5px solid currentColor;border-right:0"></i></span>';
+    const chips =
+      params.labels === 1
+        ? [chip(params.labelPrint || "Print"), chip(params.labelPhoto || "Photograph")]
+        : [];
+    if (chips.length) {
+      chips[0].style[left ? "left" : "right"] = "16px";
+      chips[1].style[left ? "right" : "left"] = "16px";
+    }
     el.append(handle, ...chips);
     const style = () => {
-      Object.assign(handle.style, { background: T.hex.bg, color: T.hex.ink, boxShadow: `0 0 0 1px ${color.mix(T.hex.bg, T.hex.ink, 0.18)}, 0 6px 18px rgb(0 0 0 / 0.18)` });
-      for (const c of chips) Object.assign(c.style, { color: T.hex.ink, background: T.hex.bg, boxShadow: `0 0 0 1px ${color.mix(T.hex.bg, T.hex.ink, 0.14)}` });
+      Object.assign(handle.style, {
+        background: T.hex.bg,
+        color: T.hex.ink,
+        boxShadow: `0 0 0 1px ${color.mix(T.hex.bg, T.hex.ink, 0.18)}, 0 6px 18px rgb(0 0 0 / 0.18)`,
+      });
+      for (const c of chips)
+        Object.assign(c.style, {
+          color: T.hex.ink,
+          background: T.hex.bg,
+          boxShadow: `0 0 0 1px ${color.mix(T.hex.bg, T.hex.ink, 0.14)}`,
+        });
     };
     style();
 
-    const place = st => {
+    const place = (st) => {
       handle.style.transform = `translateX(${split * st.cssW}px)`;
-      handle.setAttribute('aria-valuenow', String(Math.round(split * 100)));
+      handle.setAttribute("aria-valuenow", String(Math.round(split * 100)));
       if (chips.length) {
         const room = st.cssW >= 480;
-        const a = left ? split : 1 - split, b = 1 - a;
-        chips[0].style.opacity = room ? String(smooth(0.14, 0.28, a)) : '0';
-        chips[1].style.opacity = room ? String(smooth(0.14, 0.28, b)) : '0';
+        const a = left ? split : 1 - split,
+          b = 1 - a;
+        chips[0].style.opacity = room ? String(smooth(0.14, 0.28, a)) : "0";
+        chips[1].style.opacity = room ? String(smooth(0.14, 0.28, b)) : "0";
       }
     };
 
     let s;
     let resolveReady;
-    const ready = new Promise(r => (resolveReady = r));
-    const width = Math.min(1920, Math.max(960, Math.ceil(((el.clientWidth || 800) * Math.min(window.devicePixelRatio || 1, 1.5)) / 320) * 320));
+    const ready = new Promise((r) => (resolveReady = r));
+    const width = Math.min(
+      1920,
+      Math.max(
+        960,
+        Math.ceil(((el.clientWidth || 800) * Math.min(window.devicePixelRatio || 1, 1.5)) / 320) *
+          320,
+      ),
+    );
     const url = photoURL(photo, width);
     // the softened copy for the tone, at about two texels per screen cell across the cover crop
-    const softFor = st => {
+    const softFor = (st) => {
       if (!img) return null;
       const fit = cover(st.w, st.h, img.naturalWidth / img.naturalHeight, focus[0], focus[1]);
       const want = Math.round(clamp(((st.cssW / cellOf(st)) * 2) / fit[0], 64, 1400));
       if (soft && Math.abs(want - softW) / want < 0.25) return soft;
       softW = want;
       soft = softCopy(img, want, 0.9);
-      if (stex && st.gl) { st.gl.deleteTexture(stex.t); stex = null; }
+      if (stex && st.gl) {
+        st.gl.deleteTexture(stex.t);
+        stex = null;
+      }
       return soft;
     };
-    loadImage(url).then(im => {
-      img = im; lv = levels(im);
-      if (s && s.gl && !tex) tex = s.texture(img, { mipmap: true });
-      s?.redraw(); resolveReady();
-    }).catch(err => { console.warn(err.message); s?.fail(); resolveReady(); });
+    loadImage(url)
+      .then((im) => {
+        img = im;
+        lv = levels(im);
+        if (s && s.gl && !tex) tex = s.texture(img, { mipmap: true });
+        s?.redraw();
+        resolveReady();
+      })
+      .catch((err) => {
+        console.warn(err.message);
+        s?.fail();
+        resolveReady();
+      });
 
     s = stage(el, {
-      name: 'split',
+      name: "split",
       init(gl, st) {
         prog = st.program(frag);
         tex = img ? st.texture(img, { mipmap: true }) : null;
-        stex = null; soft = null;
+        stex = null;
+        soft = null;
       },
       loaded: () => !!img,
       ready: () => !!tex,
       pointer(kind, st) {
         const P = st.pointer;
-        if (kind === 'down') dragging = true;
-        if (kind === 'up' || kind === 'leave') dragging = false;
-        if (P.inside && (P.type === 'mouse' || dragging)) keyed = false;
-        if (st.reduced && P.inside && (P.type === 'mouse' || dragging)) split = clamp(P.u, 0.02, 0.98);
+        if (kind === "down") dragging = true;
+        if (kind === "up" || kind === "leave") dragging = false;
+        if (P.inside && (P.type === "mouse" || dragging)) keyed = false;
+        if (st.reduced && P.inside && (P.type === "mouse" || dragging))
+          split = clamp(P.u, 0.02, 0.98);
       },
       frame(gl, t, dt, st) {
         const P = st.pointer;
-        const follow = P.inside && (P.type === 'mouse' || dragging);
+        const follow = P.inside && (P.type === "mouse" || dragging);
         const target = follow ? clamp(P.u, 0.02, 0.98) : keyed ? split : rest;
-        if (st.reduced || dt === 0) { if (!follow && !keyed) split = rest; }
-        else split = Math.abs(target - split) < 1e-4 ? target : approach(split, target, follow ? 11 : 4, dt);
+        if (st.reduced || dt === 0) {
+          if (!follow && !keyed) split = rest;
+        } else
+          split =
+            Math.abs(target - split) < 1e-4 ? target : approach(split, target, follow ? 11 : 4, dt);
         place(st);
         if (!tex) return;
         // nothing moved: the canvas keeps its picture
@@ -191,28 +288,46 @@ export default {
         if (!stex && sc) stex = st.texture(sc);
         const fit = cover(st.w, st.h, img.naturalWidth / img.naturalHeight, focus[0], focus[1]);
         prog.use();
-        tex.bind(0); prog.int('u_img', 0);
-        (stex || tex).bind(1); prog.int('u_soft', 1);
-        prog.set('u_res', [st.w, st.h]).set('u_time', t).set('u_seed', 3)
-          .set('u_fit', fit).set('u_lv', lv)
-          .set('u_split', split * st.w).set('u_cell', cellOf(st) * st.dpr).set('u_angle', angle).set('u_dark', T.dark ? 1 : 0)
-          .set('u_lineW', 2 * st.dpr).set('u_band', 0.22 * st.w).set('u_left', left ? 1 : 0).set('u_dpr', st.dpr)
-          .set('u_bg', T.r[0]).set('u_ink', T.r[3]).set('u_line', T.r[0]);
+        tex.bind(0);
+        prog.int("u_img", 0);
+        (stex || tex).bind(1);
+        prog.int("u_soft", 1);
+        prog
+          .set("u_res", [st.w, st.h])
+          .set("u_time", t)
+          .set("u_seed", 3)
+          .set("u_fit", fit)
+          .set("u_lv", lv)
+          .set("u_split", split * st.w)
+          .set("u_cell", cellOf(st) * st.dpr)
+          .set("u_angle", angle)
+          .set("u_dark", T.dark ? 1 : 0)
+          .set("u_lineW", 2 * st.dpr)
+          .set("u_band", 0.22 * st.w)
+          .set("u_left", left ? 1 : 0)
+          .set("u_dpr", st.dpr)
+          .set("u_bg", T.r[0])
+          .set("u_ink", T.r[3])
+          .set("u_line", T.r[0]);
         st.fullscreen();
       },
-      resize() { drawn = -1; },
-      fallback: () => fallbackImage(url, alt, 'cover', focus),
-      failed() { for (const n of [handle, ...chips]) n.style.display = 'none'; },
+      resize() {
+        drawn = -1;
+      },
+      fallback: () => fallbackImage(url, alt, "cover", focus),
+      failed() {
+        for (const n of [handle, ...chips]) n.style.display = "none";
+      },
     });
 
     // keyboard on the handle
-    handle.addEventListener('keydown', e => {
+    handle.addEventListener("keydown", (e) => {
       const step = e.shiftKey ? 0.1 : 0.04;
       let v = split;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= step;
-      else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += step;
-      else if (e.key === 'Home') v = 0.02;
-      else if (e.key === 'End') v = 0.98;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") v -= step;
+      else if (e.key === "ArrowRight" || e.key === "ArrowUp") v += step;
+      else if (e.key === "Home") v = 0.02;
+      else if (e.key === "End") v = 0.98;
       else return;
       e.preventDefault();
       keyed = true;
@@ -220,15 +335,27 @@ export default {
       place(s);
       s.redraw();
     });
-    if (alt) { el.setAttribute('role', 'group'); el.setAttribute('aria-label', alt); }
-    el.style.touchAction = 'pan-y';
+    if (alt) {
+      el.setAttribute("role", "group");
+      el.setAttribute("aria-label", alt);
+    }
+    el.style.touchAction = "pan-y";
 
     return {
       ready,
-      destroy() { s.destroy(); handle.remove(); chips.forEach(c => c.remove()); },
+      destroy() {
+        s.destroy();
+        handle.remove();
+        chips.forEach((c) => c.remove());
+      },
       pause: () => s.pause(),
       resume: () => s.resume(),
-      setPalette(p) { if (p !== undefined) given = p; T = tones(paletteOf(el, given)); style(); s.redraw(); },
+      setPalette(p) {
+        if (p !== undefined) given = p;
+        T = tones(paletteOf(el, given));
+        style();
+        s.redraw();
+      },
     };
   },
 };

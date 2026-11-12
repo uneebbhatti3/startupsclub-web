@@ -3,18 +3,18 @@
 // uneven: where the light gathers (a slow focus field) they are bright and thick and the knots where
 // they merge flare; elsewhere they are dim and soft. Large brighter and darker patches drift across
 // the floor, and a calm area the size of a text block stays near empty.
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  scale:      { default: 5,    min: 1.5, max: 8,   step: 0.1 },  // cells per frame height (below 4 the net reads as cracked tiles)
-  sharpness:  { default: 3,    min: 1,   max: 8,   step: 0.1 },  // crisper line cores
-  speed:      { default: 0.15, min: 0,   max: 1,   step: 0.01 },
-  intensity:  { default: 0.75, min: 0,   max: 1.2, step: 0.01 },
-  distortion: { default: 0.62, min: 0,   max: 1,   step: 0.01 },  // how wavy the lines are (above 0.7 the plane can fold into loops)
-  depth:      { default: 0.6,  min: 0,   max: 1,   step: 0.01 },  // large light and dark patches across the floor
-  calm:       { default: 0.5,  min: 0,   max: 1,   step: 0.01 },  // clear a text-block area of light
-  calmX:      { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:      { default: 0.7,  min: 0,   max: 1,   step: 0.01 },
+  scale: { default: 5, min: 1.5, max: 8, step: 0.1 }, // cells per frame height (below 4 the net reads as cracked tiles)
+  sharpness: { default: 3, min: 1, max: 8, step: 0.1 }, // crisper line cores
+  speed: { default: 0.15, min: 0, max: 1, step: 0.01 },
+  intensity: { default: 0.75, min: 0, max: 1.2, step: 0.01 },
+  distortion: { default: 0.62, min: 0, max: 1, step: 0.01 }, // how wavy the lines are (above 0.7 the plane can fold into loops)
+  depth: { default: 0.6, min: 0, max: 1, step: 0.01 }, // large light and dark patches across the floor
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // clear a text-block area of light
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -98,7 +98,7 @@ void main() {
 }
 `;
 
-const violet = h => h >= 262 && h <= 338;
+const violet = (h) => h >= 262 && h <= 338;
 
 export function tones(P) {
   const { bg, ink, accent } = P;
@@ -109,14 +109,19 @@ export function tones(P) {
     // dark: the water keeps the page's lightness; a cool accent (green to blue) may turn its hue,
     // but never drags it darker or browner. Warm accents only warm the light lines.
     const cool = useAcc && ha >= 150 && ha < 262 && Cb < 0.07;
-    const water = cool ? color.fromLch([Lb + 0.02, Math.max(Cb, 0.035), ha]) : color.lighten(bg, 0.012);
+    const water = cool
+      ? color.fromLch([Lb + 0.02, Math.max(Cb, 0.035), ha])
+      : color.lighten(bg, 0.012);
     const [Lw, Cw, hw] = color.lch(water);
     const pale = color.fromLch([0.9, Math.min(0.05, Cw * 0.6 + 0.01), hw]);
     return {
       deep: color.fromLch([Math.max(0, Lw - 0.025), Cw, hw]),
       shallow: color.fromLch([Lw + 0.045, Cw * 1.1, hw]),
       // on a coloured ground the lines stay a pale of the ground unless the accent is a near hue
-      light: useAcc && (Cb < 0.07 || color.hueDistance(bg, accent) < 50) ? color.mix(pale, color.withLightness(accent, 0.9), cool ? 0.25 : 0.3) : color.mix(pale, ink, 0.15),
+      light:
+        useAcc && (Cb < 0.07 || color.hueDistance(bg, accent) < 50)
+          ? color.mix(pale, color.withLightness(accent, 0.9), cool ? 0.25 : 0.3)
+          : color.mix(pale, ink, 0.15),
     };
   }
   // light: the floor is the page itself in its own hue (no accent mixed in), deeper in the dark
@@ -130,13 +135,17 @@ export function tones(P) {
 
 function uniforms({ palette }) {
   const k = tones(palette);
-  return { u_deep: color.labVec(k.deep), u_shallow: color.labVec(k.shallow), u_light: color.labVec(k.light) };
+  return {
+    u_deep: color.labVec(k.deep),
+    u_shallow: color.labVec(k.shallow),
+    u_light: color.labVec(k.light),
+  };
 }
 
 export default {
-  id: 'caustics',
-  name: 'Water caustics',
-  family: 'light',
+  id: "caustics",
+  name: "Water caustics",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

@@ -1,19 +1,19 @@
 // grain-gradient: a soft tonal ramp and three blobs of the page colours, mixed in OKLab, under fine
 // film grain and a grainy dissolve between the colours (the sand-print look).
-import { shader, color, fallbackCSS } from '../fx.js';
+import { shader, color, fallbackCSS } from "../fx.js";
 
 const params = {
-  speed:       { default: 0.5,  min: 0, max: 2, step: 0.01 },  // how fast the shapes drift
-  softness:    { default: 0.45, min: 0, max: 1, step: 0.01 },  // size and edge softness of the blobs
-  warp:        { default: 0.6,  min: 0, max: 1, step: 0.01 },  // slow organic bending of the shapes
-  grain:       { default: 0.6,  min: 0, max: 1, step: 0.01 },  // film grain strength
-  scatter:     { default: 0.5,  min: 0, max: 1, step: 0.01 },  // grainy dissolve between colours
-  tint:        { default: 0.5,  min: 0, max: 1, step: 0.01 },  // how much accent enters
-  contrast:    { default: 0.55, min: 0, max: 1, step: 0.01 },  // how far the colours move from the background
-  calm:        { default: 0.5,  min: 0, max: 1, step: 0.01 },  // flatten the area where text sits
-  calmX:       { default: 0.25, min: 0, max: 1, step: 0.01 },  // calm area centre, 0 left .. 1 right
-  calmY:       { default: 0.7,  min: 0, max: 1, step: 0.01 },  // calm area centre, 0 top .. 1 bottom
-  grainMotion: { default: 1,    min: 0, max: 1, step: 1 },     // 1 grain moves like film, 0 still grain
+  speed: { default: 0.5, min: 0, max: 2, step: 0.01 }, // how fast the shapes drift
+  softness: { default: 0.45, min: 0, max: 1, step: 0.01 }, // size and edge softness of the blobs
+  warp: { default: 0.6, min: 0, max: 1, step: 0.01 }, // slow organic bending of the shapes
+  grain: { default: 0.6, min: 0, max: 1, step: 0.01 }, // film grain strength
+  scatter: { default: 0.5, min: 0, max: 1, step: 0.01 }, // grainy dissolve between colours
+  tint: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how much accent enters
+  contrast: { default: 0.55, min: 0, max: 1, step: 0.01 }, // how far the colours move from the background
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // flatten the area where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 }, // calm area centre, 0 left .. 1 right
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 }, // calm area centre, 0 top .. 1 bottom
+  grainMotion: { default: 1, min: 0, max: 1, step: 1 }, // 1 grain moves like film, 0 still grain
 };
 
 const frag = /* glsl */ `
@@ -73,33 +73,38 @@ void main() {
 // every colour is a mix, shade or tint of a palette colour; no hue is invented
 function tones(P, prm, kind) {
   const { bg, surface, ink, accent } = P;
-  const c = prm.contrast, tn = prm.tint;
+  const c = prm.contrast,
+    tn = prm.tint;
   const neutral = color.chroma(bg) < 0.035;
   // an accent that will not turn muddy when mixed with the background
-  const acc = neutral || color.hueDistance(bg, accent) < 55 ? accent : color.withLightness(color.saturate(bg, 1.1), color.lab(accent)[0]);
-  const [Lb] = color.lab(bg), [Li] = color.lab(ink);
+  const acc =
+    neutral || color.hueDistance(bg, accent) < 55
+      ? accent
+      : color.withLightness(color.saturate(bg, 1.1), color.lab(accent)[0]);
+  const [Lb] = color.lab(bg),
+    [Li] = color.lab(ink);
   const away = Li > Lb ? -1 : 1; // the lightness direction that adds contrast to the ink
   const near = color.saturate(color.lighten(bg, away * (0.012 + 0.03 * c)), 1.1);
-  if (kind === 'dark') {
+  if (kind === "dark") {
     return {
       grain: 0.04,
       near,
       far: color.mix(bg, surface, 0.7 + 0.3 * c),
       k: [
-        color.mix(bg, acc, 0.28 + 0.45 * tn),                       // glow
-        color.mix(bg, acc, 0.1 + 0.2 * tn),                         // soft glow
+        color.mix(bg, acc, 0.28 + 0.45 * tn), // glow
+        color.mix(bg, acc, 0.1 + 0.2 * tn), // soft glow
         color.lighten(color.mix(surface, acc, 0.08 + 0.1 * tn), 0.015 + 0.04 * c), // tinted haze
       ],
     };
   }
-  if (kind === 'colour') {
+  if (kind === "colour") {
     return {
       grain: 0.05,
       near,
       far: color.lighten(bg, -away * (0.04 + 0.08 * c)),
       k: [
-        color.mix(bg, acc, 0.25 + 0.45 * tn),                       // accent light
-        color.mix(bg, ink, 0.06 + 0.1 * c),                         // pale
+        color.mix(bg, acc, 0.25 + 0.45 * tn), // accent light
+        color.mix(bg, ink, 0.06 + 0.1 * c), // pale
         color.saturate(color.lighten(bg, away * (0.035 + 0.06 * c)), 1.08), // deep field
       ],
     };
@@ -112,9 +117,9 @@ function tones(P, prm, kind) {
     near,
     far: color.saturate(color.mix(bg, tone, 0.08 + 0.14 * c), 1.15),
     k: [
-      color.saturate(color.mix(bg, acc, 0.22 + 0.5 * tn), 1.25),    // accent
+      color.saturate(color.mix(bg, acc, 0.22 + 0.5 * tn), 1.25), // accent
       color.saturate(color.lighten(color.mix(bg, acc, 0.1), 0.03), 1.3), // pale light
-      color.saturate(color.mix(bg, tone, 0.3 + 0.35 * c), 1.4),     // deep
+      color.saturate(color.mix(bg, tone, 0.3 + 0.35 * c), 1.4), // deep
     ],
   };
 }
@@ -125,20 +130,30 @@ function uniforms({ palette, params, rng, kind, width, height }) {
   const asp = width && height ? width / height : 4 / 3;
   // geometry in centred height units, y up (the space of fx_p())
   const calm = [(params.calmX - 0.5) * asp, 0.5 - params.calmY];
-  const corners = [[-asp / 2, -0.5], [asp / 2, -0.5], [-asp / 2, 0.5], [asp / 2, 0.5]];
-  const far = corners.reduce((a, b) => (Math.hypot(b[0] - calm[0], b[1] - calm[1]) > Math.hypot(a[0] - calm[0], a[1] - calm[1]) ? b : a));
+  const corners = [
+    [-asp / 2, -0.5],
+    [asp / 2, -0.5],
+    [-asp / 2, 0.5],
+    [asp / 2, 0.5],
+  ];
+  const far = corners.reduce((a, b) =>
+    Math.hypot(b[0] - calm[0], b[1] - calm[1]) > Math.hypot(a[0] - calm[0], a[1] - calm[1]) ? b : a,
+  );
   const span = Math.max(0.3, Math.hypot(far[0] - calm[0], far[1] - calm[1]));
   const dir = [(far[0] - calm[0]) / span, (far[1] - calm[1]) / span];
   const perp = [-dir[1], dir[0]];
   // a point along the calm-to-far axis, kept inside the frame
   const at = (along, side) => [
-    Math.max(-asp / 2 + 0.12, Math.min(asp / 2 - 0.12, calm[0] + dir[0] * span * along + perp[0] * side)),
+    Math.max(
+      -asp / 2 + 0.12,
+      Math.min(asp / 2 - 0.12, calm[0] + dir[0] * span * along + perp[0] * side),
+    ),
     Math.max(-0.38, Math.min(0.38, calm[1] + dir[1] * span * along + perp[1] * side)),
   ];
   const side = r() < 0.5 ? -1 : 1;
-  const b0 = at(0.7 + 0.2 * r(), side * (0.05 + 0.2 * r()));       // accent, across from the calm area
-  const b1 = at(0.3 + 0.2 * r(), -side * (0.2 + 0.25 * r()));      // pale light, near the middle
-  const b2 = at(0.6 + 0.3 * r(), -side * (0.15 + 0.3 * r()));      // deep, beside the accent
+  const b0 = at(0.7 + 0.2 * r(), side * (0.05 + 0.2 * r())); // accent, across from the calm area
+  const b1 = at(0.3 + 0.2 * r(), -side * (0.2 + 0.25 * r())); // pale light, near the middle
+  const b2 = at(0.6 + 0.3 * r(), -side * (0.15 + 0.3 * r())); // deep, beside the accent
   const u = {
     u_kNear: color.labVec(set.near),
     u_kFar: color.labVec(set.far),
@@ -152,14 +167,16 @@ function uniforms({ palette, params, rng, kind, width, height }) {
     u_b1: [...b1, 0.36 + 0.12 * r(), r() * 6.283],
     u_b2: [...b2, 0.3 + 0.12 * r(), r() * 6.283],
   };
-  set.k.forEach((k, i) => { u['u_k' + i] = color.labVec(k); });
+  set.k.forEach((k, i) => {
+    u["u_k" + i] = color.labVec(k);
+  });
   return u;
 }
 
 export default {
-  id: 'grain-gradient',
-  name: 'Grain gradient',
-  family: 'grain',
+  id: "grain-gradient",
+  name: "Grain gradient",
+  family: "grain",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -172,7 +189,10 @@ export default {
       still: 4,
       fallback: ({ palette: P, params: prm, kind }) => {
         const k = tones(P, prm, kind).k;
-        return fallbackCSS({ ...P, accent: k[0] }, { at: `${(1 - prm.calmX) * 100}% ${(1 - prm.calmY) * 100}%`, tint: 1 });
+        return fallbackCSS(
+          { ...P, accent: k[0] },
+          { at: `${(1 - prm.calmX) * 100}% ${(1 - prm.calmY) * 100}%`, tint: 1 },
+        );
       },
     });
   },

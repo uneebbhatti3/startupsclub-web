@@ -8,7 +8,7 @@
   The spokes print as wire in the ink on every paper (dark wire on light paper, bright on dark).
   Rendered: a black tread with tan gum sidewalls, an alloy rim, black spokes and a hub in the accent.
 */
-import { definePrint } from '../_print-core/print3d.js';
+import { definePrint } from "../_print-core/print3d.js";
 
 const DEG = Math.PI / 180;
 
@@ -107,28 +107,34 @@ void surf(float id, vec3 p, vec3 n, inout Surf s) {
 `;
 
 export default definePrint({
-  id: 'print-wheel',
-  name: 'Bicycle wheel',
-  label: 'A road bicycle wheel turning on its axle',
+  id: "print-wheel",
+  name: "Bicycle wheel",
+  label: "A road bicycle wheel turning on its axle",
   base: import.meta.url,
   glsl,
   pivot: [0, 0.5, 0],
   radius: 0.52,
   extent: [0.5, 0.52],
   camera: { elev: 12, dist: 6, target: 0.44 },
-  turn: { mode: 'sway', amp: 30, period: 20 },
-  step: 'toggle',
+  turn: { mode: "sway", amp: 30, period: 20 },
+  step: "toggle",
   stepTime: 1.4,
   light: [-0.36, 1.5, 0.75],
   steps: 160,
   shadowSteps: 48,
-  press: 'Press to spin it up.',
-  params: { effect: { default: 'render' }, angle: { default: -30 }, size: { default: 0.8 } },
+  press: "Press to spin it up.",
+  params: { effect: { default: "render" }, angle: { default: -30 }, size: { default: 0.8 } },
   // card: cut by the bottom-left (the bottom-right corner stays clear for the pause button), and in a
   // panel about as tall as wide (a phone) less cut, so the thing still reads; tile: whole, low; hero:
   // right of the text, smaller and under it in a phone-shaped frame
   place: {
-    card: { transparent: 1, size: 1.25, x: -0.25, y: -0.2, narrow: { size: 1.02, x: -0.2, y: -0.16 } },
+    card: {
+      transparent: 1,
+      size: 1.25,
+      x: -0.25,
+      y: -0.2,
+      narrow: { size: 1.02, x: -0.2, y: -0.16 },
+    },
     tile: { transparent: 1, size: 0.88, y: -0.05 },
     hero: { transparent: 1, size: 1.1, x: 0.22, y: -0.1, narrow: { size: 0.78, x: 0.1, y: -0.2 } },
   },

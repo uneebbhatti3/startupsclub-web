@@ -5,6 +5,17 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // AGENTS.md hard rule 3: no `any` (explicit or `as any`) and no @ts-ignore. Pinned here so a
+  // change in the Next.js preset can never weaken them; the pre-commit hook relies on these.
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        { "ts-ignore": true, "ts-expect-error": "allow-with-description" },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -12,6 +23,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored third-party skill (tracked by skills-lock.json), not project code.
+    ".agents/**",
   ]),
 ]);
 

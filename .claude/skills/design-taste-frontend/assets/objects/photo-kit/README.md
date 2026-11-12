@@ -4,11 +4,11 @@ A photograph printed whole by a shader in the page's ink on its own sheet: a hal
 or a dither. Hover (a tap on a phone) shows the photograph itself under the print. A print is one
 crafted moment on a page, never the way a page shows its photographs.
 
-| Object | Looks like | Hover |
-|---|---|---|
-| `photo-halftone` | a one-ink halftone: round dots on a 45° screen, clean paper in the light, solid ink in the deepest shadow | a loupe (round lens, hairline rim, soft shadow) shows the photograph in its own colours |
-| `photo-engraving` | an engraved plate: diagonal lines that swell in shadow and bend over the forms, over a light wash of the photograph's colour | the lines part around the cursor and the photograph shows through |
-| `photo-dither` | a three-colour grain: the photograph's deepest and most colourful colours on the paper | the photograph develops through the grain in a soft circle |
+| Object            | Looks like                                                                                                                   | Hover                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `photo-halftone`  | a one-ink halftone: round dots on a 45° screen, clean paper in the light, solid ink in the deepest shadow                    | a loupe (round lens, hairline rim, soft shadow) shows the photograph in its own colours |
+| `photo-engraving` | an engraved plate: diagonal lines that swell in shadow and bend over the forms, over a light wash of the photograph's colour | the lines part around the cursor and the photograph shows through                       |
+| `photo-dither`    | a three-colour grain: the photograph's deepest and most colourful colours on the paper                                       | the photograph develops through the grain in a soft circle                              |
 
 Each folder's `demo.html` (served over http) shows it in the light, dark and colour palettes.
 `meta.json` lists its params, touch behaviour, fallback and cost.
@@ -43,14 +43,22 @@ largest `srcset` size), keeps its `alt`, and takes its `object-position` as the 
 
 ```html
 <div class="print-frame" style="aspect-ratio: 4 / 5; border-radius: var(--radius-card)">
-  <img src="assets/img/photo-d88.jpg" srcset="..." sizes="(max-width: 1023px) 100vw, 50vw"
-       width="1280" height="1757" alt="Cream ceramic table lamp in low sun" loading="lazy" decoding="async"
-       style="object-position: 50% 40%">
+  <img
+    src="assets/img/photo-d88.jpg"
+    srcset="..."
+    sizes="(max-width: 1023px) 100vw, 50vw"
+    width="1280"
+    height="1757"
+    alt="Cream ceramic table lamp in low sun"
+    loading="lazy"
+    decoding="async"
+    style="object-position: 50% 40%"
+  />
 </div>
 <script type="module">
-  import fx from './assets/effects/fx.js';
-  import halftone from './assets/objects/photo-halftone/object.js';
-  const el = document.querySelector('.print-frame');
+  import fx from "./assets/effects/fx.js";
+  import halftone from "./assets/objects/photo-halftone/object.js";
+  const el = document.querySelector(".print-frame");
   halftone.mount(el, { palette: fx.readPalette(el) });
 </script>
 ```
