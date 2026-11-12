@@ -53,6 +53,13 @@ Use this format:
 - Questions for the owner:
 ```
 
+### 2026-11-12 — Claude — Deploy only after merge (GitHub Actions → Vercel)
+
+- Did: `vercel.json` turns off Vercel's Git deployments; new `Deploy to Vercel` job in `ci.yml` deploys `integration` to Preview and `main` to Production after all checks pass on the merged commit; workflow cancellation limited to pull requests so a deploy is never cut off. ESLint now ignores the skill copy in `.claude/` (CI lint errors) and the hook passes `--no-warn-ignored`. D19 added; `docs/DEPLOYMENT.md` updated.
+- Verified: Prettier clean on the changed files. The workflow itself has not run yet.
+- Not verified / known issues: the deploy job needs the three secrets before it can succeed; untested whether CLI deployments carry Git commit metadata to Vercel (Sentry release naming relies on `VERCEL_GIT_COMMIT_SHA`).
+- Next: owner adds `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` as GitHub Actions secrets.
+
 ### 2026-11-12 — Claude — Site-wide SEO foundation
 
 - Did: `src/config/{env,site}.ts`, `src/lib/seo.ts` (`createPageMetadata`, JSON-LD); root metadata and viewport; moved home page to `(marketing)` (metadata only, body unchanged); `(marketing)/layout.tsx` with Organization and WebSite JSON-LD; `robots.ts`, `sitemap.ts`, `not-found.tsx`, `llms.txt/route.ts`, `opengraph-image.alt.txt`; `format`, `format:check` and `typecheck` scripts; `playwright.config.ts` and `e2e/marketing/seo.spec.ts`; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in `.env.example`. Decisions D1–D17 in `docs/DECISIONS.md`.
