@@ -12,7 +12,7 @@
  * never publish canonical URLs, sitemaps or Open Graph links that point somewhere else.
  */
 function readSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL;
+  const raw = process.env.NEXT_PUBLIC_SITE_URL as string;
   if (!raw) {
     throw new Error("NEXT_PUBLIC_SITE_URL is not set. Copy .env.example to .env.local.");
   }
