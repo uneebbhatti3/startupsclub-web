@@ -11,13 +11,25 @@
   opts: travel (how far the picture moves, % of the frame's height each way; 12, 4-20).
 */
 export default function (root, opts, lib) {
-  const img = root.querySelector('img');
+  const img = root.querySelector("img");
   if (!img) return {};
-  root.classList.add('mo-wp');
+  root.classList.add("mo-wp");
   if (lib.reduced()) return {};
   const travel = lib.clamp(+opts.travel || 12, 4, 20);
-  root.style.setProperty('--mo-travel', `${travel}%`);
-  root.classList.add('is-live');
-  const s = lib.scrub(root, (p, r) => { img.style.transform = `translateY(${((0.5 - p) * 2 * (travel / 100) * r.height).toFixed(1)}px)`; }, { mode: 'view' });
-  return { destroy() { s.destroy(); img.style.transform = ''; root.classList.remove('is-live'); } };
+  root.style.setProperty("--mo-travel", `${travel}%`);
+  root.classList.add("is-live");
+  const s = lib.scrub(
+    root,
+    (p, r) => {
+      img.style.transform = `translateY(${((0.5 - p) * 2 * (travel / 100) * r.height).toFixed(1)}px)`;
+    },
+    { mode: "view" },
+  );
+  return {
+    destroy() {
+      s.destroy();
+      img.style.transform = "";
+      root.classList.remove("is-live");
+    },
+  };
 }

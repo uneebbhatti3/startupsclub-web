@@ -13,7 +13,7 @@
 // second, paused off screen, in a hidden tab and under the pause button (fx.shader). Under reduced
 // motion it is drawn once and kept as a picture (still() in shared.js): no context, no frames. One per
 // page.
-import { fx, palette, tone, color, bag, pauser, still, reduced } from '../shared.js';
+import { fx, palette, tone, color, bag, pauser, still, reduced } from "../shared.js";
 
 /* ------------------------------------------------------------------ shader */
 
@@ -46,7 +46,7 @@ const OBJECTS = {
     cam: { target: [0, 0.74, 0], dist: 4.7, pitch: 0.2, yaw: 0.62, focal: 2.0 },
     bound: [0, 0.78, 0, 1.12],
     follow: 1,
-    label: 'Over-ear headphones, drawn in dots',
+    label: "Over-ear headphones, drawn in dots",
     glsl: /* glsl */ `
 void setup() {}
 // one ear cup; q.x runs outward from the cup's middle plane
@@ -110,7 +110,7 @@ float extra(vec2 uv) {
     cam: { target: [0, 0.66, -0.02], dist: 3.75, pitch: 0.24, yaw: 0.78, focal: 2.0 },
     bound: [0, 0.64, -0.04, 0.98],
     follow: 0.35,
-    label: 'An office chair on five castors, drawn in dots',
+    label: "An office chair on five castors, drawn in dots",
     glsl: /* glsl */ `
 // the seat and back swivel after the pointer; the base stays put
 void setup() { g_a = -g_hov * g_m.x * 2.6; }
@@ -153,7 +153,7 @@ float extra(vec2 uv) { return 0.0; }
     cam: { target: [0.02, 0.36, 0.12], dist: 3.1, pitch: 0.27, yaw: 0.6, focal: 2.0 },
     bound: [0.0, 0.38, 0.2, 0.86],
     follow: 1,
-    label: 'A camera with a zoom lens, drawn in dots',
+    label: "A camera with a zoom lens, drawn in dots",
     glsl: /* glsl */ `
 void setup() {
   g_a = g_hov * clamp(0.55 - g_m.y * 1.8, 0.0, 1.0);   // the zoom: the pointer high draws the lens out
@@ -190,7 +190,7 @@ float extra(vec2 uv) { return 0.0; }
     cam: { target: [0, 0.36, 0], dist: 3.45, pitch: 0.5, yaw: 0.55, focal: 2.0 },
     bound: [0, 0.4, 0, 1.18],
     follow: 0.6,
-    label: 'A camera drone with four rotors, drawn in dots',
+    label: "A camera drone with four rotors, drawn in dots",
     glsl: /* glsl */ `
 float g_lift;
 // world to the drone's own frame: lifted, tipped toward the pointer
@@ -376,9 +376,9 @@ void main() {
 `;
 
 const SCHEMA = {
-  pixel: { default: 3, min: 1, max: 8, step: 1 },   // dither cell, CSS px
+  pixel: { default: 3, min: 1, max: 8, step: 1 }, // dither cell, CSS px
   sway: { default: 0.45, min: 0, max: 1, step: 0.01 }, // how far the object swings on its spot (radians)
-  speed: { default: 1, min: 0, max: 2, step: 0.01 },   // idle motion
+  speed: { default: 1, min: 0, max: 2, step: 0.01 }, // idle motion
 };
 
 /* the tones: the stage ground, a shade, the ink, the accent (kept apart from the ground) and a deep
@@ -389,17 +389,28 @@ function tones(page, ground) {
   let acc = page.accent;
   if (color.contrast(acc, ground) < 1.8) acc = color.mix(acc, ink, 0.4);
   const deep = dark ? color.mix(acc, ground, 0.5) : color.mix(acc, ink, 0.35);
-  return { t0: ground, t1: color.mix(ground, ink, dark ? 0.36 : 0.3), t2: ink, t3: acc, t4: deep, dark };
+  return {
+    t0: ground,
+    t1: color.mix(ground, ink, dark ? 0.36 : 0.3),
+    t2: ink,
+    t3: acc,
+    t4: deep,
+    dark,
+  };
 }
 
 /* without WebGL: a line drawing of the same object in the ink, its accent part filled, each shape in
    front filled with the ground so no line runs through it; the strokes keep one thin width at any size.
    Drawn in a 120 x 90 box, seen from the same side as the 3D view. */
 const DRAW = {
-  headphones: (a, g) => `<path d="M33 55C31 22 47 12 60 12s29 10 27 43" stroke-width="2.4"/><path d="M38 40c2-14 11-20 22-20s20 6 22 20" stroke-width="4.5" opacity=".55"/><path d="M27 58q0-9 7-9M93 58q0-9-7-9"/><rect x="24" y="52" width="17" height="30" rx="8" fill="${a}"/><rect x="38" y="55" width="8" height="24" rx="4" fill="${g}"/><rect x="79" y="52" width="17" height="30" rx="8" fill="${a}"/><rect x="74" y="55" width="8" height="24" rx="4" fill="${g}"/>`,
-  chair: (a, g) => `<path d="M60 70 31 76M60 70 89 76M60 70l-3 13M60 70 44 64M60 70l16-6"/><circle cx="30" cy="77.5" r="2.6" fill="${g}"/><circle cx="90" cy="77.5" r="2.6" fill="${g}"/><circle cx="57" cy="84.5" r="2.6" fill="${g}"/><path d="M60 70V52M60 50l2-12M39 47V37h9M81 47V37h-9"/><path d="M44 8q16-5 32 0l-2 28q-14 4-28 0z" fill="${a}"/><path d="M34 46q26-8 52 0 2 5-2 7-24 6-48 0-4-2-2-7z" fill="${a}"/>`,
-  camera: (a, g) => `<path d="M46 26l5-9h18l5 9" fill="${g}"/><rect x="14" y="26" width="92" height="50" rx="6" fill="${g}"/><path d="M14.5 42h91v28a6 6 0 0 1-6 6h-79a6 6 0 0 1-6-6z" fill="${a}"/><rect x="17" y="34" width="16" height="42" rx="6" fill="${g}"/><path d="M84 26v-5h12v5M22 26v-4h7v4"/><circle cx="63" cy="52" r="21" fill="${g}"/><circle cx="63" cy="52" r="16"/><circle cx="63" cy="52" r="10" fill="${g}"/><path d="M58 47q3-3 7-2" opacity=".7"/>`,
-  drone: (a, g) => `<path d="M60 46 27 27M60 46 93 27M60 46 27 65M60 46 93 65"/><ellipse cx="27" cy="27" rx="19" ry="6"/><ellipse cx="93" cy="27" rx="19" ry="6"/><ellipse cx="27" cy="65" rx="19" ry="6"/><ellipse cx="93" cy="65" rx="19" ry="6"/><circle cx="27" cy="27" r="2.6" fill="${g}"/><circle cx="93" cy="27" r="2.6" fill="${g}"/><circle cx="27" cy="65" r="2.6" fill="${g}"/><circle cx="93" cy="65" r="2.6" fill="${g}"/><rect x="49" y="33" width="22" height="27" rx="8" fill="${a}"/><circle cx="60" cy="64" r="3.6" fill="${g}"/><path d="M52 60l-4 10M68 60l4 10"/>`,
+  headphones: (a, g) =>
+    `<path d="M33 55C31 22 47 12 60 12s29 10 27 43" stroke-width="2.4"/><path d="M38 40c2-14 11-20 22-20s20 6 22 20" stroke-width="4.5" opacity=".55"/><path d="M27 58q0-9 7-9M93 58q0-9-7-9"/><rect x="24" y="52" width="17" height="30" rx="8" fill="${a}"/><rect x="38" y="55" width="8" height="24" rx="4" fill="${g}"/><rect x="79" y="52" width="17" height="30" rx="8" fill="${a}"/><rect x="74" y="55" width="8" height="24" rx="4" fill="${g}"/>`,
+  chair: (a, g) =>
+    `<path d="M60 70 31 76M60 70 89 76M60 70l-3 13M60 70 44 64M60 70l16-6"/><circle cx="30" cy="77.5" r="2.6" fill="${g}"/><circle cx="90" cy="77.5" r="2.6" fill="${g}"/><circle cx="57" cy="84.5" r="2.6" fill="${g}"/><path d="M60 70V52M60 50l2-12M39 47V37h9M81 47V37h-9"/><path d="M44 8q16-5 32 0l-2 28q-14 4-28 0z" fill="${a}"/><path d="M34 46q26-8 52 0 2 5-2 7-24 6-48 0-4-2-2-7z" fill="${a}"/>`,
+  camera: (a, g) =>
+    `<path d="M46 26l5-9h18l5 9" fill="${g}"/><rect x="14" y="26" width="92" height="50" rx="6" fill="${g}"/><path d="M14.5 42h91v28a6 6 0 0 1-6 6h-79a6 6 0 0 1-6-6z" fill="${a}"/><rect x="17" y="34" width="16" height="42" rx="6" fill="${g}"/><path d="M84 26v-5h12v5M22 26v-4h7v4"/><circle cx="63" cy="52" r="21" fill="${g}"/><circle cx="63" cy="52" r="16"/><circle cx="63" cy="52" r="10" fill="${g}"/><path d="M58 47q3-3 7-2" opacity=".7"/>`,
+  drone: (a, g) =>
+    `<path d="M60 46 27 27M60 46 93 27M60 46 27 65M60 46 93 65"/><ellipse cx="27" cy="27" rx="19" ry="6"/><ellipse cx="93" cy="27" rx="19" ry="6"/><ellipse cx="27" cy="65" rx="19" ry="6"/><ellipse cx="93" cy="65" rx="19" ry="6"/><circle cx="27" cy="27" r="2.6" fill="${g}"/><circle cx="93" cy="27" r="2.6" fill="${g}"/><circle cx="27" cy="65" r="2.6" fill="${g}"/><circle cx="93" cy="65" r="2.6" fill="${g}"/><rect x="49" y="33" width="22" height="27" rx="8" fill="${a}"/><circle cx="60" cy="64" r="3.6" fill="${g}"/><path d="M52 60l-4 10M68 60l4 10"/>`,
 };
 const drawing = (kind, ink, accent, ground) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90" fill="none" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><style>*{vector-effect:non-scaling-stroke}</style>${(DRAW[kind] || DRAW.headphones)(accent, ground)}</svg>`;
@@ -413,7 +424,7 @@ function objectEffect(kind, page, studio = false) {
   const T = tones(page, ground);
   const frag = COMMON + o.glsl + MAIN;
   return {
-    id: `cx-object-${kind}${studio ? '-studio' : ''}`,
+    id: `cx-object-${kind}${studio ? "-studio" : ""}`,
     params: SCHEMA,
     mount(el, { params, seed }) {
       const pixel = params.pixel;
@@ -428,14 +439,22 @@ function objectEffect(kind, page, studio = false) {
         crisp: !studio,
         maxDpr: studio ? (el.clientWidth * el.clientHeight > 640000 ? 0.75 : 1) : 1 / pixel,
         fps: 20,
-        still: 0,                 // reduced motion: the rest view, as designed
+        still: 0, // reduced motion: the rest view, as designed
         pointer: true,
         uniforms: ({ dpr, params: pr }) => ({
-          u_t0: color.vec3(T.t0), u_t1: color.vec3(T.t1), u_t2: color.vec3(T.t2), u_t3: color.vec3(T.t3), u_t4: color.vec3(T.t4),
+          u_t0: color.vec3(T.t0),
+          u_t1: color.vec3(T.t1),
+          u_t2: color.vec3(T.t2),
+          u_t3: color.vec3(T.t3),
+          u_t4: color.vec3(T.t4),
           u_dark: T.dark ? 1 : 0,
           u_cell: studio ? 1 : Math.max(1, Math.round(pr.pixel * dpr)),
           u_smooth: studio ? 1 : 0,
-          u_target: o.cam.target, u_dist: o.cam.dist, u_pitch: o.cam.pitch, u_yaw0: o.cam.yaw, u_focal: o.cam.focal,
+          u_target: o.cam.target,
+          u_dist: o.cam.dist,
+          u_pitch: o.cam.pitch,
+          u_yaw0: o.cam.yaw,
+          u_focal: o.cam.focal,
           u_bound: o.bound,
           u_follow: o.follow,
         }),
@@ -449,30 +468,43 @@ function objectEffect(kind, page, studio = false) {
 export default function init(root) {
   const b = bag();
   const page = palette(root);
-  const figs = root.matches('.cx-obj') ? [root] : [...root.querySelectorAll('.cx-obj')];
-  figs.forEach(fig => {
-    const stage = fig.querySelector('.cx-obj__stage');
-    const kind = OBJECTS[fig.dataset.cxObject] ? fig.dataset.cxObject : 'headphones';
-    stage.setAttribute('aria-label', fig.dataset.cxLabel || OBJECTS[kind].label);
+  const figs = root.matches(".cx-obj") ? [root] : [...root.querySelectorAll(".cx-obj")];
+  figs.forEach((fig) => {
+    const stage = fig.querySelector(".cx-obj__stage");
+    const kind = OBJECTS[fig.dataset.cxObject] ? fig.dataset.cxObject : "headphones";
+    stage.setAttribute("aria-label", fig.dataset.cxLabel || OBJECTS[kind].label);
     // never a caption under the picture: the section copy names the object
-    const pixel = Math.max(1, Math.round(+(fig.dataset.cxPixel || (stage.clientWidth < 420 ? 2 : 3)) || 3));
+    const pixel = Math.max(
+      1,
+      Math.round(+(fig.dataset.cxPixel || (stage.clientWidth < 420 ? 2 : 3)) || 3),
+    );
     // data-cx-render="studio": the same object as a smooth shaded render (a product shot), not a print
-    const studio = fig.dataset.cxRender === 'studio';
+    const studio = fig.dataset.cxRender === "studio";
     const effect = objectEffect(kind, page, studio);
     const seed = fig.dataset.cxSeed;
     // the line drawing stands on the stage until the dither canvas covers it: a stage the effect never draws is not an empty card
-    { const ground = tone(page, 0.035), T = tones(page, ground); stage.style.background = drawing(kind, color.mix(T.t2, ground, 0.15), T.t3, ground); b.add(() => { stage.style.background = ''; }); }
+    {
+      const ground = tone(page, 0.035),
+        T = tones(page, ground);
+      stage.style.background = drawing(kind, color.mix(T.t2, ground, 0.15), T.t3, ground);
+      b.add(() => {
+        stage.style.background = "";
+      });
+    }
     // reduced motion: one picture, its context freed (no sway, no answer to the pointer, no button)
     if (reduced()) {
       b.add(still(stage, effect, { seed, params: { pixel } }));
       return;
     }
-    const p = b.add(pauser(fig, { label: 'the drawing', corner: 'tr', at: stage }));
-    fx.mount(stage, effect, { seed, params: { pixel } }).then(ctrl => {
-      b.add(p.add(ctrl));
-      // the line drawing without WebGL is still: no pause button
-      if (ctrl.info?.fallback) p.destroy();
-    }, err => console.warn('fx-dither-object:', err));
+    const p = b.add(pauser(fig, { label: "the drawing", corner: "tr", at: stage }));
+    fx.mount(stage, effect, { seed, params: { pixel } }).then(
+      (ctrl) => {
+        b.add(p.add(ctrl));
+        // the line drawing without WebGL is still: no pause button
+        if (ctrl.info?.fallback) p.destroy();
+      },
+      (err) => console.warn("fx-dither-object:", err),
+    );
   });
   return b;
 }

@@ -6,11 +6,48 @@
    --mo-cut. Once the line has reached the top (.is-open) the stage is taken off the screen. The words and
    pictures are made whole by the script (moment.js), not here: with no script nothing is hidden. At rest (a
    phone, reduced motion, no script) the stage does not exist. */
-.mo-lc { --mo-cut: 100%; --mo-below: 0px; --mo-gap: clamp(8px, 1.2vw, 18px); position: relative; overflow: clip; }
-.mo-lc > .mo-lc__stage { position: absolute; inset: var(--mo-gap); z-index: 20; pointer-events: none; overflow: clip; border-radius: var(--r-lg, 16px); }
-.mo-lc__stage > .mo-lc__cover { position: absolute; inset: 0; background: var(--mo-from, var(--p-bg, var(--bg))); clip-path: inset(0 0 var(--mo-below) 0); will-change: clip-path; }
-.mo-lc__stage > .mo-lc__line { position: absolute; left: 0; right: 0; top: var(--mo-cut); height: 1px; background: var(--accent); will-change: top; }
-.mo-lc--surface { --mo-from: var(--p-surface, var(--surface)); }
-.mo-lc--inverse { --mo-from: var(--p-inv-bg, var(--bg)); }
-.mo-lc.is-open > .mo-lc__stage { display: none; }
-@media (prefers-reduced-motion: reduce) { .mo-lc > .mo-lc__stage { display: none; } }
+.mo-lc {
+  --mo-cut: 100%;
+  --mo-below: 0px;
+  --mo-gap: clamp(8px, 1.2vw, 18px);
+  position: relative;
+  overflow: clip;
+}
+.mo-lc > .mo-lc__stage {
+  position: absolute;
+  inset: var(--mo-gap);
+  z-index: 20;
+  pointer-events: none;
+  overflow: clip;
+  border-radius: var(--r-lg, 16px);
+}
+.mo-lc__stage > .mo-lc__cover {
+  position: absolute;
+  inset: 0;
+  background: var(--mo-from, var(--p-bg, var(--bg)));
+  clip-path: inset(0 0 var(--mo-below) 0);
+  will-change: clip-path;
+}
+.mo-lc__stage > .mo-lc__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--mo-cut);
+  height: 1px;
+  background: var(--accent);
+  will-change: top;
+}
+.mo-lc--surface {
+  --mo-from: var(--p-surface, var(--surface));
+}
+.mo-lc--inverse {
+  --mo-from: var(--p-inv-bg, var(--bg));
+}
+.mo-lc.is-open > .mo-lc__stage {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mo-lc > .mo-lc__stage {
+    display: none;
+  }
+}

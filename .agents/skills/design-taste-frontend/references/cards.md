@@ -48,8 +48,8 @@ Motion: `assets/ui/ui.js`. Objects instead of photographs: `assets/ui/_lab/objec
 A card holds a picture, and the picture holds the product. That is all:
 
 - **card > panel (a lit picture) > fragment.** The panel must read as a picture, not as a box: a
-  soft field with no border lines, grid, ruling or dots of its own, so the fragment sits *on a
-  picture*, not in a frame in a frame.
+  soft field with no border lines, grid, ruling or dots of its own, so the fragment sits _on a
+  picture_, not in a frame in a frame.
 - Never card > patterned panel > white UI card (in testing, "card, grid-paper panel, white UI card"
   read as three nested boxes). Never a fragment that is itself a card holding cards of text.
 - Never a card inside a card for text, never glass.
@@ -185,7 +185,7 @@ Other tech card groups take a flat panel, the lit ground plain, a photograph or 
   more), so page, card, panel and UI are never four near-black layers; on the light page it is a
   clear step darker than the white UI. The palettes in the showcase:
   - painting: `{"bg":"#a3b0b6","accent":"#c49a6c"}` with params `"blur":1,"brush":0.35,"slope":0,
-    "hillY":0.3,"horizon":0.62` (a level mist over warm sand, fully soft). Never a blue sky over a
+"hillY":0.3,"horizon":0.62` (a level mist over warm sand, fully soft). Never a blue sky over a
     green hill with a diagonal crest: it reads as a stock desktop wallpaper, not a crafted ground.
     At most one painted panel in a card group (one per page is better); the others take the sand, sky
     or sage palette on grain, mesh or silk.

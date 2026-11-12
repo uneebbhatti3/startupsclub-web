@@ -8,7 +8,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-
 # AGENTS.md — StartupsClub Web (frontend)
 
 This file is the single source of truth for every AI coding agent working in this repository

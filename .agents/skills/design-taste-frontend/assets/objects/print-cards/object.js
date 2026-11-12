@@ -7,7 +7,7 @@
   pointer and the stack leans toward it. Click, Enter or focus: the cards fan out from the near edge like a hand being spread; click
   again to gather them.
 */
-import { definePrint } from '../_print-core/print3d.js';
+import { definePrint } from "../_print-core/print3d.js";
 
 const glsl = /* glsl */ `
 const vec2 FAN = vec2(0.0, 0.215);              // the fan's pivot, near the bottom edge
@@ -102,9 +102,9 @@ void surf(float id, vec3 p, vec3 n, inout Surf s) {
 `;
 
 export default definePrint({
-  id: 'print-cards',
-  name: 'Playing cards',
-  label: 'A stack of playing cards; it fans out when chosen',
+  id: "print-cards",
+  name: "Playing cards",
+  label: "A stack of playing cards; it fans out when chosen",
   base: import.meta.url,
   glsl,
   pivot: [0, 0.04, 0],
@@ -113,19 +113,31 @@ export default definePrint({
   bound: 0.82,
   camera: { elev: 38, dist: 6, target: 0.02 },
   light: [-0.45, 1.25, 0.55],
-  turn: { mode: 'spin', speed: 6 },
-  step: 'toggle',
+  turn: { mode: "spin", speed: 6 },
+  step: "toggle",
   stepTime: 1.0,
   shadowSteps: 32,
   floorReach: 0.04,
-  press: 'Press to fan the cards out.',
-  params: { effect: { default: 'render' }, angle: { default: 20 }, size: { default: 0.82 } },
+  press: "Press to fan the cards out.",
+  params: { effect: { default: "render" }, angle: { default: 20 }, size: { default: 0.82 } },
   // card: cut by the bottom-left (the bottom-right corner stays clear for the pause button), and in a
   // panel about as tall as wide (a phone) less cut, so the thing still reads; tile: whole, low; hero:
   // right of the text, smaller and under it in a phone-shaped frame
   place: {
-    card: { transparent: 1, size: 1.2, x: -0.22, y: -0.14, narrow: { size: 1.0, x: -0.12, y: -0.12 } },
+    card: {
+      transparent: 1,
+      size: 1.2,
+      x: -0.22,
+      y: -0.14,
+      narrow: { size: 1.0, x: -0.12, y: -0.12 },
+    },
     tile: { transparent: 1, size: 1.0, y: -0.04 },
-    hero: { transparent: 1, size: 1.05, x: 0.22, y: -0.04, narrow: { size: 0.8, x: 0.05, y: -0.22 } },
+    hero: {
+      transparent: 1,
+      size: 1.05,
+      x: 0.22,
+      y: -0.04,
+      narrow: { size: 0.8, x: 0.05, y: -0.22 },
+    },
   },
 });

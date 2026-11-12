@@ -14,13 +14,32 @@
   default 15), hold (seconds between steps at rest, default 1.7), autoplay (0 holds still until
   hovered), readout (1 shows the angle under the stage), transparent (1 leaves the ground clear), alt.
 */
-import { stage, tones, setTones, GLSL_PRINT, approach, clamp, paletteOf, MONO } from '../_scenes/kit.js';
+import {
+  stage,
+  tones,
+  setTones,
+  GLSL_PRINT,
+  approach,
+  clamp,
+  paletteOf,
+  MONO,
+} from "../_scenes/kit.js";
 
 const FORMS = { camera: 0, cup: 1, speaker: 2, chair: 3 };
-const NAMES = ['camera', 'cup', 'speaker', 'chair'];
-const LABELS = ['A rangefinder camera on a turntable', 'A glazed cup on its saucer, on a turntable', 'A cylindrical speaker on a turntable', 'A wooden side chair with a linen seat, on a turntable'];
+const NAMES = ["camera", "cup", "speaker", "chair"];
+const LABELS = [
+  "A rangefinder camera on a turntable",
+  "A glazed cup on its saucer, on a turntable",
+  "A cylindrical speaker on a turntable",
+  "A wooden side chair with a linen seat, on a turntable",
+];
 // the product's reach in world units (y up from the floor): [radius in xz, height] for the camera fit
-const REACH = [[0.78, 0.86], [0.62, 0.72], [0.48, 1.24], [0.56, 1.56]];
+const REACH = [
+  [0.78, 0.86],
+  [0.62, 0.72],
+  [0.48, 1.24],
+  [0.56, 1.56],
+];
 
 const frag = (form) => /* glsl */ `
 #define FORM ${form}
@@ -296,135 +315,230 @@ function fitCamera(form, aspect) {
   const ty = 0.08 + H * 0.42;
   const ro = [0, ty + CAM.dist * Math.sin(CAM.elev), CAM.dist * Math.cos(CAM.elev)];
   const fw = norm([0 - ro[0], ty - ro[1], 0 - ro[2]]);
-  const rt = norm(cross(fw, [0, 1, 0])), up = cross(rt, fw);
+  const rt = norm(cross(fw, [0, 1, 0])),
+    up = cross(rt, fw);
   const pts = [];
   for (let i = 0; i < 48; i++) {
-    const a = (i / 48) * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
+    const a = (i / 48) * Math.PI * 2,
+      ca = Math.cos(a),
+      sa = Math.sin(a);
     pts.push([1.04 * ca, 0, 1.04 * sa], [1.04 * ca, 0.08, 1.04 * sa], [R * ca, 0.08 + H, R * sa]);
   }
   pts.push([0, 0, 1.2]);
-  let mx = 0, y0 = 1e9, y1 = -1e9;
+  let mx = 0,
+    y0 = 1e9,
+    y1 = -1e9;
   for (const P of pts) {
     const d = [P[0] - ro[0], P[1] - ro[1], P[2] - ro[2]];
-    const z = dot(d, fw), x = dot(d, rt) / z, y = dot(d, up) / z;
-    mx = Math.max(mx, Math.abs(x)); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    const z = dot(d, fw),
+      x = dot(d, rt) / z,
+      y = dot(d, up) / z;
+    mx = Math.max(mx, Math.abs(x));
+    y0 = Math.min(y0, y);
+    y1 = Math.max(y1, y);
   }
   // margins as shares of the frame height: a little more below for the index mark's room
-  const side = 0.08, top = 0.1, bottom = 0.1;
+  const side = 0.08,
+    top = 0.1,
+    bottom = 0.1;
   const focal = Math.min((aspect * 0.5 * (1 - 2 * side)) / mx, (1 - top - bottom) / (y1 - y0));
   const shift = (focal * (y0 + y1)) / 2 - (bottom - top) / 2;
   return { focal, shift, ty };
 }
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-const norm = a => { const l = Math.hypot(...a) || 1; return a.map(v => v / l); };
+const cross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
+const norm = (a) => {
+  const l = Math.hypot(...a) || 1;
+  return a.map((v) => v / l);
+};
 
 export default {
-  id: 'product-turntable',
-  name: 'Product turntable',
-  kind: 'scene',
+  id: "product-turntable",
+  name: "Product turntable",
+  kind: "scene",
   mount(el, { palette, params = {} } = {}) {
-    const form = FORMS[params.form] ?? (typeof params.form === 'number' ? params.form : 0);
-    const stepDeg = params.step || 15, STEP = (stepDeg * Math.PI) / 180;
+    const form = FORMS[params.form] ?? (typeof params.form === "number" ? params.form : 0);
+    const stepDeg = params.step || 15,
+      STEP = (stepDeg * Math.PI) / 180;
     const hold = params.hold ?? 1.7;
     const autoplay = params.autoplay !== 0;
     let given = palette || null;
     let T = tones(paletteOf(el, given));
-    let prog = null, fit = null, fitKey = '';
-    let angle = Math.round((((params.start ?? -30) * Math.PI) / 180) / STEP) * STEP, target = angle, vel = 0, sinceStep = 0;
-    let base = 0, u0 = 0.5, lightA = -0.7;
+    let prog = null,
+      fit = null,
+      fitKey = "";
+    let angle = Math.round(((params.start ?? -30) * Math.PI) / 180 / STEP) * STEP,
+      target = angle,
+      vel = 0,
+      sinceStep = 0;
+    let base = 0,
+      u0 = 0.5,
+      lightA = -0.7;
     let readout = null;
     if (params.readout === 1) {
-      readout = document.createElement('div');
-      readout.className = 'obj-readout scene-label';
-      readout.setAttribute('aria-hidden', 'true');
+      readout = document.createElement("div");
+      readout.className = "obj-readout scene-label";
+      readout.setAttribute("aria-hidden", "true");
       el.appendChild(readout);
     }
-    const cellOf = s => params.cell || clamp(Math.min(s.cssW, s.cssH) / 220, 2, 3);
+    const cellOf = (s) => params.cell || clamp(Math.min(s.cssW, s.cssH) / 220, 2, 3);
     const s = stage(el, {
-      name: 'turntable',
+      name: "turntable",
       cell: cellOf,
       alpha: !!params.transparent,
       preserve: !!params.transparent,
       loops: () => autoplay,
       // between steps nothing moves and nothing is drawn; a step needs no more than 30 frames a second
-      fps: st => (st.pointer.inside ? 60 : 30),
-      init(gl, st) { prog = st.program(frag(form)); },
-      resize() { fitKey = ''; },
+      fps: (st) => (st.pointer.inside ? 60 : 30),
+      init(gl, st) {
+        prog = st.program(frag(form));
+      },
+      resize() {
+        fitKey = "";
+      },
       pointer(kind, st) {
         const P = st.pointer;
-        if (kind === 'enter' || kind === 'down') { base = Math.round(target / STEP) * STEP; u0 = P.u; }
-        if ((kind === 'move' && P.inside) || kind === 'down') {
-          const turns = P.type === 'mouse' ? 1 : 1.4;
+        if (kind === "enter" || kind === "down") {
+          base = Math.round(target / STEP) * STEP;
+          u0 = P.u;
+        }
+        if ((kind === "move" && P.inside) || kind === "down") {
+          const turns = P.type === "mouse" ? 1 : 1.4;
           target = base + Math.round(((P.u - u0) * turns * 2 * Math.PI) / STEP) * STEP;
         }
-        if (kind === 'leave') sinceStep = 0;
+        if (kind === "leave") sinceStep = 0;
       },
       frame(gl, t, dt, st) {
         const P = st.pointer;
         const still = st.reduced || !st.running;
         if (!P.inside && !still && autoplay) {
           sinceStep += dt;
-          if (sinceStep > hold) { target += STEP; sinceStep = 0; }
+          if (sinceStep > hold) {
+            target += STEP;
+            sinceStep = 0;
+          }
         }
         let moved = false;
-        if (still || dt === 0) { if (st.reduced && angle !== target) { angle = target; moved = true; } }
-        else if (Math.abs(target - angle) > 1e-4 || Math.abs(vel) > 1e-3) {
+        if (still || dt === 0) {
+          if (st.reduced && angle !== target) {
+            angle = target;
+            moved = true;
+          }
+        } else if (Math.abs(target - angle) > 1e-4 || Math.abs(vel) > 1e-3) {
           // a stiff, critically damped spring: each step lands in about a third of a second
-          const k = 170, d = 2 * Math.sqrt(k);
+          const k = 170,
+            d = 2 * Math.sqrt(k);
           const sub = Math.max(1, Math.ceil(dt / 0.008));
-          for (let i = 0; i < sub; i++) { const h = dt / sub; vel += ((target - angle) * k - vel * d) * h; angle += vel * h; }
-          if (Math.abs(target - angle) < 1e-4 && Math.abs(vel) < 1e-3) { angle = target; vel = 0; }
+          for (let i = 0; i < sub; i++) {
+            const h = dt / sub;
+            vel += ((target - angle) * k - vel * d) * h;
+            angle += vel * h;
+          }
+          if (Math.abs(target - angle) < 1e-4 && Math.abs(vel) < 1e-3) {
+            angle = target;
+            vel = 0;
+          }
           moved = true;
         }
         const lt = -0.7 + (P.inside ? (P.u - 0.5) * 0.9 : 0);
-        if (Math.abs(lt - lightA) > 1e-3) { lightA = still ? lt : approach(lightA, lt, 3, dt); moved = true; }
+        if (Math.abs(lt - lightA) > 1e-3) {
+          lightA = still ? lt : approach(lightA, lt, 3, dt);
+          moved = true;
+        }
         if (dt > 0 && !st.dirty && !moved) return;
         const key = `${st.w}x${st.h}`;
-        if (key !== fitKey) { fit = fitCamera(form, st.w / st.h); fitKey = key; }
+        if (key !== fitKey) {
+          fit = fitCamera(form, st.w / st.h);
+          fitKey = key;
+        }
         prog.use();
         setTones(gl, prog, T);
-        prog.set('u_res', [st.w, st.h]).set('u_time', t).set('u_seed', 7).set('u_four', 4).set('u_five', 5)
-          .set('u_rot', angle).set('u_steps', 120).set('u_shadowSteps', 36).set('u_focal', fit.focal)
-          .set('u_dark', T.dark ? 1 : 0).set('u_lightA', lightA).set('u_lightE', 0.78)
-          .set('u_cam', [CAM.dist, CAM.elev, fit.ty]).set('u_shift', fit.shift).set('u_clear', params.transparent ? 1 : 0)
-          .set('u_px', CAM.dist / (fit.focal * st.h));
+        prog
+          .set("u_res", [st.w, st.h])
+          .set("u_time", t)
+          .set("u_seed", 7)
+          .set("u_four", 4)
+          .set("u_five", 5)
+          .set("u_rot", angle)
+          .set("u_steps", 120)
+          .set("u_shadowSteps", 36)
+          .set("u_focal", fit.focal)
+          .set("u_dark", T.dark ? 1 : 0)
+          .set("u_lightA", lightA)
+          .set("u_lightE", 0.78)
+          .set("u_cam", [CAM.dist, CAM.elev, fit.ty])
+          .set("u_shift", fit.shift)
+          .set("u_clear", params.transparent ? 1 : 0)
+          .set("u_px", CAM.dist / (fit.focal * st.h));
         st.fullscreen();
         if (readout) {
           const deg = ((Math.round((target * 180) / Math.PI) % 360) + 360) % 360;
-          const txt = String(deg).padStart(3, '0') + '°';
+          const txt = String(deg).padStart(3, "0") + "°";
           if (readout.textContent !== txt) readout.textContent = txt;
         }
       },
       fallback() {
         // stills rendered by this object on a clear ground (make-fallbacks.html): ink for light pages,
         // light for dark ones, one pair per form
-        const im = document.createElement('img');
-        im.src = new URL(`./fallback-${NAMES[form]}-${T.dark ? 'dark' : 'light'}.png`, import.meta.url).href;
-        im.alt = '';
+        const im = document.createElement("img");
+        im.src = new URL(
+          `./fallback-${NAMES[form]}-${T.dark ? "dark" : "light"}.png`,
+          import.meta.url,
+        ).href;
+        im.alt = "";
         im.onerror = () => im.remove();
-        Object.assign(im.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated' });
+        Object.assign(im.style, {
+          position: "absolute",
+          inset: "0",
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          imageRendering: "pixelated",
+        });
         return im;
       },
-      failed() { readout?.remove(); },
+      failed() {
+        readout?.remove();
+      },
     });
     const styleReadout = () => {
       if (!readout) return;
       Object.assign(readout.style, {
-        position: 'absolute', left: '50%', bottom: '12px', transform: 'translateX(-50%)', zIndex: '1',
-        font: `500 11px/1 ${MONO}`, letterSpacing: '0.08em', color: T.hex.muted, pointerEvents: 'none',
+        position: "absolute",
+        left: "50%",
+        bottom: "12px",
+        transform: "translateX(-50%)",
+        zIndex: "1",
+        font: `500 11px/1 ${MONO}`,
+        letterSpacing: "0.08em",
+        color: T.hex.muted,
+        pointerEvents: "none",
       });
     };
     styleReadout();
-    el.setAttribute('role', 'img');
-    el.setAttribute('aria-label', params.alt || el.getAttribute('aria-label') || LABELS[form]);
-    el.style.touchAction = 'pan-y';
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", params.alt || el.getAttribute("aria-label") || LABELS[form]);
+    el.style.touchAction = "pan-y";
     return {
-      destroy() { s.destroy(); readout?.remove(); },
+      destroy() {
+        s.destroy();
+        readout?.remove();
+      },
       pause: () => s.pause(),
       resume: () => s.resume(),
-      setPalette(p) { if (p !== undefined) given = p; T = tones(paletteOf(el, given)); styleReadout(); s.redraw(); },
-      get stage() { return s; },
+      setPalette(p) {
+        if (p !== undefined) given = p;
+        T = tones(paletteOf(el, given));
+        styleReadout();
+        s.redraw();
+      },
+      get stage() {
+        return s;
+      },
     };
   },
 };

@@ -126,7 +126,7 @@ A visit or contact section shows the real streets around the place, as a map app
 colours: the judges marked a contour pattern standing in for a map as a fake drawing.
 
 - **Bake once** at build time: `node assets/components/fx-map/bake.mjs --lat <lat> --lon <lon> --out
-  map.json` fetches the streets, water, parks, rails and stations from OpenStreetMap (one request to
+map.json` fetches the streets, water, parks, rails and stations from OpenStreetMap (one request to
   an Overpass server) and writes a small JSON (about 55 KB, 18 KB gzipped, for 3 x 2 km of a city):
   streets in four classes, water (the sea built from coastlines too), parks, rails and trams, up to
   14 street names placed along the straightest part of each street. `--from none` (the default) leaves
@@ -179,26 +179,26 @@ colours: the judges marked a contour pattern standing in for a map as a fake dra
 
 ## When to use each
 
-| Part | Use it for | Not for |
-|---|---|---|
-| `fx-feature-card` | A 2x2 of product features | Features with nothing to show in a window |
-| `fx-dither-object` | The product as an object, with no photograph (the print render) | Decoration that is not the product; a studio render |
-| `fx-headline` | The hero line or closing line; fill 2-3 words | Body text, two filled lines on a page |
-| `fx-stat` | 2-4 proof numbers from the brief, at the stat size (`--t-stat`, 38 at 1440) | Small numbers, count-ups, invented figures |
-| `fx-button` | The one primary call to action | Every button |
-| `fx-prompt` | The hero prompt box of an AI or dev product | Ordinary forms |
-| `fx-search` | Docs or command search | A field that always glows |
-| `fx-tabs` | A product tour or dashboard preview | Navigation |
-| `fx-icon-tiles` | A feature grid with drawn glyphs | Brand logos |
-| `fx-spotlight` | A row of plain feature cards (security, admin) | A page with another pointer effect |
-| `fx-globe` | Products with global reach | Local businesses |
-| `fx-map` | Visit or contact: the real streets around the door, baked still | A product without a place |
-| `fx-chart` | One metric over time | Decoration without numbers |
-| `fx-bars` | Monthly figures on a labelled scale | More than 16 bars |
-| `fx-photo` | The client's own photograph of the subject, in colour | Mood stock, blank notebooks, filters |
-| `fx-avatar` | Calls, presence, a team list | Static team grids |
-| `fx-pricing` | The recommended plan | All plans |
-| `fx-progress` | Only inside a product window, as its own import or setup step (a UI fragment) | A progress bar as a card or visual of its own (the judge marks it); page loaders |
+| Part               | Use it for                                                                    | Not for                                                                          |
+| ------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `fx-feature-card`  | A 2x2 of product features                                                     | Features with nothing to show in a window                                        |
+| `fx-dither-object` | The product as an object, with no photograph (the print render)               | Decoration that is not the product; a studio render                              |
+| `fx-headline`      | The hero line or closing line; fill 2-3 words                                 | Body text, two filled lines on a page                                            |
+| `fx-stat`          | 2-4 proof numbers from the brief, at the stat size (`--t-stat`, 38 at 1440)   | Small numbers, count-ups, invented figures                                       |
+| `fx-button`        | The one primary call to action                                                | Every button                                                                     |
+| `fx-prompt`        | The hero prompt box of an AI or dev product                                   | Ordinary forms                                                                   |
+| `fx-search`        | Docs or command search                                                        | A field that always glows                                                        |
+| `fx-tabs`          | A product tour or dashboard preview                                           | Navigation                                                                       |
+| `fx-icon-tiles`    | A feature grid with drawn glyphs                                              | Brand logos                                                                      |
+| `fx-spotlight`     | A row of plain feature cards (security, admin)                                | A page with another pointer effect                                               |
+| `fx-globe`         | Products with global reach                                                    | Local businesses                                                                 |
+| `fx-map`           | Visit or contact: the real streets around the door, baked still               | A product without a place                                                        |
+| `fx-chart`         | One metric over time                                                          | Decoration without numbers                                                       |
+| `fx-bars`          | Monthly figures on a labelled scale                                           | More than 16 bars                                                                |
+| `fx-photo`         | The client's own photograph of the subject, in colour                         | Mood stock, blank notebooks, filters                                             |
+| `fx-avatar`        | Calls, presence, a team list                                                  | Static team grids                                                                |
+| `fx-pricing`       | The recommended plan                                                          | All plans                                                                        |
+| `fx-progress`      | Only inside a product window, as its own import or setup step (a UI fragment) | A progress bar as a card or visual of its own (the judge marks it); page loaders |
 
 ## Picking the effect
 

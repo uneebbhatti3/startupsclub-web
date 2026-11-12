@@ -289,6 +289,7 @@ When one feature matters more, use the bento.
 on the page ground, the panel under them), on a dark page the card's box with `.panel.panel--flush`
 (x.ai's cards). Each card: the title, two lines in ink (16 to 20 words), then the panel (page CSS
 `#<section> .panel { --p-h: 336px }`) holding a `.stage.stage--fade-b` with one pasted fragment:
+
 - `chat` `.at-rise.fit` (`--fit-max: 400px; --ax: max(24px, 50% - 200px)`, `--ay` and `--ay-sm`
   56px): out through the bottom by 24px or more; `search` or `stat` the same with `.to-edge`
   (`stat` with `data-ui-opts='{"fill":true}'`);
@@ -298,7 +299,7 @@ on the page ground, the panel under them), on a dark page the card's box with `.
 - `window` (`{"compact":true}`) `.at-corner` 24/28 on a flush `.panel--device` whose bar names the
   app and its status;
 - a diagram card (`diagrams.md`): `<div class="dg" data-diagram="<preset>">` filling the panel.
-Not `calendar` (its month must show whole), `doc` or `code` (wider than the 324px slot at 1024).
+  Not `calendar` (its month must show whole), `doc` or `code` (wider than the 324px slot at 1024).
 
 **At 1024.** The panels are 372 wide: a `.fit` fragment narrows to 324, the others stay cut.
 **At 768 and 390.** One card per row; each fragment at its corner in its own layout.
@@ -358,16 +359,17 @@ that shows exactly that. The workhorse for software, products and studios.
 24px; up to three short facts as plain lines; 24px; one `.link`) and
 `.frame.frame--split.span-6.start-7` (5:4, square on a phone) holding a `.stage.stage--fade-br`. The
 main piece is cut by the bottom, never floating with ground on all four sides:
+
 - `window` or the client's screenshot `.at-corner.to-edge` at `--ax`/`--ay` 56px, cut by the right
   and bottom; `files` the same with `.wide` (`--w: 680px`);
 - a narrower piece (`doc`, `code`, `chat`, `search`, `checklist`) `.at-rise.to-edge`, centred by
   `--w` and 56px down; a short one (`slider`, `toggles`) `.at-rise.fit` 40px down, cut below its
   second row.
-One small piece that shows the result (`cursor`, `notify`) only over a `window` or screenshot:
-`.at-over` its lower-right edge (`--bx: 24px; --by: -40px`), never over its first rows (Figma's
-panel with a small card over the product UI).
-A product or service: the frame holds the photograph of the part or the work the text names
-(`.frame--photo`, 628x471), never UI.
+  One small piece that shows the result (`cursor`, `notify`) only over a `window` or screenshot:
+  `.at-over` its lower-right edge (`--bx: 24px; --by: -40px`), never over its first rows (Figma's
+  panel with a small card over the product UI).
+  A product or service: the frame holds the photograph of the part or the work the text names
+  (`.frame--photo`, 628x471), never UI.
 
 **At 1024 to 1279.** The frame is 436 to 564 wide: the main piece alone.
 **At 768 and 390.** Text first, the frame 48px below, full width.
@@ -442,13 +444,13 @@ product, service or place.
 
 **The two panes** (kit fragments, rewritten to the client's names; the list is always `window`):
 
-| Product | List pane | Open pane |
-|---|---|---|
-| Code review | `window`: pull requests | `diff-review` (the comment and Apply in its top 250px) |
-| Support, inbox, CRM, agents | `window`: conversations | `chat` (the open thread) |
-| Docs, contracts, knowledge | `window`: documents | `doc` (the page with its marked phrase) |
-| CI, deploys | `window`: runs | `pipeline-board` (wide: nodes and log) or `terminal-run` |
-| Booking, scheduling | `window`: bookings | `calendar` |
+| Product                     | List pane               | Open pane                                                |
+| --------------------------- | ----------------------- | -------------------------------------------------------- |
+| Code review                 | `window`: pull requests | `diff-review` (the comment and Apply in its top 250px)   |
+| Support, inbox, CRM, agents | `window`: conversations | `chat` (the open thread)                                 |
+| Docs, contracts, knowledge  | `window`: documents     | `doc` (the page with its marked phrase)                  |
+| CI, deploys                 | `window`: runs          | `pipeline-board` (wide: nodes and log) or `terminal-run` |
+| Booking, scheduling         | `window`: bookings      | `calendar`                                               |
 
 The `window`'s rows: `.ui-win__who` the person (author, customer, owner), `.ui-win__sub` the item
 and its detail ("Retry settle jobs · +4 −3"), the status chip the product's own states (`data-open`,
@@ -462,8 +464,8 @@ words) with one `.link` on `span-6 start-7`. 48px below, the frame takes the res
 
 ```html
 <div class="ui app fill" role="img" aria-label="[what the window shows]" data-ui-pause-host>
-  <div class="app__pane app__pane--list"> [window fragment] </div>
-  <div class="app__pane app__pane--open" data-ui-loop> [the open item's fragment] </div>
+  <div class="app__pane app__pane--list">[window fragment]</div>
+  <div class="app__pane app__pane--open" data-ui-loop>[the open item's fragment]</div>
 </div>
 ```
 
@@ -471,24 +473,75 @@ words) with one `.link` on `span-6 start-7`. 48px below, the frame takes the res
 CSS (the whole recipe):
 
 ```css
-.app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
-.app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
-.app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
-.app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
-.app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
-@media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+.app.ui {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin-top: var(--s-7);
+  background: var(--u-bg);
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-r);
+  box-shadow: var(--u-shadow);
+}
+.app > .app__pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.app > .app__pane + .app__pane {
+  border-left: 1px solid var(--u-line);
+}
+.app > .app__pane > .ui-panel {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.app > .app__pane::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 64px;
+  background: linear-gradient(transparent, var(--u-bg));
+  pointer-events: none;
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .app.ui {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  }
+}
 @media (max-width: 1023px) {
-  .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .app > .app__pane--list { max-height: 252px; }
-  .app > .app__pane--list::after { display: none; }
-  .app .ui-win__side { display: none; }
-  .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
-  .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  .app.ui {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .app > .app__pane--list {
+    max-height: 252px;
+  }
+  .app > .app__pane--list::after {
+    display: none;
+  }
+  .app .ui-win__side {
+    display: none;
+  }
+  .app .ui-win__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app > .app__pane + .app__pane {
+    border-left: 0;
+    border-top: 1px solid var(--u-line);
+  }
 }
 @media (max-width: 639px) {
-  .app.ui { grid-template-rows: minmax(0, 1fr); }
-  .app > .app__pane--list { display: none; }
-  .app > .app__pane + .app__pane { border-top: 0; }
+  .app.ui {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .app > .app__pane--list {
+    display: none;
+  }
+  .app > .app__pane + .app__pane {
+    border-top: 0;
+  }
 }
 ```
 
@@ -1020,7 +1073,7 @@ two visual ones, a card layout shows at most twice.
 
 ## Software
 
-*Fernbill: invoicing for agencies of 2 to 20 people.* Dealt: hero `split`, `nav-mega`,
+_Fernbill: invoicing for agencies of 2 to 20 people._ Dealt: hero `split`, `nav-mega`,
 `footer-dark`, close `close-type`, rhythm `dark-band`, buttons `pill`, mark `ring`; effect
 `painterly-landscape` in the hero frame, card ground `grain-gradient`; one moment,
 `word-highlight` (one statement section of its own).
@@ -1036,7 +1089,7 @@ customers; no quote either.
 
 ## Product
 
-*Brinwood: solid-oak standing desks, built to order in Porto.* Dealt: hero `photo`, `nav-cards`,
+_Brinwood: solid-oak standing desks, built to order in Porto._ Dealt: hero `photo`, `nav-cards`,
 `footer-columns`, close `close-photo`, rhythm `media-band`, buttons `arrow`, mark `stack`.
 
 Order: hero (the desk in a real room), product-statement (the cut-out and three facts: load 120 kg,
@@ -1046,7 +1099,7 @@ oak top: a photograph of the grain), photo-band ("Built to order in Porto"), spl
 specs (`rows--spec` beside a photograph of the frame), proof (a review the brief gives, merged),
 faq (four questions), footer.closing. Flat grounds, no effect; the hero's entrance and one dealt moment in its own section.
 
-**With no photographs yet** (*Pellum, a desk lamp*): the lamp is shown in photographs, never
+**With no photographs yet** (_Pellum, a desk lamp_): the lamp is shown in photographs, never
 hidden and never a render by default. `photos.mjs search "desk lamp"` and `"desk lamp detail"`
 give the stand-ins: a desk lamp of the same build whole, its dial or joint close up, a lamp lit on
 a desk at dusk, no maker's name readable, one grade. The hero (`deal.mjs --type product --has
@@ -1061,7 +1114,7 @@ render (`effects-objects.md`, Product renders) on the `product` stage instead.
 
 ## Gaming
 
-*Kelpmoor: a co-op sailing game on a drowned coast, coming to Steam.* Dealt: hero `film` (the
+_Kelpmoor: a co-op sailing game on a drowned coast, coming to Steam._ Dealt: hero `film` (the
 trailer the brief supplies), `nav-centre`, `footer-dark`, close `close-word`, rhythm `media-band`,
 buttons `solid`, mark `wordmark`; effect none (the trailer is the hero's motion); one moment,
 `letters-assemble` (a statement of its own).
@@ -1093,7 +1146,7 @@ The report names every stand-in and the art to replace it. A rendered sloop and 
 
 ## Place
 
-*Fenn: a pottery studio and shop on Karl-Heine-Straße, Leipzig-Plagwitz.* Dealt: `nav-split`,
+_Fenn: a pottery studio and shop on Karl-Heine-Straße, Leipzig-Plagwitz._ Dealt: `nav-split`,
 `footer-visit`, rhythm `surface-pairs`, buttons `block`, mark `arc`, the offer `tall-small`, the place
 `trio`, the type moment `address`, rooms none.
 
@@ -1110,7 +1163,7 @@ Fourteen photographs, all the studio's own; no effect; the hero's entrance and o
 
 ## Service
 
-*Halden Dental: a dental clinic in central Malmö.* Dealt: hero `split`, `nav-mega`,
+_Halden Dental: a dental clinic in central Malmö._ Dealt: hero `split`, `nav-mega`,
 `footer-visit`, close `close-photo`, rhythm `surface-pairs`, buttons `tonal`, mark `dots`.
 
 Order: hero (a treatment room, 4:5), services-list (six treatments from €95 beside a photograph of

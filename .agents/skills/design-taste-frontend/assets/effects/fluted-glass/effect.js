@@ -1,21 +1,21 @@
 // fluted-glass: a pane of reeded glass over a soft colour field. Every rib is a small cylinder lens that
 // shows a narrow, mirrored slice of what is behind it, with a thin highlight on its lit side and a dark
 // seam where two ribs meet. The field behind is part of the same shader, so it is one pass.
-import { shader, color, fallbackCSS } from '../fx.js';
+import { shader, color, fallbackCSS } from "../fx.js";
 
 const params = {
-  ribWidth:   { default: 28,   min: 10, max: 80,  step: 1 },    // CSS px
-  angle:      { default: 0,    min: -45, max: 45, step: 1 },    // rib angle in degrees, 0 vertical
-  distortion: { default: 0.5,  min: 0,  max: 1,   step: 0.01 }, // how far each rib bends the view
-  highlight:  { default: 0.15, min: 0,  max: 1,   step: 0.01 }, // thin light line on each rib
-  shadow:     { default: 0.16, min: 0,  max: 1,   step: 0.01 }, // dark seam between ribs
-  background: { default: 0,    min: 0,  max: 1,   step: 1 },    // 0 a soft mesh of the page colours, 1 one bold shape
-  blur:       { default: 0.1,  min: 0,  max: 1,   step: 0.01 }, // frost: softens the view through the glass
-  speed:      { default: 0.03, min: 0,  max: 0.3, step: 0.005 },// how fast the field behind moves
-  clear:      { default: 0,    min: 0,  max: 0.6, step: 0.01 }, // share of the width on the calm side with no glass
-  calm:       { default: 0.4,  min: 0,  max: 1,   step: 0.01 }, // flatten the field where text sits
-  calmX:      { default: 0.25, min: 0,  max: 1,   step: 0.01 },
-  calmY:      { default: 0.7,  min: 0,  max: 1,   step: 0.01 },
+  ribWidth: { default: 28, min: 10, max: 80, step: 1 }, // CSS px
+  angle: { default: 0, min: -45, max: 45, step: 1 }, // rib angle in degrees, 0 vertical
+  distortion: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how far each rib bends the view
+  highlight: { default: 0.15, min: 0, max: 1, step: 0.01 }, // thin light line on each rib
+  shadow: { default: 0.16, min: 0, max: 1, step: 0.01 }, // dark seam between ribs
+  background: { default: 0, min: 0, max: 1, step: 1 }, // 0 a soft mesh of the page colours, 1 one bold shape
+  blur: { default: 0.1, min: 0, max: 1, step: 0.01 }, // frost: softens the view through the glass
+  speed: { default: 0.03, min: 0, max: 0.3, step: 0.005 }, // how fast the field behind moves
+  clear: { default: 0, min: 0, max: 0.6, step: 0.01 }, // share of the width on the calm side with no glass
+  calm: { default: 0.4, min: 0, max: 1, step: 0.01 }, // flatten the field where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -116,32 +116,47 @@ function lit(c, L, ck = 1) {
 function tones(P, prm, kind) {
   const { bg, ink, accent } = P;
   const bold = prm.background > 0.5;
-  const [Lb] = color.lab(bg), [Li] = color.lab(ink);
+  const [Lb] = color.lab(bg),
+    [Li] = color.lab(ink);
   const away = Li > Lb ? -1 : 1;
   const near = color.lighten(bg, away * 0.015);
-  if (kind === 'dark') {
+  if (kind === "dark") {
     // a lit accent, a deeper shade of it and a pale glint, on the dark page
     const La = color.lab(accent)[0];
     return {
-      near, far: color.mix(bg, accent, 0.08), lightK: 1.15,
-      k: [color.mix(bg, lit(accent, Math.max(0.55, Math.min(0.7, La))), bold ? 0.85 : 0.6), color.mix(bg, lit(accent, 0.4, 0.9), 0.75), color.mix(bg, lit(accent, 0.86, 0.5), 0.55)],
+      near,
+      far: color.mix(bg, accent, 0.08),
+      lightK: 1.15,
+      k: [
+        color.mix(bg, lit(accent, Math.max(0.55, Math.min(0.7, La))), bold ? 0.85 : 0.6),
+        color.mix(bg, lit(accent, 0.4, 0.9), 0.75),
+        color.mix(bg, lit(accent, 0.86, 0.5), 0.55),
+      ],
     };
   }
-  if (kind === 'colour') {
+  if (kind === "colour") {
     // the accent as one firm shape, and a deeper and a lighter tone of the page colour
     const Lbg = Lb;
     return {
-      near, far: color.lighten(bg, -away * 0.05), lightK: 1.1,
+      near,
+      far: color.lighten(bg, -away * 0.05),
+      lightK: 1.1,
       k: [accent, lit(bg, Math.max(0.2, Lbg - 0.14), 1.0), lit(bg, Math.min(0.9, Lbg + 0.2), 0.9)],
     };
   }
   // light: the accent mixed half back into the page (a full accent through ribs reads as a barcode),
   // a deeper accent shade that is small, and a white glint
   return {
-    near, far: color.mix(bg, accent, 0.06), lightK: 1.0,
+    near,
+    far: color.mix(bg, accent, 0.06),
+    lightK: 1.0,
     // (the half-strength accent is a lighter, softer accent, not a mix with the page: a page of another
     // hue would turn it grey or mauve)
-    k: [bold ? accent : lit(accent, color.lab(color.mix(bg, accent, 0.5))[0], 0.62), color.mix(bg, lit(accent, Math.min(0.5, color.lab(accent)[0]), 0.9), 0.62), color.mix(bg, '#ffffff', 0.7)],
+    k: [
+      bold ? accent : lit(accent, color.lab(color.mix(bg, accent, 0.5))[0], 0.62),
+      color.mix(bg, lit(accent, Math.min(0.5, color.lab(accent)[0]), 0.9), 0.62),
+      color.mix(bg, "#ffffff", 0.7),
+    ],
   };
 }
 
@@ -158,11 +173,31 @@ function uniforms({ palette, params, rng, kind, width, height }) {
   const clamp = (v, a) => Math.max(-a, Math.min(a, v));
   const bold = params.background > 0.5;
   const b0 = bold
-    ? [clamp(sx * asp * (0.16 + 0.08 * r()), asp / 2 - 0.25), 0.04 + 0.12 * (r() - 0.5), 0.36 + 0.06 * r(), r() * 6.283]
-    : [clamp(sx * asp * (0.16 + 0.1 * r()), asp / 2 - 0.15), 0.06 + 0.16 * (r() - 0.5), 0.36 + 0.08 * r(), r() * 6.283];
+    ? [
+        clamp(sx * asp * (0.16 + 0.08 * r()), asp / 2 - 0.25),
+        0.04 + 0.12 * (r() - 0.5),
+        0.36 + 0.06 * r(),
+        r() * 6.283,
+      ]
+    : [
+        clamp(sx * asp * (0.16 + 0.1 * r()), asp / 2 - 0.15),
+        0.06 + 0.16 * (r() - 0.5),
+        0.36 + 0.08 * r(),
+        r() * 6.283,
+      ];
   // the deeper shape sits on the main one's edge, toward the middle; the glint on its far side
-  const b1 = [b0[0] - sx * (0.18 + 0.1 * r()), b0[1] + (r() < 0.5 ? 1 : -1) * (0.2 + 0.08 * r()), 0.2 + 0.08 * r(), r() * 6.283];
-  const b2 = [clamp(b0[0] + sx * (0.22 + 0.12 * r()), asp / 2), b0[1] - 0.26 - 0.1 * r(), 0.2 + 0.07 * r(), r() * 6.283];
+  const b1 = [
+    b0[0] - sx * (0.18 + 0.1 * r()),
+    b0[1] + (r() < 0.5 ? 1 : -1) * (0.2 + 0.08 * r()),
+    0.2 + 0.08 * r(),
+    r() * 6.283,
+  ];
+  const b2 = [
+    clamp(b0[0] + sx * (0.22 + 0.12 * r()), asp / 2),
+    b0[1] - 0.26 - 0.1 * r(),
+    0.2 + 0.07 * r(),
+    r() * 6.283,
+  ];
   return {
     u_kNear: color.labVec(set.near),
     u_kFar: color.labVec(set.far),
@@ -183,9 +218,9 @@ function uniforms({ palette, params, rng, kind, width, height }) {
 }
 
 export default {
-  id: 'fluted-glass',
-  name: 'Fluted glass',
-  family: 'material',
+  id: "fluted-glass",
+  name: "Fluted glass",
+  family: "material",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

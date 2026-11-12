@@ -12,39 +12,52 @@
 */
 export default function (root, opts, lib) {
   const first = root.textContent.trim();
-  const words = Array.isArray(opts.words) ? opts.words.map(w => String(w).trim()).filter(Boolean) : [];
+  const words = Array.isArray(opts.words)
+    ? opts.words.map((w) => String(w).trim()).filter(Boolean)
+    : [];
   if (!words.includes(first)) words.unshift(first);
-  root.setAttribute('aria-label', first);
-  root.textContent = '';
-  root.classList.add('mo-wr');
+  root.setAttribute("aria-label", first);
+  root.textContent = "";
+  root.classList.add("mo-wr");
   const cells = words.map((w, i) => {
-    const s = document.createElement('span');
-    s.className = 'mo-wr__w' + (i === 0 ? ' is-on' : '');
-    s.setAttribute('aria-hidden', 'true');
+    const s = document.createElement("span");
+    s.className = "mo-wr__w" + (i === 0 ? " is-on" : "");
+    s.setAttribute("aria-hidden", "true");
     s.textContent = w;
     root.append(s);
     return s;
   });
   if (lib.reduced() || cells.length < 2) return {};
-  const every = Math.max(1200, opts.every || 2200), cycles = opts.cycles ?? 3;
-  let i = 0, timer = 0, visible = false, shown = 0;
+  const every = Math.max(1200, opts.every || 2200),
+    cycles = opts.cycles ?? 3;
+  let i = 0,
+    timer = 0,
+    visible = false,
+    shown = 0;
   const rests = () => cycles && shown >= cycles * cells.length;
   const step = () => {
     if (!visible || rests()) return;
     const out = cells[i];
     i = (i + 1) % cells.length;
     const inn = cells[i];
-    out.classList.remove('is-on'); out.classList.add('is-out');
-    inn.classList.remove('is-out'); inn.classList.add('is-on');
-    setTimeout(() => out.classList.remove('is-out'), 700);
+    out.classList.remove("is-on");
+    out.classList.add("is-out");
+    inn.classList.remove("is-out");
+    inn.classList.add("is-on");
+    setTimeout(() => out.classList.remove("is-out"), 700);
     shown++;
     if (!rests()) timer = setTimeout(step, every);
   };
-  const io = new IntersectionObserver(es => {
+  const io = new IntersectionObserver((es) => {
     visible = es[es.length - 1].isIntersecting;
     clearTimeout(timer);
     if (visible && !rests()) timer = setTimeout(step, every);
   });
   io.observe(root);
-  return { destroy() { clearTimeout(timer); io.disconnect(); } };
+  return {
+    destroy() {
+      clearTimeout(timer);
+      io.disconnect();
+    },
+  };
 }

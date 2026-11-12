@@ -16,8 +16,14 @@ captioned, never a product of another kind. One product render a page.
 ## Mount: the product at anchor scale
 
 ```html
-<div class="frame" id="bike" data-product="assets/objects/product-render/specs/my-bike.json"
-     data-product-place="stage" data-product-view="side" data-product-color="blue"></div>
+<div
+  class="frame"
+  id="bike"
+  data-product="assets/objects/product-render/specs/my-bike.json"
+  data-product-place="stage"
+  data-product-view="side"
+  data-product-color="blue"
+></div>
 <script type="module" src="assets/objects/product-render/auto.js"></script>
 ```
 
@@ -26,16 +32,16 @@ and it stands on the page's ground with its floor shadow, transparent round it: 
 Give the frame its size (a hero column as tall as the screen, a full-width stage, a tile); the product
 fills it.
 
-| attribute | |
-|---|---|
-| `data-product-place` | `hero` 0.88, `stage` 0.86, `tile` 0.84, `card` 0.9 of the frame (`legacy`: the old turntable right of the words) |
-| `data-product-view` | `three-quarter` (default), then only the views the spec lists in `supports` (`side`, `front`, `top`, a close-up of its own such as `detail-saddle`); `product.views` lists them; any other (the bike's `top`) throws and the frame carries `data-product-error`; or `detail:<part name>` |
-| `data-product-scene` | a scene of the spec: the product loaded or in use (`loaded`, `desk`, `work`) |
-| `data-product-color` | a colourway id of the spec (`spec.colors`); default its first |
-| `data-product-mode` | `auto` (default): the still make-posters made, else the turn, else one frame rendered here; `image`, `still`, `live` force one |
-| `data-product-fill` | 0.3-1.2, over the place's share |
-| `data-product-params` | `{"turn":1}` asks for the live turn; `{"x":0.1,"y":-0.05}` moves it; `{"step":0}` a lamp off |
-| `data-product-palette` | `{ bg, surface, ink, accent }`; else the page's tokens `--bg`, `--ink`, `--accent` |
+| attribute              |                                                                                                                                                                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-product-place`   | `hero` 0.88, `stage` 0.86, `tile` 0.84, `card` 0.9 of the frame (`legacy`: the old turntable right of the words)                                                                                                                                                                         |
+| `data-product-view`    | `three-quarter` (default), then only the views the spec lists in `supports` (`side`, `front`, `top`, a close-up of its own such as `detail-saddle`); `product.views` lists them; any other (the bike's `top`) throws and the frame carries `data-product-error`; or `detail:<part name>` |
+| `data-product-scene`   | a scene of the spec: the product loaded or in use (`loaded`, `desk`, `work`)                                                                                                                                                                                                             |
+| `data-product-color`   | a colourway id of the spec (`spec.colors`); default its first                                                                                                                                                                                                                            |
+| `data-product-mode`    | `auto` (default): the still make-posters made, else the turn, else one frame rendered here; `image`, `still`, `live` force one                                                                                                                                                           |
+| `data-product-fill`    | 0.3-1.2, over the place's share                                                                                                                                                                                                                                                          |
+| `data-product-params`  | `{"turn":1}` asks for the live turn; `{"x":0.1,"y":-0.05}` moves it; `{"step":0}` a lamp off                                                                                                                                                                                             |
+| `data-product-palette` | `{ bg, surface, ink, accent }`; else the page's tokens `--bg`, `--ink`, `--accent`                                                                                                                                                                                                       |
 
 **Each section a different view.** A product page shows the product big, whole in three sections at most, and never the
 same view twice: the widest view in the hero (a bike's `side`; a lamp's or an arm's `three-quarter`), another angle by the specs, a close-up on the part a section
@@ -51,8 +57,10 @@ still is cropped evenly round the parts' centre, never to the product's own box.
 **Colour from an order card.** A swatch drives the frames it names, no script needed:
 
 ```html
-<button type="button" data-product-swatch="#bike, #bike-loaded" value="red" aria-pressed="false">Signal red</button>
-<input type="radio" name="colour" value="red" data-product-swatch="#bike">
+<button type="button" data-product-swatch="#bike, #bike-loaded" value="red" aria-pressed="false">
+  Signal red
+</button>
+<input type="radio" name="colour" value="red" data-product-swatch="#bike" />
 ```
 
 On click (a button: `aria-pressed` is kept, one pressed per group) or change (an input), the named frames
@@ -100,12 +108,23 @@ with no still renders itself once on the page (`still` mode) and frees its conte
 
 ```json
 {
-  "id": "city-bike", "name": "City bicycle", "label": "A city bicycle with a front basket",
-  "units": "m", "angle": -34, "turn": { "mode": "sway", "amp": 22, "period": 24 },
+  "id": "city-bike",
+  "name": "City bicycle",
+  "label": "A city bicycle with a front basket",
+  "units": "m",
+  "angle": -34,
+  "turn": { "mode": "sway", "amp": 22, "period": 24 },
   "materials": { "frame": { "kind": "paint", "color": "accent", "finish": "gloss" } },
   "parts": [
     { "type": "wheel", "at": [-0.53, 0.35, 0], "r": 0.35, "spokes": 36, "wall": "#c7a57a" },
-    { "type": "tube", "from": [-0.07, 0.29, 0], "to": [-0.23, 0.81, 0], "r": 0.017, "mat": "frame", "blend": 0.01 }
+    {
+      "type": "tube",
+      "from": [-0.07, 0.29, 0],
+      "to": [-0.23, 0.81, 0],
+      "r": 0.017,
+      "mat": "frame",
+      "blend": 0.01
+    }
   ]
 }
 ```
@@ -114,23 +133,23 @@ Axes: **x forward** (the product's front), **y up**, **z across** (toward the vi
 unit; the model is scaled so its largest side is one unit and set on the floor at its lowest point.
 Model the product from its real measurements: proportions are most of what makes it read as a render.
 
-| key | what |
-|---|---|
-| `id`, `name`, `label` | the label is what a screen reader hears ("A desk lamp, switched on") |
-| `poster` | the posters' file name (default the id) |
-| `angle` | its turn at rest and in the still, degrees (default -32: a three-quarter view) |
-| `turn` | `{ "mode": "sway", "amp": 26, "period": 22 }` (default), `{ "mode": "spin", "speed": 10 }`, `{ "mode": "still" }` |
-| `camera` | `{ "elev": 12 }` degrees above the floor |
-| `click` | `"light"`: a click switches every `light` material (and `glow`) on and off; it starts on |
-| `pool` | `{ "at": [x, 0, z], "r": 0.2 }`: the light it throws on the floor while on |
-| `materials` | named materials for the parts |
-| `motion` | moving groups (joints), below |
-| `colors` | colourways: `[{ "id": "blue", "name": "Deep blue", "accent": "#2c4f7c" }]` (the accent parts take it; `materials` swaps materials too, at a render each) |
-| `views` | close-ups and own views: `{ "detail-saddle": { "part": ["saddle*", "seat post"], "angle": -42, "elev": 16, "margin": 1.3, "cover": 2 } }` (a name ending in `*` takes every part it begins; `cover` the widest frame the shot fills, 1 for the margin alone: a close-up render of 2-3 MP takes a CPU 2-9 minutes) |
-| `scenes` | the product loaded or in use, below |
-| `supports` | the views the product draws well, `["three-quarter", "side", "front", "detail-saddle"]`: only these are offered (`product.views`), made (`make.variants` outside it fails `--check`) and mounted; list a view only after looking at its still (a bike from above reads as lying on its side, so the city bike omits `top`). Keep `three-quarter` (the default view) |
-| `make` | `{ "variants": ["three-quarter", "side", "detail-saddle", "three-quarter+loaded"], "grounds": ["light", "dark"], "px": 1100 }`: what make-posters makes |
-| `parts` | the parts, below (keep it under about 90) |
+| key                   | what                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`, `name`, `label` | the label is what a screen reader hears ("A desk lamp, switched on")                                                                                                                                                                                                                                                                                                |
+| `poster`              | the posters' file name (default the id)                                                                                                                                                                                                                                                                                                                             |
+| `angle`               | its turn at rest and in the still, degrees (default -32: a three-quarter view)                                                                                                                                                                                                                                                                                      |
+| `turn`                | `{ "mode": "sway", "amp": 26, "period": 22 }` (default), `{ "mode": "spin", "speed": 10 }`, `{ "mode": "still" }`                                                                                                                                                                                                                                                   |
+| `camera`              | `{ "elev": 12 }` degrees above the floor                                                                                                                                                                                                                                                                                                                            |
+| `click`               | `"light"`: a click switches every `light` material (and `glow`) on and off; it starts on                                                                                                                                                                                                                                                                            |
+| `pool`                | `{ "at": [x, 0, z], "r": 0.2 }`: the light it throws on the floor while on                                                                                                                                                                                                                                                                                          |
+| `materials`           | named materials for the parts                                                                                                                                                                                                                                                                                                                                       |
+| `motion`              | moving groups (joints), below                                                                                                                                                                                                                                                                                                                                       |
+| `colors`              | colourways: `[{ "id": "blue", "name": "Deep blue", "accent": "#2c4f7c" }]` (the accent parts take it; `materials` swaps materials too, at a render each)                                                                                                                                                                                                            |
+| `views`               | close-ups and own views: `{ "detail-saddle": { "part": ["saddle*", "seat post"], "angle": -42, "elev": 16, "margin": 1.3, "cover": 2 } }` (a name ending in `*` takes every part it begins; `cover` the widest frame the shot fills, 1 for the margin alone: a close-up render of 2-3 MP takes a CPU 2-9 minutes)                                                   |
+| `scenes`              | the product loaded or in use, below                                                                                                                                                                                                                                                                                                                                 |
+| `supports`            | the views the product draws well, `["three-quarter", "side", "front", "detail-saddle"]`: only these are offered (`product.views`), made (`make.variants` outside it fails `--check`) and mounted; list a view only after looking at its still (a bike from above reads as lying on its side, so the city bike omits `top`). Keep `three-quarter` (the default view) |
+| `make`                | `{ "variants": ["three-quarter", "side", "detail-saddle", "three-quarter+loaded"], "grounds": ["light", "dark"], "px": 1100 }`: what make-posters makes                                                                                                                                                                                                             |
+| `parts`               | the parts, below (keep it under about 90)                                                                                                                                                                                                                                                                                                                           |
 
 ### Parts
 
@@ -139,23 +158,23 @@ meets the parts listed before it: welded tubes, a cast body), `in` (a motion gro
 It is placed by `from` + `to` (a linear part runs between them; `up` turns its section), or by `at`
 plus `axis` (`"x"`, `"y"`, `"z"` or a vector) and/or `rot` ([x, y, z] degrees).
 
-| type | sizes | use |
-|---|---|---|
-| `tube` | `r`, `r2` (taper), `cap` `flat`/`round`, `round`, `seams` | frame tubes, posts, rods, handles, a tapered robot link |
-| `beam` | `w`, `d` (section), `round`, `seams` | flat bars, cranks, rails |
-| `box` | `size` [x, y, z], `round`, `seams` | housings, bodies, pedals, a gripper |
-| `panel` | `size` (thin), rounder | plates, lids, a screen's back |
-| `cylinder` / `disc` | `r`, `h`, `round`, `seams` | bases, hubs, motor housings, caps |
-| `sphere`, `ellipsoid` | `r` / `size` | a bulb, a bell, a knob |
-| `torus` | `R`, `r` | rings, a chainring, a status light |
-| `joint` | `r`, `w`, `capMat` | a hinge: knuckle about `axis` (default z) with caps on both faces |
-| `wheel` | `r`, `tyre` [width, height], `rim` [depth, width], `hub` [r, length], `spokes`, `spokeR`, `style` `spoked`/`disc`/`solid`, `wall` (sidewall colour), `rimMat`, `hubMat`, `spin` (deg/s) | bicycles, strollers, carts, casters; axle along `axis` (default z) |
-| `shade` | `from` (closed end) `to` (open end), `r1`, `r2`, `t`, `bulge` 0..1, `innerMat` | lamp shades, bells, horns, a speaker cone |
-| `seat` | `size` [length, height, width], `style` `saddle`/`cushion` | saddles, seats, cushions (local x forward) |
-| `basket` | `size`, `style` `wire`/`slats`/`solid`, `pitch`, `wire`, `rimMat` | baskets, crates, bins, trays (open top) |
-| `arc` | `R`, `a0`, `a1` (degrees), `r` or `size` [radial, axial] | mudguards, handles, bent frames, hoops |
-| `spring` | `from`, `to`, `R`, `r`, `turns` | springs, coiled cords |
-| `path` | `points` [[x,y,z]...], `r`, `smooth` (on with 3+ points) | handlebars, cables, bent tubes |
+| type                  | sizes                                                                                                                                                                                   | use                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `tube`                | `r`, `r2` (taper), `cap` `flat`/`round`, `round`, `seams`                                                                                                                               | frame tubes, posts, rods, handles, a tapered robot link            |
+| `beam`                | `w`, `d` (section), `round`, `seams`                                                                                                                                                    | flat bars, cranks, rails                                           |
+| `box`                 | `size` [x, y, z], `round`, `seams`                                                                                                                                                      | housings, bodies, pedals, a gripper                                |
+| `panel`               | `size` (thin), rounder                                                                                                                                                                  | plates, lids, a screen's back                                      |
+| `cylinder` / `disc`   | `r`, `h`, `round`, `seams`                                                                                                                                                              | bases, hubs, motor housings, caps                                  |
+| `sphere`, `ellipsoid` | `r` / `size`                                                                                                                                                                            | a bulb, a bell, a knob                                             |
+| `torus`               | `R`, `r`                                                                                                                                                                                | rings, a chainring, a status light                                 |
+| `joint`               | `r`, `w`, `capMat`                                                                                                                                                                      | a hinge: knuckle about `axis` (default z) with caps on both faces  |
+| `wheel`               | `r`, `tyre` [width, height], `rim` [depth, width], `hub` [r, length], `spokes`, `spokeR`, `style` `spoked`/`disc`/`solid`, `wall` (sidewall colour), `rimMat`, `hubMat`, `spin` (deg/s) | bicycles, strollers, carts, casters; axle along `axis` (default z) |
+| `shade`               | `from` (closed end) `to` (open end), `r1`, `r2`, `t`, `bulge` 0..1, `innerMat`                                                                                                          | lamp shades, bells, horns, a speaker cone                          |
+| `seat`                | `size` [length, height, width], `style` `saddle`/`cushion`                                                                                                                              | saddles, seats, cushions (local x forward)                         |
+| `basket`              | `size`, `style` `wire`/`slats`/`solid`, `pitch`, `wire`, `rimMat`                                                                                                                       | baskets, crates, bins, trays (open top)                            |
+| `arc`                 | `R`, `a0`, `a1` (degrees), `r` or `size` [radial, axial]                                                                                                                                | mudguards, handles, bent frames, hoops                             |
+| `spring`              | `from`, `to`, `R`, `r`, `turns`                                                                                                                                                         | springs, coiled cords                                              |
+| `path`                | `points` [[x,y,z]...], `r`, `smooth` (on with 3+ points)                                                                                                                                | handlebars, cables, bent tubes                                     |
 
 `seams`: panel lines cut round the part at heights along its length (-1..1 of its half length):
 the seams of a robot's shell, a base's groove. `seamWidth`, `seamDepth` in units.
@@ -164,18 +183,18 @@ the seams of a robot's shell, a base's groove. `seamWidth`, `seamDepth` in units
 
 A name from `materials`, a built-in name, or `{ "kind": ..., "color": "#hex" | "accent", "finish": "gloss" | "satin" | "matte" }`.
 
-| kind | | built-in names |
-|---|---|---|
-| `paint` | enamel or powder coat; `color: "accent"` takes the page's accent | `accent`, `paint`, `white`, `black`, `graphite` |
-| `metal` | brushed alloy | `alloy`, `aluminium` |
-| `chrome` | polished | `chrome` |
-| `steel` | dark stainless (spokes, wire) | `steel` |
-| `rubber` | tyres, pads, grips | `rubber` |
-| `plastic` | satin plastic | `plastic` |
-| `wood` | oiled wood with rings; `grain` x/y/z, `scale` | `wood`, `oak`, `walnut` |
-| `fabric` | a fine weave; `weave` | `fabric` |
-| `leather` | | `leather` |
-| `light` | gives light; with `click: "light"` it switches | `light` |
+| kind      |                                                                  | built-in names                                  |
+| --------- | ---------------------------------------------------------------- | ----------------------------------------------- |
+| `paint`   | enamel or powder coat; `color: "accent"` takes the page's accent | `accent`, `paint`, `white`, `black`, `graphite` |
+| `metal`   | brushed alloy                                                    | `alloy`, `aluminium`                            |
+| `chrome`  | polished                                                         | `chrome`                                        |
+| `steel`   | dark stainless (spokes, wire)                                    | `steel`                                         |
+| `rubber`  | tyres, pads, grips                                               | `rubber`                                        |
+| `plastic` | satin plastic                                                    | `plastic`                                       |
+| `wood`    | oiled wood with rings; `grain` x/y/z, `scale`                    | `wood`, `oak`, `walnut`                         |
+| `fabric`  | a fine weave; `weave`                                            | `fabric`                                        |
+| `leather` |                                                                  | `leather`                                       |
+| `light`   | gives light; with `click: "light"` it switches                   | `light`                                         |
 
 Any material takes `glow` (0..1): a lit inner face (a shade's inside when the lamp is on).
 
@@ -212,18 +231,18 @@ ordinary parts at the size of the real thing, standing on y = 0 and facing x, in
 converts: 1000 for a spec in millimetres); each takes `at`, `yaw`, `scale`, `size`, `color`,
 `mats` { role: material }, `in` (a motion group: a parcel held in a gripper) and `name`.
 
-| prop | what | options |
-|---|---|---|
-| `child-seat` | a rack seat: high back, wings, cushion, shoulder and lap belts to a red buckle, footrests | `color`; roles shell, pad, belt, buckle |
-| `bench` | a padded bench for 1-3 children or passengers in a row (a cargo box): two belts and a buckle a seat | `seats`, `width`, `color`; roles frame, pad, belt, buckle |
-| `crate` | a slatted wooden crate, open on top | `size`, `contents` fruit / bottles / loaves / parcels / none |
-| `bag` | a pannier (flap, straps, handle, `hooks` for a rack) or `style: "tote"` | `size`, `color` |
-| `parcel` | a cardboard box with tape and a label | `size`, `color` |
-| `tray` | a low open bin with parcels standing in it | `size`, `parcels` 0-4 |
-| `desk` | a tabletop | `size`, `color` |
-| `book` | 1-3 stacked books | `count`, `colors` |
-| `mug` | a mug of coffee | `r`, `h`, `color` |
-| `sheet` | a sheet of paper | `size` |
+| prop         | what                                                                                                | options                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `child-seat` | a rack seat: high back, wings, cushion, shoulder and lap belts to a red buckle, footrests           | `color`; roles shell, pad, belt, buckle                      |
+| `bench`      | a padded bench for 1-3 children or passengers in a row (a cargo box): two belts and a buckle a seat | `seats`, `width`, `color`; roles frame, pad, belt, buckle    |
+| `crate`      | a slatted wooden crate, open on top                                                                 | `size`, `contents` fruit / bottles / loaves / parcels / none |
+| `bag`        | a pannier (flap, straps, handle, `hooks` for a rack) or `style: "tote"`                             | `size`, `color`                                              |
+| `parcel`     | a cardboard box with tape and a label                                                               | `size`, `color`                                              |
+| `tray`       | a low open bin with parcels standing in it                                                          | `size`, `parcels` 0-4                                        |
+| `desk`       | a tabletop                                                                                          | `size`, `color`                                              |
+| `book`       | 1-3 stacked books                                                                                   | `count`, `colors`                                            |
+| `mug`        | a mug of coffee                                                                                     | `r`, `h`, `color`                                            |
+| `sheet`      | a sheet of paper                                                                                    | `size`                                                       |
 
 Keep a scene under about 110 parts. Its props must read at the size the page shows them (belts,
 buckles, a crate's slats, a bag's flap), and a scene goes where the copy promises it.

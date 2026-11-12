@@ -5,21 +5,21 @@
 // page ground, or a deep tone of a colour ground); on pages with dark text the field is the page
 // ground itself and the orb is a dark glass ball with a soft halo, so the text keeps its contrast.
 // The orb is placed on the side away from the calm area (where the page puts its text).
-import { shader, color, paletteKind } from '../fx.js';
+import { shader, color, paletteKind } from "../fx.js";
 
 const params = {
-  size:          { default: 0.36, min: 0.12, max: 0.6, step: 0.01 },  // radius, share of the shorter side
-  rim:           { default: 0.8,  min: 0,    max: 1.5, step: 0.01 },  // brightness of the fresnel edge
-  innerContrast: { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // how strongly the nebula shows
-  stars:         { default: 60,   min: 0,    max: 200, step: 1 },     // specks of light inside
-  glow:          { default: 0.35, min: 0,    max: 1,   step: 0.01 },  // soft light around the orb
-  speed:         { default: 0.05, min: 0,    max: 0.4, step: 0.005 }, // turning speed; 0.05 is about 25 s a turn
-  pulse:         { default: 0,    min: 0,    max: 1,   step: 0.01 },  // gentle breathing of size and glow
-  orbX:          { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // wanted orb centre, 0 left .. 1 right
-  orbY:          { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // wanted orb centre, 0 top .. 1 bottom
-  calm:          { default: 0.5,  min: 0,    max: 1,   step: 0.01 },  // keep the orb and glow off this area
-  calmX:         { default: 0.25, min: 0,    max: 1,   step: 0.01 },
-  calmY:         { default: 0.7,  min: 0,    max: 1,   step: 0.01 },
+  size: { default: 0.36, min: 0.12, max: 0.6, step: 0.01 }, // radius, share of the shorter side
+  rim: { default: 0.8, min: 0, max: 1.5, step: 0.01 }, // brightness of the fresnel edge
+  innerContrast: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how strongly the nebula shows
+  stars: { default: 60, min: 0, max: 200, step: 1 }, // specks of light inside
+  glow: { default: 0.35, min: 0, max: 1, step: 0.01 }, // soft light around the orb
+  speed: { default: 0.05, min: 0, max: 0.4, step: 0.005 }, // turning speed; 0.05 is about 25 s a turn
+  pulse: { default: 0, min: 0, max: 1, step: 0.01 }, // gentle breathing of size and glow
+  orbX: { default: 0.5, min: 0, max: 1, step: 0.01 }, // wanted orb centre, 0 left .. 1 right
+  orbY: { default: 0.5, min: 0, max: 1, step: 0.01 }, // wanted orb centre, 0 top .. 1 bottom
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // keep the orb and glow off this area
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -154,9 +154,13 @@ void main() {
 }
 `;
 
-const lin = c => color.rgb(c).map(v => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+const lin = (c) =>
+  color.rgb(c).map((v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const lc = (c, L, C) => { const [, , h] = color.lch(c); return color.fromLch([L, C, h]); };
+const lc = (c, L, C) => {
+  const [, , h] = color.lch(c);
+  return color.fromLch([L, C, h]);
+};
 // blues lightened at a fixed hue drift toward lavender: keep their hue at 248 and their chroma modest
 function noLavender(c) {
   const [L, C, h] = color.lch(c);
@@ -172,15 +176,27 @@ function tones(P) {
   const light = color.lab(ink)[0] < color.lab(bg)[0];
   const Ca = color.chroma(accent);
   let hue = accent;
-  if (light) hue = Ca >= 0.04 ? accent : color.chroma(ink) >= 0.04 ? ink : color.chroma(bg) >= 0.04 ? bg : accent;
-  else if (kind === 'colour' && (color.hueDistance(bg, accent) > 55 || Ca < 0.03)) hue = bg;
+  if (light)
+    hue =
+      Ca >= 0.04
+        ? accent
+        : color.chroma(ink) >= 0.04
+          ? ink
+          : color.chroma(bg) >= 0.04
+            ? bg
+            : accent;
+  else if (kind === "colour" && (color.hueDistance(bg, accent) > 55 || Ca < 0.03)) hue = bg;
   const C = color.chroma(hue);
   // yellows and yellow-greens turn olive or brown when darkened: there the body stays near the ink
   // and the light is kept high, so the colour reads as light on dark instead of mud
   const h = color.lch(hue)[2];
   const olive = C > 0.04 && h > 75 && h < 140;
   // the orb's light: a lively light step of the hue, at least some chroma so a muted accent still glows
-  const tone = noLavender(C > 0.02 ? lc(hue, olive ? 0.82 : 0.74, clamp(C * 1.1, 0.1, 0.16)) : color.withLightness(hue, 0.76));
+  const tone = noLavender(
+    C > 0.02
+      ? lc(hue, olive ? 0.82 : 0.74, clamp(C * 1.1, 0.1, 0.16))
+      : color.withLightness(hue, 0.76),
+  );
   let ground, deep, glow;
   if (light) {
     ground = bg;
@@ -188,16 +204,24 @@ function tones(P) {
     deep = color.mix(ink, lc(hue, 0.3, clamp(C, 0.04, 0.08)), olive ? 0.3 : 0.75);
     // the halo tints the ground toward the orb's light; when the two hues are far apart that mix
     // turns grey, so the ground only lightens
-    glow = color.chroma(bg) > 0.04 && color.hueDistance(bg, tone) > 70 ? color.mix(bg, '#ffffff', 0.5) : color.mix(bg, tone, 0.55);
+    glow =
+      color.chroma(bg) > 0.04 && color.hueDistance(bg, tone) > 70
+        ? color.mix(bg, "#ffffff", 0.5)
+        : color.mix(bg, tone, 0.55);
   } else {
-    ground = kind === 'dark' ? bg : lc(bg, 0.2, clamp(color.chroma(bg) * 0.55, 0.04, 0.1));
+    ground = kind === "dark" ? bg : lc(bg, 0.2, clamp(color.chroma(bg) * 0.55, 0.04, 0.1));
     deep = color.mix(ground, lc(hue, 0.3, Math.min(C, 0.08)), olive ? 0.12 : 0.3);
     glow = color.mix(ground, tone, 0.55);
   }
   return {
-    kind, light, ground, tone, deep, glow,
-    rim: noLavender(color.mix('#ffffff', tone, 0.3)),
-    star: color.mix('#ffffff', tone, 0.12),
+    kind,
+    light,
+    ground,
+    tone,
+    deep,
+    glow,
+    rim: noLavender(color.mix("#ffffff", tone, 0.3)),
+    star: color.mix("#ffffff", tone, 0.12),
   };
 }
 
@@ -210,27 +234,51 @@ function placeOrb(prm, w, h) {
   const R0 = prm.size * Math.min(w, h);
   const want = [prm.orbX * w, prm.orbY * h];
   const inside = (m) => {
-    const lo = [m, m], hi = [w - m, h - m];
-    return p => [hi[0] > lo[0] ? clamp(p[0], lo[0], hi[0]) : w / 2, hi[1] > lo[1] ? clamp(p[1], lo[1], hi[1]) : h / 2];
+    const lo = [m, m],
+      hi = [w - m, h - m];
+    return (p) => [
+      hi[0] > lo[0] ? clamp(p[0], lo[0], hi[0]) : w / 2,
+      hi[1] > lo[1] ? clamp(p[1], lo[1], hi[1]) : h / 2,
+    ];
   };
   const start = inside(R0 * 1.12)(want);
   if (prm.calm <= 0.05) return [...start, 1];
   const cc = [prm.calmX * w, prm.calmY * h];
   // clearance around the calm centre: text runs wider than it is tall
   const rc = (0.3 + 0.35 * prm.calm) * h;
-  const clearFor = R => p => ((p[0] - cc[0]) / (R + 0.9 * rc)) ** 2 + ((p[1] - cc[1]) / (R + 0.5 * rc)) ** 2;
+  const clearFor = (R) => (p) =>
+    ((p[0] - cc[0]) / (R + 0.9 * rc)) ** 2 + ((p[1] - cc[1]) / (R + 0.5 * rc)) ** 2;
   if (clearFor(R0)(start) >= 1) return [...start, 1];
   // the nearest clear spot: whole orb in frame first (a little smaller if need be), then cropped by the edge
-  let far = start, farD = clearFor(R0)(start);
-  for (const [s, m] of [[1, 1.12], [0.84, 1.12], [0.7, 1.12], [1, 0.25]]) {
-    const R = R0 * s, f = inside(R * m), clear = clearFor(R);
-    let best = null, bestE = Infinity;
-    for (let i = 0; i <= 32; i++) for (let j = 0; j <= 20; j++) {
-      const p = f([w * i / 32, h * j / 20]);
-      const dd = clear(p);
-      if (dd >= 1) { const e = Math.hypot(p[0] - want[0], p[1] - want[1]); if (e < bestE) { bestE = e; best = p; } }
-      if (s === 1 && dd > farD + 1e-3) { farD = dd; far = p; }
-    }
+  let far = start,
+    farD = clearFor(R0)(start);
+  for (const [s, m] of [
+    [1, 1.12],
+    [0.84, 1.12],
+    [0.7, 1.12],
+    [1, 0.25],
+  ]) {
+    const R = R0 * s,
+      f = inside(R * m),
+      clear = clearFor(R);
+    let best = null,
+      bestE = Infinity;
+    for (let i = 0; i <= 32; i++)
+      for (let j = 0; j <= 20; j++) {
+        const p = f([(w * i) / 32, (h * j) / 20]);
+        const dd = clear(p);
+        if (dd >= 1) {
+          const e = Math.hypot(p[0] - want[0], p[1] - want[1]);
+          if (e < bestE) {
+            bestE = e;
+            best = p;
+          }
+        }
+        if (s === 1 && dd > farD + 1e-3) {
+          farD = dd;
+          far = p;
+        }
+      }
     if (best) return [...best, s];
   }
   return [...far, 1];
@@ -240,8 +288,9 @@ function uniforms({ palette, params, width, height }) {
   const k = tones(palette);
   const grid = 11;
   // stars spread over the near and far shell: 6 faces * grid^2 cells
-  const p = Math.min(0.5, params.stars / (6 * grid * grid) * 1.25);
-  const w = width || 800, h = height || 500;
+  const p = Math.min(0.5, (params.stars / (6 * grid * grid)) * 1.25);
+  const w = width || 800,
+    h = height || 500;
   const [cx, cy, s] = placeOrb(params, w, h);
   return {
     u_orbS: s,
@@ -262,12 +311,15 @@ function uniforms({ palette, params, width, height }) {
 // CSS stand-in: a soft body with an offset highlight, a thin rim and a glow that fades outward, in px
 function fallback({ palette: P, params: prm, width, height }) {
   const k = tones(P);
-  const w = width || 800, h = height || 500;
+  const w = width || 800,
+    h = height || 500;
   const [cx, cy, s] = placeOrb(prm, w, h);
   const R = prm.size * s * Math.min(w, h);
-  const f = v => `${v.toFixed(1)}px`;
+  const f = (v) => `${v.toFixed(1)}px`;
   const at = `${f(cx)} ${f(cy)}`;
-  const g0 = k.light ? color.mix(k.ground, k.glow, 0.55 * prm.glow * 1.6) : color.mix(k.ground, k.glow, Math.min(1, prm.glow * 1.3));
+  const g0 = k.light
+    ? color.mix(k.ground, k.glow, 0.55 * prm.glow * 1.6)
+    : color.mix(k.ground, k.glow, Math.min(1, prm.glow * 1.3));
   const g1 = color.mix(k.ground, g0, 0.4);
   const deepC = color.mix(k.deep, k.tone, k.light ? 0.06 : 0.1);
   const deepE = color.mix(k.deep, k.tone, 0.32);
@@ -275,19 +327,28 @@ function fallback({ palette: P, params: prm, width, height }) {
   const hl = color.mix(k.deep, k.rim, 0.3);
   return [
     // the lit side (light ground: a glass reflection; dark field: the glow inside)
-    `radial-gradient(circle ${f(R * 0.42)} at ${f(cx - R * 0.34)} ${f(cy - R * 0.4)}, ${hl}${k.light ? 'cc' : '55'}, ${hl}00)`,
+    `radial-gradient(circle ${f(R * 0.42)} at ${f(cx - R * 0.34)} ${f(cy - R * 0.4)}, ${hl}${k.light ? "cc" : "55"}, ${hl}00)`,
     `radial-gradient(circle ${f(R * 0.55)} at ${f(cx + R * 0.22)} ${f(cy + R * 0.18)}, ${color.mix(k.deep, k.tone, 0.3)}99, ${k.deep}00)`,
     `radial-gradient(circle at ${at}, ${deepC} 0, ${k.deep} ${f(R * 0.62)}, ${deepE} ${f(R * 0.93)}, ${rim} ${f(R - 1)}, ${g0} ${f(R + 0.6)}, ${g1} ${f(R * 1.3)}, ${k.ground}00 ${f(R * 2.1)})`,
     k.ground,
-  ].join(', ');
+  ].join(", ");
 }
 
 export default {
-  id: 'orb-sphere',
-  name: 'Light orb',
-  family: 'light',
+  id: "orb-sphere",
+  name: "Light orb",
+  family: "light",
   params,
   mount(el, { palette, params: given, seed }) {
-    return shader(el, { frag, schema: params, params: given, palette, seed, uniforms, still: 6, fallback });
+    return shader(el, {
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      seed,
+      uniforms,
+      still: 6,
+      fallback,
+    });
   },
 };

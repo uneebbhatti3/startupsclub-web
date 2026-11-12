@@ -3,19 +3,19 @@
 // anisotropic (narrower across the folds than along them) and broad, so it lies over each crest like
 // light on satin. All shading is done in OKLab: the light raises lightness and lowers chroma at a fixed
 // hue, and colours outside sRGB lose chroma, never hue (so a blue cloth never turns violet).
-import { shader, color } from '../fx.js';
+import { shader, color } from "../fx.js";
 
 const params = {
-  tone:   { default: 0,    min: 0,   max: 2,   step: 1 },     // 0 auto (accent, or the ground when the accent is too pale), 1 accent, 2 ground
-  scale:  { default: 1,    min: 0.4, max: 2.5, step: 0.01 },  // size of the folds
-  folds:  { default: 0.6,  min: 0,   max: 1,   step: 0.01 },  // depth of the folds
-  sheen:  { default: 0.6,  min: 0,   max: 1,   step: 0.01 },  // strength of the satin highlight
-  speed:  { default: 0.05, min: 0,   max: 0.4, step: 0.005 }, // how fast the cloth moves
-  grain:  { default: 0.02, min: 0,   max: 0.1, step: 0.005 }, // fine grain against banding
-  angle:  { default: 25,   min: -90, max: 90,  step: 1 },     // direction of the folds, 0 vertical
-  calm:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 },  // smooth, quiet cloth where text sits
-  calmX:  { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:  { default: 0.7,  min: 0,   max: 1,   step: 0.01 },
+  tone: { default: 0, min: 0, max: 2, step: 1 }, // 0 auto (accent, or the ground when the accent is too pale), 1 accent, 2 ground
+  scale: { default: 1, min: 0.4, max: 2.5, step: 0.01 }, // size of the folds
+  folds: { default: 0.6, min: 0, max: 1, step: 0.01 }, // depth of the folds
+  sheen: { default: 0.6, min: 0, max: 1, step: 0.01 }, // strength of the satin highlight
+  speed: { default: 0.05, min: 0, max: 0.4, step: 0.005 }, // how fast the cloth moves
+  grain: { default: 0.02, min: 0, max: 0.1, step: 0.005 }, // fine grain against banding
+  angle: { default: 25, min: -90, max: 90, step: 1 }, // direction of the folds, 0 vertical
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // smooth, quiet cloth where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -165,19 +165,27 @@ function tones(P, prm, kind) {
   // auto: the accent, unless it is too pale to carry shadows (a yellow, a pastel), or the page is a
   // colour with dark text (a mustard page): then the page colour, which that text already reads on
   const darkText = color.lab(ink)[0] < color.lab(bg)[0];
-  const useGround = prm.tone >= 1.5 || (prm.tone < 0.5 && color.chroma(bg) > 0.04 && (La > 0.82 || (kind === 'colour' && darkText)));
+  const useGround =
+    prm.tone >= 1.5 ||
+    (prm.tone < 0.5 && color.chroma(bg) > 0.04 && (La > 0.82 || (kind === "colour" && darkText)));
   let base = useGround ? bg : accent;
-  if (kind === 'light' && !useGround) {
+  if (kind === "light" && !useGround) {
     // on a light page the cloth is a muted tint of the accent, not a full-strength panel of it (made
     // from the accent alone: mixed with a page colour of another hue it would turn grey or mauve)
     const Lm = color.lab(color.mix(bg, accent, 0.42))[0];
     const Ca = color.chroma(accent);
-    base = cool(color.fromLch([Math.min(0.8, Math.max(0.68, Lm)), Math.min(0.11, Math.max(Ca * 0.55, Math.min(Ca, 0.05))), color.lch(accent)[2]]));
+    base = cool(
+      color.fromLch([
+        Math.min(0.8, Math.max(0.68, Lm)),
+        Math.min(0.11, Math.max(Ca * 0.55, Math.min(Ca, 0.05))),
+        color.lch(accent)[2],
+      ]),
+    );
   }
   const [L] = color.lab(base);
   // keep the cloth in a range where both the shadows and the sheen can show; on a dark page a
   // deeper shade of the colour, so the cloth does not glare
-  const top = kind === 'dark' ? 0.5 : 0.8;
+  const top = kind === "dark" ? 0.5 : 0.8;
   if (L > top) base = color.withLightness(base, top);
   if (L < 0.3) base = color.withLightness(base, 0.3);
   const Lb = color.lab(base)[0];
@@ -185,7 +193,12 @@ function tones(P, prm, kind) {
   const dir = color.lab(ink)[0] > Lb ? -1 : 1;
   let calm = base;
   const mutedGoal = Math.min(4.5, color.contrast(bg, muted) * 0.95);
-  for (let i = 0; i < 40 && (color.contrast(calm, ink) < 5.5 || color.contrast(calm, muted) < mutedGoal); i++) calm = color.lighten(calm, dir * 0.012);
+  for (
+    let i = 0;
+    i < 40 && (color.contrast(calm, ink) < 5.5 || color.contrast(calm, muted) < mutedGoal);
+    i++
+  )
+    calm = color.lighten(calm, dir * 0.012);
   // the calm tone keeps the cloth's hue, turned out of lavender if lifting it made it periwinkle
   const calmLab = color.lab(cool(calm));
   return {
@@ -193,20 +206,27 @@ function tones(P, prm, kind) {
     turn: sheenTurn(base),
     calmL: calmLab[0],
     calmAB: [calmLab[1], calmLab[2]],
-    shadowK: kind === 'dark' ? 0.26 : 0.34,
-    sheenL: Math.min(0.96, Lb + (kind === 'dark' ? 0.32 : 0.24)),
+    shadowK: kind === "dark" ? 0.26 : 0.34,
+    sheenL: Math.min(0.96, Lb + (kind === "dark" ? 0.32 : 0.24)),
   };
 }
 
 function uniforms({ palette, params, kind }) {
   const t = tones(palette, params, kind);
-  return { u_base: color.labVec(t.base), u_calmL: t.calmL, u_calmAB: t.calmAB, u_shadowK: t.shadowK, u_sheenL: t.sheenL, u_turn: t.turn };
+  return {
+    u_base: color.labVec(t.base),
+    u_calmL: t.calmL,
+    u_calmAB: t.calmAB,
+    u_shadowK: t.shadowK,
+    u_sheenL: t.sheenL,
+    u_turn: t.turn,
+  };
 }
 
 export default {
-  id: 'silk-folds',
-  name: 'Silk folds',
-  family: 'material',
+  id: "silk-folds",
+  name: "Silk folds",
+  family: "material",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -219,7 +239,8 @@ export default {
       still: 6,
       fallback: ({ palette: P, params: prm, kind }) => {
         const b = tones(P, prm, kind).base;
-        const lo = color.darken(b, 0.1), hi = color.adjust(b, { l: 0.1, c: 0.7 });
+        const lo = color.darken(b, 0.1),
+          hi = color.adjust(b, { l: 0.1, c: 0.7 });
         return `linear-gradient(${115 + prm.angle}deg, ${lo} 0%, ${b} 24%, ${hi} 36%, ${b} 50%, ${lo} 64%, ${b} 80%, ${hi} 92%, ${b} 100%)`;
       },
     });

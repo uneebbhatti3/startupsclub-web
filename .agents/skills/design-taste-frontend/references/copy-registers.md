@@ -132,23 +132,23 @@ the footer. Use it only when the client asks for it, and then within the device 
 
 ## Matching voice to the trade (starting points only)
 
-| Trade | Try first | Avoid |
-| --- | --- | --- |
-| Cafe, roastery, bakery | 7 sensory, 8 historical, 4 playful | 0 the default |
-| Developer tool, infrastructure | 2 technical-dry, 3 founder's letter | 4 playful in the hero |
-| Software for small businesses | 3 founder's letter, 11 product as hero | abstract "power and alignment" |
-| AI product | 2 technical-dry, 11 product as hero | "magic", "superpowers" |
-| Agency, studio | 1 facts only, 12 hurried, 4 playful | stacked category nouns ("digital brand experience company") |
-| Portfolio | 12 hurried, 1 facts only | a list of credits with no person in it |
-| Luxury hotel | 6 restraint | the word "luxury" |
-| Guesthouse, small hotel | 12 hurried, 7 sensory, 6 restraint | "boutique", "curated experiences" |
-| Fitness, yoga | 7 sensory, 10 refusal | "the best version of yourself" |
-| Architecture | 6 restraint, 1 facts only | "spaces that inspire" |
-| Course, teaching | 3 the teacher's letter, 7 sensory for a physical skill | "transform your life" |
-| Skincare, beauty | 5 literary, 10 refusal | "clean", "glow" with no ingredient |
-| Finance | 1 facts only, 3 founder's letter | jokes about money worries, unsourced savings |
-| Hardware, appliances | 11 product as hero, 2 technical-dry | adjectives where the spec should be |
-| Game | the game's own world and tone, 12 for the studio | the default register on the store page |
-| Drinks, snacks | 4 playful, 9 activist | 0 the default |
-| Repair shop, trade | 10 refusal, 1 facts only | "passion", "quality you can trust" |
-| Wedding, events, photography | 7 sensory, 12 hurried | "capturing your special day" |
+| Trade                          | Try first                                              | Avoid                                                       |
+| ------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------- |
+| Cafe, roastery, bakery         | 7 sensory, 8 historical, 4 playful                     | 0 the default                                               |
+| Developer tool, infrastructure | 2 technical-dry, 3 founder's letter                    | 4 playful in the hero                                       |
+| Software for small businesses  | 3 founder's letter, 11 product as hero                 | abstract "power and alignment"                              |
+| AI product                     | 2 technical-dry, 11 product as hero                    | "magic", "superpowers"                                      |
+| Agency, studio                 | 1 facts only, 12 hurried, 4 playful                    | stacked category nouns ("digital brand experience company") |
+| Portfolio                      | 12 hurried, 1 facts only                               | a list of credits with no person in it                      |
+| Luxury hotel                   | 6 restraint                                            | the word "luxury"                                           |
+| Guesthouse, small hotel        | 12 hurried, 7 sensory, 6 restraint                     | "boutique", "curated experiences"                           |
+| Fitness, yoga                  | 7 sensory, 10 refusal                                  | "the best version of yourself"                              |
+| Architecture                   | 6 restraint, 1 facts only                              | "spaces that inspire"                                       |
+| Course, teaching               | 3 the teacher's letter, 7 sensory for a physical skill | "transform your life"                                       |
+| Skincare, beauty               | 5 literary, 10 refusal                                 | "clean", "glow" with no ingredient                          |
+| Finance                        | 1 facts only, 3 founder's letter                       | jokes about money worries, unsourced savings                |
+| Hardware, appliances           | 11 product as hero, 2 technical-dry                    | adjectives where the spec should be                         |
+| Game                           | the game's own world and tone, 12 for the studio       | the default register on the store page                      |
+| Drinks, snacks                 | 4 playful, 9 activist                                  | 0 the default                                               |
+| Repair shop, trade             | 10 refusal, 1 facts only                               | "passion", "quality you can trust"                          |
+| Wedding, events, photography   | 7 sensory, 12 hurried                                  | "capturing your special day"                                |

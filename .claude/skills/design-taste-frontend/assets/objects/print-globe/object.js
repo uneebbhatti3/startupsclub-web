@@ -8,8 +8,8 @@
   pointer and the globe leans toward it. Click, Enter or focus: a flick, the Earth spins up and runs
   down again, as a real globe does under a hand.
 */
-import { definePrint } from '../_print-core/print3d.js';
-import { LAND, LAKES } from './land.js';
+import { definePrint } from "../_print-core/print3d.js";
+import { LAND, LAKES } from "./land.js";
 
 const DEG = Math.PI / 180;
 
@@ -104,11 +104,17 @@ void surf(float id, vec3 p, vec3 n, inout Surf s) {
 
 // the same test as the shader's: a blue or teal accent (blue well above red and green)
 function seaAccent(hex) {
-  let h = String(hex || '').replace('#', '');
-  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  let h = String(hex || "").replace("#", "");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const n = parseInt(h.slice(0, 6), 16);
   if (!Number.isFinite(n)) return false;
-  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const r = ((n >> 16) & 255) / 255,
+    g = ((n >> 8) & 255) / 255,
+    b = (n & 255) / 255;
   return b - Math.max(r, g * 0.85) >= 0.06;
 }
 
@@ -116,30 +122,35 @@ function seaAccent(hex) {
 let landCanvas = null;
 function landMask() {
   if (landCanvas) return landCanvas;
-  const w = 1024, h = 512, c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  const x = c.getContext('2d');
-  const sx = w / 360, sy = h / 180;
+  const w = 1024,
+    h = 512,
+    c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const x = c.getContext("2d");
+  const sx = w / 360,
+    sy = h / 180;
   const fill = (poly, off) => {
     x.beginPath();
     x.moveTo((poly[0] + 180 + off) * sx, (90 - poly[1]) * sy);
-    for (let i = 2; i < poly.length; i += 2) x.lineTo((poly[i] + 180 + off) * sx, (90 - poly[i + 1]) * sy);
+    for (let i = 2; i < poly.length; i += 2)
+      x.lineTo((poly[i] + 180 + off) * sx, (90 - poly[i + 1]) * sy);
     x.closePath();
     x.fill();
   };
-  x.filter = 'blur(0.6px)';
-  x.fillStyle = '#fff';
+  x.filter = "blur(0.6px)";
+  x.fillStyle = "#fff";
   for (const off of [-360, 0, 360]) for (const p of LAND) fill(p, off);
-  x.globalCompositeOperation = 'destination-out';
+  x.globalCompositeOperation = "destination-out";
   for (const p of LAKES) fill(p, 0);
   landCanvas = c;
   return c;
 }
 
 export default definePrint({
-  id: 'print-globe',
-  name: 'Desk globe',
-  label: 'A desk globe turning on its tilted axis',
+  id: "print-globe",
+  name: "Desk globe",
+  label: "A desk globe turning on its tilted axis",
   base: import.meta.url,
   glsl,
   pivot: [0, 0.46, 0],
@@ -147,24 +158,35 @@ export default definePrint({
   extent: [0.34, 0.47],
   camera: { elev: 14, dist: 6, target: 0.44 },
   light: [-0.32, 1.6, 0.75],
-  turn: { mode: 'sway', amp: 16, period: 26 },
-  step: 'impulse',
+  turn: { mode: "sway", amp: 16, period: 26 },
+  step: "impulse",
   texture: landMask,
-  posterPrint: 'engrave',
+  posterPrint: "engrave",
   // the accent sits on the sea when it is blue (as the shader decides), else on the land (a print) or
   // nowhere (the render keeps its deep ocean blue): so each picture has a second set of posters
-  poster: (pal, dark, render) => (seaAccent(pal.accent) ? `./fallback-${render ? 'render-' : ''}sea${dark ? '-dark' : ''}.png` : null),
+  poster: (pal, dark, render) =>
+    seaAccent(pal.accent)
+      ? `./fallback-${render ? "render-" : ""}sea${dark ? "-dark" : ""}.png`
+      : null,
   plates: [
-    { file: 'fallback-sea.png', paper: 'light', accent: '#2f5f93' }, { file: 'fallback-sea-dark.png', paper: 'dark', accent: '#5a8fd0' },
-    { file: 'fallback-render-sea.png', paper: 'light', accent: '#2f5f93', render: 1 }, { file: 'fallback-render-sea-dark.png', paper: 'dark', accent: '#5a8fd0', render: 1 },
+    { file: "fallback-sea.png", paper: "light", accent: "#2f5f93" },
+    { file: "fallback-sea-dark.png", paper: "dark", accent: "#5a8fd0" },
+    { file: "fallback-render-sea.png", paper: "light", accent: "#2f5f93", render: 1 },
+    { file: "fallback-render-sea-dark.png", paper: "dark", accent: "#5a8fd0", render: 1 },
   ],
-  press: 'Press to spin it.',
-  params: { effect: { default: 'render' }, angle: { default: 22 }, size: { default: 0.8 } },
+  press: "Press to spin it.",
+  params: { effect: { default: "render" }, angle: { default: 22 }, size: { default: 0.8 } },
   // card: cut by the bottom-left (the bottom-right corner stays clear for the pause button), and in a
   // panel about as tall as wide (a phone) less cut, so the thing still reads; tile: whole, low; hero:
   // right of the text, smaller and under it in a phone-shaped frame
   place: {
-    card: { transparent: 1, size: 1.12, x: -0.2, y: -0.24, narrow: { size: 0.94, x: -0.1, y: -0.24 } },
+    card: {
+      transparent: 1,
+      size: 1.12,
+      x: -0.2,
+      y: -0.24,
+      narrow: { size: 0.94, x: -0.1, y: -0.24 },
+    },
     tile: { transparent: 1, size: 0.86, y: -0.06 },
     hero: { transparent: 1, size: 0.9, x: 0.2, y: -0.02, narrow: { size: 0.66, x: 0.1, y: -0.2 } },
   },

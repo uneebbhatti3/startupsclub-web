@@ -21,41 +21,65 @@
         start 0.45 (the share of the section's rise at which the line comes up from under the screen).
 */
 export default function (root, opts, lib) {
-  root.classList.add('mo-lc');
-  if (lib.reduced()) { root.classList.add('is-done'); return {}; }
-  const from = ['base', 'surface', 'inverse'].includes(opts.from) ? opts.from : 'base';
+  root.classList.add("mo-lc");
+  if (lib.reduced()) {
+    root.classList.add("is-done");
+    return {};
+  }
+  const from = ["base", "surface", "inverse"].includes(opts.from) ? opts.from : "base";
   const start = lib.clamp(+opts.start || 0.45, 0.1, 0.8);
-  const stage = document.createElement('div');
-  stage.className = 'mo-lc__stage';
-  stage.setAttribute('aria-hidden', 'true');
-  const cover = document.createElement('div');
-  cover.className = 'mo-lc__cover';
-  const line = document.createElement('div');
-  line.className = 'mo-lc__line';
+  const stage = document.createElement("div");
+  stage.className = "mo-lc__stage";
+  stage.setAttribute("aria-hidden", "true");
+  const cover = document.createElement("div");
+  cover.className = "mo-lc__cover";
+  const line = document.createElement("div");
+  line.className = "mo-lc__line";
   stage.append(cover, line);
   root.append(stage);
-  root.classList.add('is-live', `mo-lc--${from}`);
+  root.classList.add("is-live", `mo-lc--${from}`);
   // the section's words and pictures as whole blocks (lib.blocks): each stays invisible until the line is above all of it
   const bl = lib.blocks(root, [stage]);
-  const remeasure = () => { bl.measure(); s.update(); };
-  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(remeasure) : null;
+  const remeasure = () => {
+    bl.measure();
+    s.update();
+  };
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(remeasure) : null;
   if (ro) ro.observe(root);
   if (lib.fontsReady) lib.fontsReady(1500).then(remeasure);
   let open = null;
-  const s = lib.scrub(root, (p, r) => {
-    const vh = innerHeight;
-    const rise = lib.clamp((vh * 0.98 - r.top) / (vh * 0.78));          // 0: the section's top at the screen's foot; 1: a fifth down
-    const k = lib.ease.smooth(start, 1, rise);                          // the line's climb, 0 at its foot, 1 at the top
-    const sr = stage.getBoundingClientRect(), gy = sr.top - r.top, h = sr.height;
-    const cut = (1 - k) * h;                                            // the line's place in the stage's own coordinates
-    root.style.setProperty('--mo-cut', `${cut.toFixed(1)}px`);
-    root.style.setProperty('--mo-below', `${(h - cut).toFixed(1)}px`);
-    const done = k >= 0.999;
-    if (done !== open) { open = done; root.classList.toggle('is-open', done); if (done) bl.release(); }
-    if (done) return;
-    // a block appears once the line is above the whole of it, then fades in over the next stretch of the climb
-    const soft = Math.max(48, h * 0.12);
-    bl.set(b => lib.ease.smooth(0, 1, ((b.t - gy) - cut) / soft));
-  }, { mode: 'view' });
-  return { destroy() { s.destroy(); if (ro) ro.disconnect(); bl.release(); stage.remove(); root.classList.remove('is-live', 'is-open', `mo-lc--${from}`); } };
+  const s = lib.scrub(
+    root,
+    (p, r) => {
+      const vh = innerHeight;
+      const rise = lib.clamp((vh * 0.98 - r.top) / (vh * 0.78)); // 0: the section's top at the screen's foot; 1: a fifth down
+      const k = lib.ease.smooth(start, 1, rise); // the line's climb, 0 at its foot, 1 at the top
+      const sr = stage.getBoundingClientRect(),
+        gy = sr.top - r.top,
+        h = sr.height;
+      const cut = (1 - k) * h; // the line's place in the stage's own coordinates
+      root.style.setProperty("--mo-cut", `${cut.toFixed(1)}px`);
+      root.style.setProperty("--mo-below", `${(h - cut).toFixed(1)}px`);
+      const done = k >= 0.999;
+      if (done !== open) {
+        open = done;
+        root.classList.toggle("is-open", done);
+        if (done) bl.release();
+      }
+      if (done) return;
+      // a block appears once the line is above the whole of it, then fades in over the next stretch of the climb
+      const soft = Math.max(48, h * 0.12);
+      bl.set((b) => lib.ease.smooth(0, 1, (b.t - gy - cut) / soft));
+    },
+    { mode: "view" },
+  );
+  return {
+    destroy() {
+      s.destroy();
+      if (ro) ro.disconnect();
+      bl.release();
+      stage.remove();
+      root.classList.remove("is-live", "is-open", `mo-lc--${from}`);
+    },
+  };
 }

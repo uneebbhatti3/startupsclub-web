@@ -2,19 +2,19 @@
 // n-th node carries a small cross, and the ruling thins out toward the text and fades before the edges.
 // A wide soft light wanders slowly across the far side and brings the dots it passes forward (stronger,
 // a touch larger, leaning to the accent), so the ground reads as lit paper, never as blinking.
-import { shader, color, grainCSS } from '../fx.js';
+import { shader, color, grainCSS } from "../fx.js";
 
 const params = {
-  cell:  { default: 16,   min: 12, max: 28, step: 1 },    // dot pitch in CSS px (snapped to whole device px)
-  major: { default: 4,    min: 0,  max: 8,  step: 1 },    // every n-th node carries a small cross; under 3 none
-  ink:   { default: 0.5,  min: 0,  max: 1,  step: 0.01 }, // strength of the ruling
-  focus: { default: 0.6,  min: 0,  max: 1,  step: 0.01 }, // how much the wandering light brings the dots forward
-  speed: { default: 0.8,  min: 0,  max: 2,  step: 0.01 }, // 1 = one sweep across in 25 s
-  reach: { default: 0.5,  min: 0,  max: 1,  step: 0.01 }, // how far the ruling reaches toward the text side
-  grain: { default: 0.5,  min: 0,  max: 1,  step: 0.01 }, // still paper grain on the ground
-  calm:  { default: 0.5,  min: 0,  max: 1,  step: 0.01 }, // clear the ruling and the light where text sits
-  calmX: { default: 0.25, min: 0,  max: 1,  step: 0.01 },
-  calmY: { default: 0.7,  min: 0,  max: 1,  step: 0.01 },
+  cell: { default: 16, min: 12, max: 28, step: 1 }, // dot pitch in CSS px (snapped to whole device px)
+  major: { default: 4, min: 0, max: 8, step: 1 }, // every n-th node carries a small cross; under 3 none
+  ink: { default: 0.5, min: 0, max: 1, step: 0.01 }, // strength of the ruling
+  focus: { default: 0.6, min: 0, max: 1, step: 0.01 }, // how much the wandering light brings the dots forward
+  speed: { default: 0.8, min: 0, max: 2, step: 0.01 }, // 1 = one sweep across in 25 s
+  reach: { default: 0.5, min: 0, max: 1, step: 0.01 }, // how far the ruling reaches toward the text side
+  grain: { default: 0.5, min: 0, max: 1, step: 0.01 }, // still paper grain on the ground
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // clear the ruling and the light where text sits
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.7, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -76,38 +76,59 @@ void main() {
 
 // the violet guard: no derived colour, and no mix the shader makes between two of them, may land in the
 // violet or lavender band (OKLCH hue 274-336 with any real chroma)
-const inBand = c => { const [, C, h] = color.lch(c); return C > 0.025 && h > 274 && h < 336; };
-const clean = (a, b) => { for (let i = 1; i <= 10; i++) if (inBand(color.mix(a, b, i / 10))) return false; return true; };
+const inBand = (c) => {
+  const [, C, h] = color.lch(c);
+  return C > 0.025 && h > 274 && h < 336;
+};
+const clean = (a, b) => {
+  for (let i = 1; i <= 10; i++) if (inBand(color.mix(a, b, i / 10))) return false;
+  return true;
+};
 // the ground's own hue at another lightness, nearly grey (a hue at the band's edge leans a little bluer)
 const step = (bg, L, cmax = 0.02) => {
   const [, C, h] = color.lch(bg);
-  return color.fromLch([Math.min(1, Math.max(0, L)), Math.min(C, cmax), h > 262 && h < 276 ? 262 : h]);
+  return color.fromLch([
+    Math.min(1, Math.max(0, L)),
+    Math.min(C, cmax),
+    h > 262 && h < 276 ? 262 : h,
+  ]);
 };
 
 // every colour is the palette's own: the ink for the ruling, steps of the ground for the ramp, and the
 // accent for the light only when it sits with the ground
 function tones(P, kind) {
   const { bg, surface, ink, accent } = P;
-  const Lb = color.lab(bg)[0], Li = color.lab(ink)[0];
-  const up = Li > Lb ? 1 : -1;                         // toward the ink
+  const Lb = color.lab(bg)[0],
+    Li = color.lab(ink)[0];
+  const up = Li > Lb ? 1 : -1; // toward the ink
   const neutral = color.chroma(bg) < 0.02;
   const line = clean(bg, ink) ? ink : step(bg, Li);
-  const accOk = color.chroma(accent) > 0.03 && !inBand(accent) && clean(bg, accent) && (neutral || color.hueDistance(bg, accent) < 55);
+  const accOk =
+    color.chroma(accent) > 0.03 &&
+    !inBand(accent) &&
+    clean(bg, accent) &&
+    (neutral || color.hueDistance(bg, accent) < 55);
   let T;
-  if (kind === 'dark') {
+  if (kind === "dark") {
     const lift = color.lighten(color.mix(bg, surface, 0.7), 0.008);
     T = {
-      near: bg, aDot: 0.3, grain: 0.018,
+      near: bg,
+      aDot: 0.3,
+      grain: 0.018,
       far: accOk ? color.mix(lift, accent, 0.05) : lift,
       pool: accOk ? color.lighten(color.mix(bg, accent, 0.2), 0.015) : step(bg, Lb + 0.07, 0.03),
       glow: accOk ? color.adjust(accent, { l: 0.06, c: 0.85 }) : color.lighten(line, 0.03),
     };
-  } else if (kind === 'colour') {
+  } else if (kind === "colour") {
     T = {
-      near: bg, aDot: 0.3, grain: 0.02,
+      near: bg,
+      aDot: 0.3,
+      grain: 0.02,
       far: color.lighten(bg, -0.03 * up),
       pool: color.withLightness(color.saturate(bg, 1.05), Lb + 0.08 * up),
-      glow: accOk ? color.adjust(accent, { l: 0.04 * up, c: 0.85 }) : color.lighten(line, 0.02 * up),
+      glow: accOk
+        ? color.adjust(accent, { l: 0.04 * up, c: 0.85 })
+        : color.lighten(line, 0.02 * up),
     };
   } else {
     // light: the light is a paler sheen on the paper (tinted by the accent when it fits) under darker dots
@@ -115,27 +136,40 @@ function tones(P, kind) {
     const deep = color.mix(bg, ink, 0.055);
     const sheen = Math.min(0.995, Lb + 0.035);
     T = {
-      near: white ? bg : color.lighten(bg, 0.012), aDot: 0.28, grain: 0.02,
+      near: white ? bg : color.lighten(bg, 0.012),
+      aDot: 0.28,
+      grain: 0.02,
       far: accOk ? color.mix(deep, accent, 0.03) : deep,
-      pool: accOk ? color.withLightness(color.mix(bg, accent, 0.1), sheen) : color.withLightness(bg, sheen),
+      pool: accOk
+        ? color.withLightness(color.mix(bg, accent, 0.1), sheen)
+        : color.withLightness(bg, sheen),
       glow: accOk ? color.darken(accent, 0.04) : line,
     };
   }
   T.line = line;
-  for (const k of ['far', 'pool', 'glow']) if (!clean(bg, T[k]) || inBand(T[k])) T[k] = k === 'glow' ? line : step(bg, color.lab(T[k])[0]);
+  for (const k of ["far", "pool", "glow"])
+    if (!clean(bg, T[k]) || inBand(T[k])) T[k] = k === "glow" ? line : step(bg, color.lab(T[k])[0]);
   return T;
 }
 
 // composition shared by the shader and the CSS stand-in (positions in height units, y down)
 function geometry(prm, r, asp) {
   const C = [prm.calmX * asp, prm.calmY];
-  const corners = [[0, 0], [asp, 0], [0, 1], [asp, 1]];
+  const corners = [
+    [0, 0],
+    [asp, 0],
+    [0, 1],
+    [asp, 1],
+  ];
   // the corner farthest from the text; a tie (text in the middle) goes to the lower right
-  const far = c => Math.hypot(c[0] - C[0], c[1] - C[1]) + 0.002 * c[1] + 0.001 * c[0];
+  const far = (c) => Math.hypot(c[0] - C[0], c[1] - C[1]) + 0.002 * c[1] + 0.001 * c[0];
   const corner = corners.reduce((a, b) => (far(b) > far(a) ? b : a));
   const span = Math.max(0.4, Math.hypot(corner[0] - C[0], corner[1] - C[1]));
   // the light wanders across the side away from the text
-  const pc = [asp * 0.5 + (asp * 0.5 - C[0]) * 0.35, Math.min(0.7, Math.max(0.3, 0.5 + (0.5 - C[1]) * 0.5))];
+  const pc = [
+    asp * 0.5 + (asp * 0.5 - C[0]) * 0.35,
+    Math.min(0.7, Math.max(0.3, 0.5 + (0.5 - C[1]) * 0.5)),
+  ];
   const ph = [r() * 6.283, r() * 6.283];
   return { C, corner, span, pc, amp: [0.28 * asp, 0.12], pr: 0.38 + 0.06 * r(), ph };
 }
@@ -160,11 +194,12 @@ function uniforms({ palette, params, rng, kind, dpr, width, height }) {
     u_ph: g.ph,
     u_aDot: Math.min(0.5, T.aDot * s),
     u_aMark: Math.min(0.5, T.aDot * s * 0.8),
-    u_lw: Math.max(1, Math.floor(D + 0.3)),            // one CSS px in whole device px
-    u_arm: Math.max(2, Math.round(3 * D)),             // cross arm, 3 CSS px
+    u_lw: Math.max(1, Math.floor(D + 0.3)), // one CSS px in whole device px
+    u_arm: Math.max(2, Math.round(3 * D)), // cross arm, 3 CSS px
     u_grainAmp: T.grain * (0.4 + 1.2 * params.grain),
   };
-  for (const key of ['near', 'far', 'pool', 'line', 'glow']) u['u_k' + key[0].toUpperCase() + key.slice(1)] = color.labVec(T[key]);
+  for (const key of ["near", "far", "pool", "line", "glow"])
+    u["u_k" + key[0].toUpperCase() + key.slice(1)] = color.labVec(T[key]);
   return u;
 }
 
@@ -174,7 +209,10 @@ function fallback({ palette: P, params: prm, kind, rng, width, height }) {
   const g = geometry(prm, rng, asp);
   const T = tones(P, kind);
   const s = 0.4 + 1.2 * prm.ink;
-  const rgba = (c, a) => { const [r, gg, b] = color.rgb(c).map(v => Math.round(v * 255)); return `rgba(${r},${gg},${b},${a.toFixed(3)})`; };
+  const rgba = (c, a) => {
+    const [r, gg, b] = color.rgb(c).map((v) => Math.round(v * 255));
+    return `rgba(${r},${gg},${b},${a.toFixed(3)})`;
+  };
   const pct = (x, y) => `${((x / asp) * 100).toFixed(1)}% ${(y * 100).toFixed(1)}%`;
   const c = prm.cell;
   const dot = color.mix(T.near, T.line, Math.min(0.5, T.aDot * s * 0.9));
@@ -189,22 +227,25 @@ function fallback({ palette: P, params: prm, kind, rng, width, height }) {
     `radial-gradient(ellipse 58% 60% at 50% 50%, transparent 72%, ${rgba(P.bg, 0.92)} 100%)`,
   ];
   if (prm.major > 2.5) {
-    const M = c * prm.major, h = M / 2;
+    const M = c * prm.major,
+      h = M / 2;
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${M}' height='${M}'><path d='M${h - 3} ${h + 0.5}h7M${h + 0.5} ${h - 3}v7' stroke='${color.mix(T.near, T.line, Math.min(0.5, T.aDot * s * 0.8))}' stroke-width='1' shape-rendering='crispEdges'/></svg>`;
-    layers.push(`url("data:image/svg+xml,${encodeURIComponent(svg)}") calc(50% - ${h}px) calc(50% - ${h}px) / ${M}px ${M}px`);
+    layers.push(
+      `url("data:image/svg+xml,${encodeURIComponent(svg)}") calc(50% - ${h}px) calc(50% - ${h}px) / ${M}px ${M}px`,
+    );
   }
   layers.push(
     `radial-gradient(circle at 50% 50%, ${dot} 0.8px, transparent 1.3px) 50% 50% / ${c}px ${c}px`,
-    `radial-gradient(${((g.pr * 1.6 / asp) * 100).toFixed(1)}% ${(g.pr * 160).toFixed(1)}% at ${pct(L[0], L[1])}, ${rgba(T.pool, prm.focus * 0.8)}, transparent 72%)`,
+    `radial-gradient(${(((g.pr * 1.6) / asp) * 100).toFixed(1)}% ${(g.pr * 160).toFixed(1)}% at ${pct(L[0], L[1])}, ${rgba(T.pool, prm.focus * 0.8)}, transparent 72%)`,
     `linear-gradient(${ang.toFixed(1)}deg, ${T.near}, ${color.mix(T.near, T.far, 0.5)} 55%, ${T.far})`,
   );
-  return `${layers.join(', ')}, ${P.bg}`;
+  return `${layers.join(", ")}, ${P.bg}`;
 }
 
 export default {
-  id: 'ruled-grounds',
-  name: 'Ruled dot ground',
-  family: 'pattern',
+  id: "ruled-grounds",
+  name: "Ruled dot ground",
+  family: "pattern",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {
@@ -215,9 +256,9 @@ export default {
       seed,
       uniforms,
       fallback,
-      crisp: true,   // dots and crosses on whole device pixels, never resampled
-      maxDpr: 3,     // so 3x and 2.6x screens are drawn 1:1, never pixel-upscaled
-      fps: 30,       // the light moves a few pixels a frame; 30 frames are plenty
+      crisp: true, // dots and crosses on whole device pixels, never resampled
+      maxDpr: 3, // so 3x and 2.6x screens are drawn 1:1, never pixel-upscaled
+      fps: 30, // the light moves a few pixels a frame; 30 frames are plenty
       still: 6,
     });
   },

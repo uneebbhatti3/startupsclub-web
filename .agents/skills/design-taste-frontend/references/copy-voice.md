@@ -33,19 +33,19 @@ swapped for its synonym is the next tell.
 Before a sentence, write down what the brief, the client's files or an existing site give, word for
 word where you can. Each field feeds a part of the page:
 
-| Field | What it holds | Where it goes |
-| --- | --- | --- |
-| What it is | One plain sentence, no adjective | the h1 and the sub-line |
-| For whom, and not for whom | The best-fit buyer; who should look elsewhere | the h1 or sub-line, one line in the FAQ |
-| What they do today instead | A spreadsheet, the big rival, the bakery across town, nothing | the pain line, the comparison |
-| The true difference | What is true here and not elsewhere, with its proof | the claims worth a heading |
-| Customer words | Phrases from reviews, emails, the brief's own quotes | the pain line, headings |
-| Numbers | Each with where it came from | sentences, the facts strip |
-| People | Names and roles the brief gives | the about block, a quote |
-| Odd true details | History, an object, a ritual, a house word, the awkward bit | the texture you would otherwise invent |
-| A limit | What it does not do, who it is wrong for, what is closed | one admission a page |
-| An enemy | A habit or a category ("re-typing invoices"), never the reader | the pain line, one section |
-| The offer | Price, trial, booking terms, the one action | buttons, the close |
+| Field                      | What it holds                                                  | Where it goes                           |
+| -------------------------- | -------------------------------------------------------------- | --------------------------------------- |
+| What it is                 | One plain sentence, no adjective                               | the h1 and the sub-line                 |
+| For whom, and not for whom | The best-fit buyer; who should look elsewhere                  | the h1 or sub-line, one line in the FAQ |
+| What they do today instead | A spreadsheet, the big rival, the bakery across town, nothing  | the pain line, the comparison           |
+| The true difference        | What is true here and not elsewhere, with its proof            | the claims worth a heading              |
+| Customer words             | Phrases from reviews, emails, the brief's own quotes           | the pain line, headings                 |
+| Numbers                    | Each with where it came from                                   | sentences, the facts strip              |
+| People                     | Names and roles the brief gives                                | the about block, a quote                |
+| Odd true details           | History, an object, a ritual, a house word, the awkward bit    | the texture you would otherwise invent  |
+| A limit                    | What it does not do, who it is wrong for, what is closed       | one admission a page                    |
+| An enemy                   | A habit or a category ("re-typing invoices"), never the reader | the pain line, one section              |
+| The offer                  | Price, trial, booking terms, the one action                    | buttons, the close                      |
 
 - **Nothing is invented** beyond what `copy.md` allows (a coined name; on a place, plausible hours and
   prices). An empty field stays empty: its section shrinks or goes, and the report lists what the client
@@ -136,23 +136,23 @@ Read `copy-moves.md` before drafting a whole page.
 None of these is banned; each works once. The problem is using them by default. `copy-lint.mjs`
 counts them: over the budget is a WARN, twice the budget plus one or more is a FAIL (a tic).
 
-| Device | Budget | Note |
-| --- | --- | --- |
-| Heading in two fragments "X. Y." | 1 | spend it where it lands hardest |
-| Number-pair heading "Four X, one Y" | 0 to 1 | the most repeated model habit |
-| Negation run "No X. No Y." | 1 | only when each item is a refusal a buyer can check |
-| Contrast "X, not Y", isn't, rather than, instead of, without the | 2 in all | banning one form moves you to the next; count them together |
-| Dry closing line on a paragraph | 2, never in a row | most paragraphs end on information |
-| Pun on the name or its metaphor | 1, never the h1 | it is the page's one brand line (`copy.md` rule 3) |
-| Sign-off line in the footer | 0 | the footer holds facts (`copy.md`) |
-| Strip of figures | facts from the brief only | never invented KPIs |
-| Virtue words about ourselves | 0 | the lint skips literal ones (a quiet room, calm water, genuine parts) and allows 2 |
-| Lists of three | when there are three things | never in consecutive sentences |
-| Step numbers on cards | only where the order is the content (a booking's steps) | none on features that read in any order |
-| Eyebrow labels | 1 or 2 a page | a heading that names the thing needs none |
-| Testimonials | the brief's only | name and role or town; none is fine |
-| Response-time promise | 1, from the brief | the same words wherever it repeats |
-| "Since [year]" | 1, from the brief | |
+| Device                                                           | Budget                                                  | Note                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Heading in two fragments "X. Y."                                 | 1                                                       | spend it where it lands hardest                                                    |
+| Number-pair heading "Four X, one Y"                              | 0 to 1                                                  | the most repeated model habit                                                      |
+| Negation run "No X. No Y."                                       | 1                                                       | only when each item is a refusal a buyer can check                                 |
+| Contrast "X, not Y", isn't, rather than, instead of, without the | 2 in all                                                | banning one form moves you to the next; count them together                        |
+| Dry closing line on a paragraph                                  | 2, never in a row                                       | most paragraphs end on information                                                 |
+| Pun on the name or its metaphor                                  | 1, never the h1                                         | it is the page's one brand line (`copy.md` rule 3)                                 |
+| Sign-off line in the footer                                      | 0                                                       | the footer holds facts (`copy.md`)                                                 |
+| Strip of figures                                                 | facts from the brief only                               | never invented KPIs                                                                |
+| Virtue words about ourselves                                     | 0                                                       | the lint skips literal ones (a quiet room, calm water, genuine parts) and allows 2 |
+| Lists of three                                                   | when there are three things                             | never in consecutive sentences                                                     |
+| Step numbers on cards                                            | only where the order is the content (a booking's steps) | none on features that read in any order                                            |
+| Eyebrow labels                                                   | 1 or 2 a page                                           | a heading that names the thing needs none                                          |
+| Testimonials                                                     | the brief's only                                        | name and role or town; none is fine                                                |
+| Response-time promise                                            | 1, from the brief                                       | the same words wherever it repeats                                                 |
+| "Since [year]"                                                   | 1, from the brief                                       |                                                                                    |
 
 ## 6. Check
 

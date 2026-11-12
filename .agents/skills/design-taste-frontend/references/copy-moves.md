@@ -10,16 +10,16 @@ heading has its noun, buttons are a verb and an object, nothing is invented.
 Professional heroes are short (2 to 9 words), one clause, never two adjectives stacked. On a tasteskill
 page the h1 names the category, so the form is chosen among the ones that do:
 
-| Form | Example | When |
-| --- | --- | --- |
-| Category and buyer | "Payroll app for restaurant teams" | software, a service nobody knows yet |
-| Category and place | "Bakery on Mill Street, Leith" | every place |
-| Category and a true, unexpected promise | "Tax return app that asks eleven questions" | the category is known and the twist is in the brief |
-| Category and one striking customer | "Rota planner for the night shift at three hospitals" | the brief names that customer and it may be shown |
-| Category and scope | "Card payments for market stalls" | infrastructure, B2B with a real scope |
-| Category, place and year | "Guesthouse on the lake shore since 1962" | the brief gives the year |
-| A narrow superlative | "The only ferry to the island in winter" | the brief proves it, and the next line says how |
-| Name and genre | "Kelpmoor, a co-op sailing game" | a game |
+| Form                                    | Example                                               | When                                                |
+| --------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| Category and buyer                      | "Payroll app for restaurant teams"                    | software, a service nobody knows yet                |
+| Category and place                      | "Bakery on Mill Street, Leith"                        | every place                                         |
+| Category and a true, unexpected promise | "Tax return app that asks eleven questions"           | the category is known and the twist is in the brief |
+| Category and one striking customer      | "Rota planner for the night shift at three hospitals" | the brief names that customer and it may be shown   |
+| Category and scope                      | "Card payments for market stalls"                     | infrastructure, B2B with a real scope               |
+| Category, place and year                | "Guesthouse on the lake shore since 1962"             | the brief gives the year                            |
+| A narrow superlative                    | "The only ferry to the island in winter"              | the brief proves it, and the next line says how     |
+| Name and genre                          | "Kelpmoor, a co-op sailing game"                      | a game                                              |
 
 The other forms professionals use (a greeting, a line to the reader's state of mind, a question, an
 imperative, an enemy, a twisted idiom, product news) never take the h1. They can take the sub-line, a

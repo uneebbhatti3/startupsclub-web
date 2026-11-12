@@ -26,33 +26,53 @@
   the first panel's title is then an <h2>.
   The object's WebGL context is taken only while the section is near the screen and given back when it is far.
 */
-import { scene, seg, ease, lerp } from '../lib.js';
-import { attachPrint } from '../print.js';
+import { scene, seg, ease, lerp } from "../lib.js";
+import { attachPrint } from "../print.js";
 
 export default function mount(root, opts = {}) {
-  const panels = [...root.querySelectorAll('.fho__panel')];
+  const panels = [...root.querySelectorAll(".fho__panel")];
   const n = panels.length;
-  const objectEl = root.querySelector('.fho__object');
-  const host = root.querySelector('.fho__host');
-  if (!objectEl || n < 2) { root.classList.add('sc', 'is-rest'); return { destroy() {} }; }
-  const ground = document.createElement('div'); ground.className = 'fho__ground'; ground.setAttribute('aria-hidden', 'true');
-  root.querySelector('.sc__stage').prepend(ground);
+  const objectEl = root.querySelector(".fho__object");
+  const host = root.querySelector(".fho__host");
+  if (!objectEl || n < 2) {
+    root.classList.add("sc", "is-rest");
+    return { destroy() {} };
+  }
+  const ground = document.createElement("div");
+  ground.className = "fho__ground";
+  ground.setAttribute("aria-hidden", "true");
+  root.querySelector(".sc__stage").prepend(ground);
   const turns = opts.turns ?? 1;
-  let obj = null, liveNow = false, nearNow = false;
-  const lanes = panels.map((_, i) => (i % 2 ? -1 : 1));      // hero right, then left, right …
+  let obj = null,
+    liveNow = false,
+    nearNow = false;
+  const lanes = panels.map((_, i) => (i % 2 ? -1 : 1)); // hero right, then left, right …
   const scales = panels.map((_, i) => (i === 0 ? 1 : i === n - 1 && n > 2 ? 0.74 : 0.86));
-  if (opts.object && host) obj = attachPrint(host, { object: opts.object, effect: opts.effect, params: opts.params });
-  const wake = () => { if (obj && liveNow && nearNow) obj.wake(); };
-  const turnTo = (deg, force) => { if (obj) obj.turnTo(deg, force); };
+  if (opts.object && host)
+    obj = attachPrint(host, { object: opts.object, effect: opts.effect, params: opts.params });
+  const wake = () => {
+    if (obj && liveNow && nearNow) obj.wake();
+  };
+  const turnTo = (deg, force) => {
+    if (obj) obj.turnTo(deg, force);
+  };
   const ctrl = scene(root, {
     hold: opts.hold ?? 1,
-    phone: 'rest',
-    enter() { liveNow = true; wake(); },
-    near(_, isNear) { nearNow = isNear; if (isNear) wake(); else if (obj) obj.sleep(); },
+    phone: "rest",
+    enter() {
+      liveNow = true;
+      wake();
+    },
+    near(_, isNear) {
+      nearNow = isNear;
+      if (isNear) wake();
+      else if (obj) obj.sleep();
+    },
     update(p, ctx) {
-      const t = p * (n - 1);                      // panel time
-      const i = Math.min(n - 2, Math.floor(t)), f = t - i;
-      const u = seg(f, 0.2, 0.8, ease.inOut);     // the glide between lanes
+      const t = p * (n - 1); // panel time
+      const i = Math.min(n - 2, Math.floor(t)),
+        f = t - i;
+      const u = seg(f, 0.2, 0.8, ease.inOut); // the glide between lanes
       const lane = lerp(lanes[i], lanes[Math.min(n - 1, i + 1)], u);
       const sc = lerp(scales[i], scales[Math.min(n - 1, i + 1)], u);
       const x = lane * ctx.vw * 0.24;
@@ -61,24 +81,34 @@ export default function mount(root, opts = {}) {
       turnTo(p * 360 * turns);
       let dark = 0;
       panels.forEach((panel, k) => {
-        const d = t - k;                           // -: still to come, +: passed
-        const vis = 1 - seg(Math.abs(d), 0.4, 0.5, ease.inOut);      // one chapter's copy at a time: a quick hand-over at the midpoint
+        const d = t - k; // -: still to come, +: passed
+        const vis = 1 - seg(Math.abs(d), 0.4, 0.5, ease.inOut); // one chapter's copy at a time: a quick hand-over at the midpoint
         const copy = panel.firstElementChild;
-        panel.style.visibility = vis <= 0.001 ? 'hidden' : '';
+        panel.style.visibility = vis <= 0.001 ? "hidden" : "";
         copy.style.opacity = vis.toFixed(3);
         copy.style.transform = `translate3d(0, ${(-d * 70).toFixed(1)}px, 0)`;
-        if (panel.classList.contains('is-dark')) dark = Math.max(dark, vis);
-        panel.classList.toggle('is-current', k === Math.round(t));
+        if (panel.classList.contains("is-dark")) dark = Math.max(dark, vis);
+        panel.classList.toggle("is-current", k === Math.round(t));
       });
       ground.style.opacity = dark.toFixed(3);
-      root.style.setProperty('--fho-dark', dark.toFixed(3));
+      root.style.setProperty("--fho-dark", dark.toFixed(3));
     },
     rest() {
       liveNow = false;
-      objectEl.style.transform = ''; ground.style.opacity = '0';
-      panels.forEach(panel => { panel.style.visibility = ''; panel.firstElementChild.style.cssText = ''; panel.classList.remove('is-current'); });
+      objectEl.style.transform = "";
+      ground.style.opacity = "0";
+      panels.forEach((panel) => {
+        panel.style.visibility = "";
+        panel.firstElementChild.style.cssText = "";
+        panel.classList.remove("is-current");
+      });
       if (obj) obj.sleep();
     },
   });
-  return { destroy() { ctrl && ctrl.destroy(); if (obj) obj.destroy(); } };
+  return {
+    destroy() {
+      ctrl && ctrl.destroy();
+      if (obj) obj.destroy();
+    },
+  };
 }

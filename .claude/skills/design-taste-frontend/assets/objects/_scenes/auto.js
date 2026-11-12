@@ -28,51 +28,75 @@
   on each: it reads the page tokens again.
 */
 export const scenes = new Map();
-const IDS = ['product-turntable', 'dot-object', 'split-reveal', 'dither-sequence', 'exploded-layers'];
-const LOOPING = new Set(['product-turntable', 'dither-sequence']);
+const IDS = [
+  "product-turntable",
+  "dot-object",
+  "split-reveal",
+  "dither-sequence",
+  "exploded-layers",
+];
+const LOOPING = new Set(["product-turntable", "dither-sequence"]);
 const claimed = new WeakSet();
-const json = (s, d = {}) => { try { return s ? JSON.parse(s) : d; } catch (_) { console.warn('scenes: bad JSON', s); return d; } };
-const srcOf = s => {
+const json = (s, d = {}) => {
+  try {
+    return s ? JSON.parse(s) : d;
+  } catch (_) {
+    console.warn("scenes: bad JSON", s);
+    return d;
+  }
+};
+const srcOf = (s) => {
   if (!s) return undefined;
   s = s.trim();
-  return s[0] === '{' || s[0] === '[' ? json(s, undefined) : s;
+  return s[0] === "{" || s[0] === "[" ? json(s, undefined) : s;
 };
 
 export async function mountAll(root = document) {
-  const els = [...root.querySelectorAll('[data-scene]')].filter(el => !claimed.has(el));
-  els.forEach(el => claimed.add(el));
+  const els = [...root.querySelectorAll("[data-scene]")].filter((el) => !claimed.has(el));
+  els.forEach((el) => claimed.add(el));
   // one moving scene per group
   const groups = new Map();
   for (const el of els) {
     if (!LOOPING.has(el.dataset.scene)) continue;
-    const g = el.closest('[data-scene-group]') || el.closest('section') || document.body;
+    const g = el.closest("[data-scene-group]") || el.closest("section") || document.body;
     if (!groups.has(g)) groups.set(g, []);
     groups.get(g).push(el);
   }
   const moving = new Set();
   for (const [g, list] of groups) {
-    const before = [...scenes.keys()].some(el => g.contains(el) && el.dataset.sceneMoving === '1');
-    if (!before) moving.add(list.find(el => el.hasAttribute('data-scene-loop')) || list[0]);
+    const before = [...scenes.keys()].some(
+      (el) => g.contains(el) && el.dataset.sceneMoving === "1",
+    );
+    if (!before) moving.add(list.find((el) => el.hasAttribute("data-scene-loop")) || list[0]);
   }
-  await Promise.all(els.map(async el => {
-    const id = el.dataset.scene;
-    if (!IDS.includes(id)) { console.warn('scenes: unknown object', id); return; }
-    try {
-      const obj = (await import(new URL(`../${id}/object.js`, import.meta.url).href)).default;
-      const params = json(el.dataset.sceneParams);
-      if (LOOPING.has(id) && params.autoplay == null) params.autoplay = moving.has(el) ? 1 : 0;
-      if (params.autoplay) el.dataset.sceneMoving = '1';
-      if (el.getAttribute('aria-label') && params.alt == null) params.alt = el.getAttribute('aria-label');
-      const opts = { params, src: srcOf(el.dataset.sceneSrc) };
-      if (el.dataset.scenePalette) opts.palette = json(el.dataset.scenePalette);
-      scenes.set(el, obj.mount(el, opts));
-    } catch (e) { console.warn('scenes:', id, e); }
-  }));
+  await Promise.all(
+    els.map(async (el) => {
+      const id = el.dataset.scene;
+      if (!IDS.includes(id)) {
+        console.warn("scenes: unknown object", id);
+        return;
+      }
+      try {
+        const obj = (await import(new URL(`../${id}/object.js`, import.meta.url).href)).default;
+        const params = json(el.dataset.sceneParams);
+        if (LOOPING.has(id) && params.autoplay == null) params.autoplay = moving.has(el) ? 1 : 0;
+        if (params.autoplay) el.dataset.sceneMoving = "1";
+        if (el.getAttribute("aria-label") && params.alt == null)
+          params.alt = el.getAttribute("aria-label");
+        const opts = { params, src: srcOf(el.dataset.sceneSrc) };
+        if (el.dataset.scenePalette) opts.palette = json(el.dataset.scenePalette);
+        scenes.set(el, obj.mount(el, opts));
+      } catch (e) {
+        console.warn("scenes:", id, e);
+      }
+    }),
+  );
   return scenes;
 }
 
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountAll(), { once: true });
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", () => mountAll(), { once: true });
   else mountAll();
 }
 export default { mountAll, scenes };

@@ -2,20 +2,20 @@
 // screen of round dots whose area follows the tone, like a zoomed-in magazine print. One ink on paper,
 // or two at their own screen angles. The seed picks the form unless `source` names one; the
 // panel-filling ones come up most often.
-import { shader, color, rng } from '../fx.js';
+import { shader, color, rng } from "../fx.js";
 
 const params = {
-  cell:      { default: 10,   min: 5,   max: 24,  step: 0.5 },  // screen cell, CSS px
-  angle:     { default: 30,   min: 0,   max: 90,  step: 1 },    // screen angle, degrees
-  source:    { default: -1,   min: -1,  max: 2,   step: 1 },    // -1 the seed picks, 0 sphere, 1 gradient hill, 2 slow noise
-  secondInk: { default: 0,    min: 0,   max: 1,   step: 1 },    // 1 adds the accent on its own screen, 45 degrees on
-  contrast:  { default: 1.4,  min: 0.6, max: 3,   step: 0.01 }, // empties the highlights, merges the shadows
-  gooey:     { default: 0,    min: 0,   max: 1,   step: 0.01 }, // dots melt into their neighbours
-  size:      { default: 1,    min: 0.5, max: 1.6, step: 0.01 }, // size of the form
-  drift:     { default: 0.02, min: 0,   max: 0.2, step: 0.005 },// slow wandering of the light; 0 is still
-  calm:      { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // empties the text area
-  calmX:     { default: 0.25, min: 0,   max: 1,   step: 0.01 },
-  calmY:     { default: 0.6,  min: 0,   max: 1,   step: 0.01 },
+  cell: { default: 10, min: 5, max: 24, step: 0.5 }, // screen cell, CSS px
+  angle: { default: 30, min: 0, max: 90, step: 1 }, // screen angle, degrees
+  source: { default: -1, min: -1, max: 2, step: 1 }, // -1 the seed picks, 0 sphere, 1 gradient hill, 2 slow noise
+  secondInk: { default: 0, min: 0, max: 1, step: 1 }, // 1 adds the accent on its own screen, 45 degrees on
+  contrast: { default: 1.4, min: 0.6, max: 3, step: 0.01 }, // empties the highlights, merges the shadows
+  gooey: { default: 0, min: 0, max: 1, step: 0.01 }, // dots melt into their neighbours
+  size: { default: 1, min: 0.5, max: 1.6, step: 0.01 }, // size of the form
+  drift: { default: 0.02, min: 0, max: 0.2, step: 0.005 }, // slow wandering of the light; 0 is still
+  calm: { default: 0.5, min: 0, max: 1, step: 0.01 }, // empties the text area
+  calmX: { default: 0.25, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.6, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -138,13 +138,14 @@ void main() {
 `;
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const lin = c => color.rgb(c).map(v => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+const lin = (c) =>
+  color.rgb(c).map((v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
 
 function inks(P) {
   const { bg, ink, accent } = P;
   const Lp = color.lab(bg)[0];
   const sub = color.lab(ink)[0] < Lp;
-  const side = c => {
+  const side = (c) => {
     const L = color.lab(c)[0];
     if (sub) return L < Lp - 0.12 ? c : color.withLightness(c, Math.max(0.25, Lp - 0.3));
     // a near-white ink on dark paper reads as heavy white dots: print it as a light tint of itself
@@ -158,18 +159,27 @@ function inks(P) {
 function layout(params, r, asp, seed) {
   // its own stream, so neighbouring seeds (and the other effects on the page) do not pick alike
   const pick = rng(`halftone-screen:pick:${seed}`)();
-  const mode = params.source >= 0 ? Math.round(params.source) : pick < 0.22 ? 0 : pick < 0.6 ? 1 : 2;
+  const mode =
+    params.source >= 0 ? Math.round(params.source) : pick < 0.22 ? 0 : pick < 0.6 ? 1 : 2;
   const C = [(params.calmX - 0.5) * asp, 0.5 - params.calmY];
   // the sphere is big and sits across the frame from the calm area, running off the far edge
   const R = clamp(0.46 * params.size * (0.92 + 0.16 * r()), 0.2, 0.75);
-  const sx = C[0] > 0.08 * asp ? -1 : C[0] < -0.08 * asp ? 1 : (r() < 0.5 ? -1 : 1);
+  const sx = C[0] > 0.08 * asp ? -1 : C[0] < -0.08 * asp ? 1 : r() < 0.5 ? -1 : 1;
   const fx = sx * (asp / 2 - R * (0.5 + 0.25 * r()));
-  const fy = Math.abs(C[1]) > 0.12 ? -Math.sign(C[1]) * (0.5 - R * (0.55 + 0.25 * r())) : (r() - 0.5) * 0.3;
+  const fy =
+    Math.abs(C[1]) > 0.12 ? -Math.sign(C[1]) * (0.5 - R * (0.55 + 0.25 * r())) : (r() - 0.5) * 0.3;
   // the light comes from the calm side and from above
   const lightA = Math.atan2(C[1] - fy + 0.35, C[0] - fx) + (r() - 0.5) * 0.3;
   // the fields rise from the calm area toward its far corner
-  const corners = [[-asp / 2, -0.5], [asp / 2, -0.5], [-asp / 2, 0.5], [asp / 2, 0.5]];
-  const far = corners.reduce((a, b) => (Math.hypot(b[0] - C[0], b[1] - C[1]) > Math.hypot(a[0] - C[0], a[1] - C[1]) ? b : a));
+  const corners = [
+    [-asp / 2, -0.5],
+    [asp / 2, -0.5],
+    [-asp / 2, 0.5],
+    [asp / 2, 0.5],
+  ];
+  const far = corners.reduce((a, b) =>
+    Math.hypot(b[0] - C[0], b[1] - C[1]) > Math.hypot(a[0] - C[0], a[1] - C[1]) ? b : a,
+  );
   const span = Math.max(0.3, Math.hypot(far[0] - C[0], far[1] - C[1]));
   return { mode, C, R, fx, fy, lightA, far, span };
 }
@@ -177,24 +187,38 @@ function layout(params, r, asp, seed) {
 function uniforms({ palette, params, seed, rng: r, width, height }) {
   const k = inks(palette);
   const P = lin(palette.bg);
-  const base = k.sub ? P : P.map(v => 1 - v);
-  const T = [k.ink, k.second].map(c => lin(c).map((v, i) => (k.sub ? clamp(v / Math.max(P[i], 1e-4), 0, 1) : clamp((1 - v) / Math.max(1 - P[i], 1e-4), 0, 1))));
+  const base = k.sub ? P : P.map((v) => 1 - v);
+  const T = [k.ink, k.second].map((c) =>
+    lin(c).map((v, i) =>
+      k.sub
+        ? clamp(v / Math.max(P[i], 1e-4), 0, 1)
+        : clamp((1 - v) / Math.max(1 - P[i], 1e-4), 0, 1),
+    ),
+  );
   const L = layout(params, r, width && height ? width / height : 4 / 3, seed);
   return {
-    u_base: base, u_sub: k.sub ? 1 : 0, u_T1: T[0], u_T2: T[1],
-    u_mode: L.mode, u_cap: k.sub ? 0.9 : 0.6,
-    u_form: [L.fx, L.fy, L.R], u_lightA: L.lightA,
-    u_calmP: L.C, u_dir: [(L.far[0] - L.C[0]) / L.span, (L.far[1] - L.C[1]) / L.span], u_span: L.span,
+    u_base: base,
+    u_sub: k.sub ? 1 : 0,
+    u_T1: T[0],
+    u_T2: T[1],
+    u_mode: L.mode,
+    u_cap: k.sub ? 0.9 : 0.6,
+    u_form: [L.fx, L.fy, L.R],
+    u_lightA: L.lightA,
+    u_calmP: L.C,
+    u_dir: [(L.far[0] - L.C[0]) / L.span, (L.far[1] - L.C[1]) / L.span],
+    u_span: L.span,
     u_cellPx: params.cell,
   };
 }
 
 // CSS fallback: an SVG of dot screens whose dot size steps with the tone, laid out like the shader
 // (the sphere across from the calm area, or the field rising away from it)
-const svgUrl = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
-const f1 = v => +v.toFixed(1);
+const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+const f1 = (v) => +v.toFixed(1);
 function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
-  const W = Math.max(40, Math.round(width || 800)), H = Math.max(40, Math.round(height || 600));
+  const W = Math.max(40, Math.round(width || 800)),
+    H = Math.max(40, Math.round(height || 600));
   const k = inks(P);
   const L = layout(prm, r, W / H, seed);
   const px = (x, y) => [f1(W / 2 + x * H), f1(H / 2 - y * H)];
@@ -204,24 +228,33 @@ function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
   let grad;
   if (L.mode === 0) {
     const [cx, cy] = px(L.fx, L.fy);
-    const [hx, hy] = px(L.fx + Math.cos(L.lightA) * L.R * 0.45, L.fy + Math.sin(L.lightA) * L.R * 0.45);
-    grad = (id, stops) => `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${f1(L.R * H)}" fx="${hx}" fy="${hy}">${stops}</radialGradient>`;
+    const [hx, hy] = px(
+      L.fx + Math.cos(L.lightA) * L.R * 0.45,
+      L.fy + Math.sin(L.lightA) * L.R * 0.45,
+    );
+    grad = (id, stops) =>
+      `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${f1(L.R * H)}" fx="${hx}" fy="${hy}">${stops}</radialGradient>`;
   } else {
     const [x1, y1] = px(L.C[0], L.C[1]);
     const [x2, y2] = px(L.far[0], L.far[1]);
-    grad = (id, stops) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops}</linearGradient>`;
+    grad = (id, stops) =>
+      `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops}</linearGradient>`;
   }
-  let defs = '', body = '';
+  let defs = "",
+    body = "";
   for (let i = 0; i < N; i++) {
     // tone along the gradient: the sphere darkens from its highlight to the rim on paper (on dark
     // paper the light ink fades instead); the field rises from the calm area
     const t = (i + 0.5) / N;
-    let a = L.mode === 0 ? (k.sub ? 0.08 + 0.9 * t : 0.75 - 0.6 * t) : Math.max(0, (t - 0.18) / 0.82);
+    let a =
+      L.mode === 0 ? (k.sub ? 0.08 + 0.9 * t : 0.75 - 0.6 * t) : Math.max(0, (t - 0.18) / 0.82);
     a = Math.min(cap, a);
     if (a < 0.03) continue;
     const rad = f1(cell * Math.sqrt(Math.min(a, 0.78) / Math.PI));
-    const s = i / N, e = (i + 1) / N;
-    const stop = (o, v) => `<stop offset="${Math.min(1, Math.max(0, o)).toFixed(3)}" stop-color="${v ? '#fff' : '#000'}"/>`;
+    const s = i / N,
+      e = (i + 1) / N;
+    const stop = (o, v) =>
+      `<stop offset="${Math.min(1, Math.max(0, o)).toFixed(3)}" stop-color="${v ? "#fff" : "#000"}"/>`;
     defs += `<pattern id="p${i}" width="${cell}" height="${cell}" patternUnits="userSpaceOnUse" patternTransform="rotate(${-prm.angle})"><circle cx="${cell / 2}" cy="${cell / 2}" r="${rad}" fill="${k.ink}"/></pattern>`;
     defs += grad(`g${i}`, stop(s - 0.002, 0) + stop(s, 1) + stop(e, 1) + stop(e + 0.002, 0));
     defs += `<mask id="m${i}"><rect width="${W}" height="${H}" fill="url(#g${i})"/></mask>`;
@@ -231,9 +264,9 @@ function fallback({ palette: P, params: prm, seed, rng: r, width, height }) {
 }
 
 export default {
-  id: 'halftone-screen',
-  name: 'Halftone screen',
-  family: 'dither',
+  id: "halftone-screen",
+  name: "Halftone screen",
+  family: "dither",
   params,
   mount(el, { palette, params: given, seed }) {
     return shader(el, {

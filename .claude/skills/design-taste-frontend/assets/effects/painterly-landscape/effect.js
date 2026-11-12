@@ -3,20 +3,20 @@
 // The ground for a UI window on a feature card. Light palettes get a pale day sky, dark ones a dusk that is
 // light only near the horizon, colour palettes a sky of the page colour over a field.
 // The picture is soft, so it renders at about half resolution; the film grain is a full-resolution CSS layer.
-import { shader, color, grainCSS } from '../fx.js';
+import { shader, color, grainCSS } from "../fx.js";
 
 const params = {
-  horizon: { default: 0.45, min: 0.3,  max: 0.7,  step: 0.01 }, // far horizon, 0 top .. 1 bottom
-  slope:   { default: 14,   min: 0,    max: 30,   step: 1 },    // how steeply the near hill rises, degrees
-  side:    { default: 0,    min: -1,   max: 1,    step: 1 },    // side the hill rises toward: -1 left, 1 right, 0 away from the calm area
-  hillY:   { default: 0.12, min: -0.1, max: 0.35, step: 0.01 }, // near hill below the horizon at the centre
-  blur:    { default: 0.6,  min: 0,    max: 1,    step: 0.01 }, // defocus of edges and dabs
-  brush:   { default: 0.6,  min: 0,    max: 1,    step: 0.01 }, // strength of the brush dabs
-  grain:   { default: 0.03, min: 0,    max: 0.1,  step: 0.005 },// film grain (a CSS layer)
-  drift:   { default: 0.02, min: 0,    max: 0.2,  step: 0.005 },// how fast the light and the dabs move
-  calm:    { default: 0.4,  min: 0,    max: 1,    step: 0.01 }, // a quiet patch of the page ground where text sits
-  calmX:   { default: 0.5,  min: 0,    max: 1,    step: 0.01 },
-  calmY:   { default: 0.55, min: 0,    max: 1,    step: 0.01 },
+  horizon: { default: 0.45, min: 0.3, max: 0.7, step: 0.01 }, // far horizon, 0 top .. 1 bottom
+  slope: { default: 14, min: 0, max: 30, step: 1 }, // how steeply the near hill rises, degrees
+  side: { default: 0, min: -1, max: 1, step: 1 }, // side the hill rises toward: -1 left, 1 right, 0 away from the calm area
+  hillY: { default: 0.12, min: -0.1, max: 0.35, step: 0.01 }, // near hill below the horizon at the centre
+  blur: { default: 0.6, min: 0, max: 1, step: 0.01 }, // defocus of edges and dabs
+  brush: { default: 0.6, min: 0, max: 1, step: 0.01 }, // strength of the brush dabs
+  grain: { default: 0.03, min: 0, max: 0.1, step: 0.005 }, // film grain (a CSS layer)
+  drift: { default: 0.02, min: 0, max: 0.2, step: 0.005 }, // how fast the light and the dabs move
+  calm: { default: 0.4, min: 0, max: 1, step: 0.01 }, // a quiet patch of the page ground where text sits
+  calmX: { default: 0.5, min: 0, max: 1, step: 0.01 },
+  calmY: { default: 0.55, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -108,7 +108,7 @@ void main() {
 }
 `;
 
-const L = c => color.lab(c)[0];
+const L = (c) => color.lab(c)[0];
 const at = (c, l) => color.withLightness(c, Math.min(0.98, Math.max(0.04, l)));
 const sat = (c, k) => color.saturate(c, k);
 
@@ -117,7 +117,7 @@ function tones(P, kind) {
   const { bg, ink, muted, accent } = P;
   const acc = color.chroma(accent) > 0.03 ? accent : color.mix(ink, muted, 0.4);
   const Lb = L(bg);
-  if (kind === 'dark') {
+  if (kind === "dark") {
     // dusk: a deep sky that lights up only near the horizon, hills as dark shapes with a lit crest
     return {
       skyTop: color.mix(bg, acc, 0.05),
@@ -132,7 +132,7 @@ function tones(P, kind) {
       ground: bg,
     };
   }
-  if (kind === 'colour') {
+  if (kind === "colour") {
     // a sky of the page colour, blue-ish far hills in its deeper shade, a field of the accent when it
     // sits far in hue (yellow on cobalt), else a deep shade of the ground
     const accFar = color.chroma(acc) > 0.04 && color.hueDistance(bg, acc) > 55;
@@ -177,36 +177,51 @@ function uniforms({ palette, params, rng, kind, width, height }) {
   const r = rng;
   const coin = r() < 0.5 ? -1 : 1;
   // the hill rises away from the calm area (where text sits); a centred calm area lets the seed choose
-  const dir = params.side !== 0 ? Math.sign(params.side) : Math.abs(params.calmX - 0.5) > 0.12 ? (params.calmX < 0.5 ? 1 : -1) : coin;
+  const dir =
+    params.side !== 0
+      ? Math.sign(params.side)
+      : Math.abs(params.calmX - 0.5) > 0.12
+        ? params.calmX < 0.5
+          ? 1
+          : -1
+        : coin;
   // the calm patch keeps the ground on the far side of the text colour from the ink
   const inkLight = color.lab(palette.ink)[0] > color.lab(palette.bg)[0];
   const Lg = color.lab(palette.bg)[0];
   const u = {
-    u_dir: dir, u_sun: [-dir * asp * (0.16 + 0.14 * r()), params.horizon - 0.06 - 0.06 * r()],
-    u_cap: inkLight ? Lg + (kind === 'dark' ? 0.08 : 0.03) : Lg - 0.02, u_capDir: inkLight ? -1 : 1,
+    u_dir: dir,
+    u_sun: [-dir * asp * (0.16 + 0.14 * r()), params.horizon - 0.06 - 0.06 * r()],
+    u_cap: inkLight ? Lg + (kind === "dark" ? 0.08 : 0.03) : Lg - 0.02,
+    u_capDir: inkLight ? -1 : 1,
   };
-  for (const [name, c] of Object.entries(k)) u['u_' + name] = color.labVec(c);
+  for (const [name, c] of Object.entries(k)) u["u_" + name] = color.labVec(c);
   return u;
 }
 
 // film grain as a CSS layer at full resolution, blended soft-light so it shades both ways
 function grainLayer(amount) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='1 1'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>`;
-  const url = `url("data:image/svg+xml,${svg.replace(/</g, '%3C').replace(/>/g, '%3E').replace(/ /g, '%20')}")`;
-  const d = document.createElement('div');
-  d.className = 'fx-grain';
-  d.setAttribute('aria-hidden', 'true');
+  const url = `url("data:image/svg+xml,${svg.replace(/</g, "%3C").replace(/>/g, "%3E").replace(/ /g, "%20")}")`;
+  const d = document.createElement("div");
+  d.className = "fx-grain";
+  d.setAttribute("aria-hidden", "true");
   Object.assign(d.style, {
-    position: 'absolute', inset: '0', zIndex: '-1', pointerEvents: 'none', borderRadius: 'inherit',
-    backgroundImage: url, mixBlendMode: 'soft-light', opacity: String(Math.min(1, amount * 9)),
+    position: "absolute",
+    inset: "0",
+    zIndex: "-1",
+    pointerEvents: "none",
+    borderRadius: "inherit",
+    backgroundImage: url,
+    mixBlendMode: "soft-light",
+    opacity: String(Math.min(1, amount * 9)),
   });
   return d;
 }
 
 export default {
-  id: 'painterly-landscape',
-  name: 'Painterly landscape',
-  family: 'mesh',
+  id: "painterly-landscape",
+  name: "Painterly landscape",
+  family: "mesh",
   params,
   mount(el, { palette, params: given, seed }) {
     const ctrl = shader(el, {
@@ -221,29 +236,58 @@ export default {
       fallback: ({ palette: P, kind, params: prm, rng }) => {
         const k = tones(P, kind);
         const h = prm.horizon * 100;
-        const dir = prm.side !== 0 ? Math.sign(prm.side) : Math.abs(prm.calmX - 0.5) > 0.12 ? (prm.calmX < 0.5 ? 1 : -1) : rng() < 0.5 ? -1 : 1;
+        const dir =
+          prm.side !== 0
+            ? Math.sign(prm.side)
+            : Math.abs(prm.calmX - 0.5) > 0.12
+              ? prm.calmX < 0.5
+                ? 1
+                : -1
+              : rng() < 0.5
+                ? -1
+                : 1;
         const ang = 180 + dir * (8 + prm.slope * 0.8);
         // a still landscape: the near hill as an angled band over sky and far hills
         return `${grainCSS(0.05)}, linear-gradient(${ang}deg, transparent ${h + prm.hillY * 100 - 2}%, ${k.nearLit} ${h + prm.hillY * 100 + 4}%, ${k.near} ${h + prm.hillY * 100 + 22}%, ${k.deep}), linear-gradient(${k.skyTop}, ${k.skyMid} ${h * 0.6}%, ${k.skyLow} ${h - 1}%, ${k.far} ${h + 1}%, ${k.mid} ${h + 9}%)`;
       },
     });
     let grain = null;
-    const sync = p => {
-      if (el.dataset.fxFallback || p.grain <= 0) { grain?.remove(); grain = null; return; }
+    const sync = (p) => {
+      if (el.dataset.fxFallback || p.grain <= 0) {
+        grain?.remove();
+        grain = null;
+        return;
+      }
       // above the canvas (which fx.shader puts first), under the content
-      if (!grain) { grain = grainLayer(p.grain); const cv = el.querySelector(':scope > canvas.fx-canvas'); el.insertBefore(grain, cv ? cv.nextSibling : el.firstChild); }
+      if (!grain) {
+        grain = grainLayer(p.grain);
+        const cv = el.querySelector(":scope > canvas.fx-canvas");
+        el.insertBefore(grain, cv ? cv.nextSibling : el.firstChild);
+      }
       grain.style.opacity = String(Math.min(1, p.grain * 9));
     };
-    sync({ grain: (given && given.grain != null) ? +given.grain : params.grain.default });
+    sync({ grain: given && given.grain != null ? +given.grain : params.grain.default });
     return {
       pause: () => ctrl.pause(),
       resume: () => ctrl.resume(),
       redraw: () => ctrl.redraw(),
-      set(next) { const p = ctrl.set(next); sync(p); return p; },
-      setPalette: p => ctrl.setPalette(p),
-      destroy() { ctrl.destroy(); grain?.remove(); grain = null; },
-      get canvas() { return ctrl.canvas; },
-      get info() { return ctrl.info; },
+      set(next) {
+        const p = ctrl.set(next);
+        sync(p);
+        return p;
+      },
+      setPalette: (p) => ctrl.setPalette(p),
+      destroy() {
+        ctrl.destroy();
+        grain?.remove();
+        grain = null;
+      },
+      get canvas() {
+        return ctrl.canvas;
+      },
+      get info() {
+        return ctrl.info;
+      },
     };
   },
 };

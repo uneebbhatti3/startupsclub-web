@@ -79,17 +79,17 @@ domain; files named as paintings, drawings, maps, logos or posters left out; one
 results in `.taste-skill/found.json` under `--out`, so `fetch` and `credits` take their ids (`f` and a number) like
 library ids. With `--trade` and no words it runs the trade's own search words:
 
-| Trade | search words |
-|---|---|
-| yoga, pilates, spa, wellness | yoga studio, yoga class, pilates studio, sauna interior |
-| pottery, ceramics | pottery wheel, pottery studio, ceramics workshop |
-| a studio (art, design, photography) | artist studio, design studio, photography studio |
-| bike shop or workshop | bicycle workshop, bicycle repair stand, bicycle mechanic, city bicycle, cargo bicycle |
-| hotel, guesthouse, inn | hotel facade, guesthouse, hotel room, hotel bedroom, inn exterior (the building and the rooms: never the library) |
-| wedding | wedding ceremony, wedding table, wedding bouquet, wedding reception, wedding rings |
-| restaurant | restaurant kitchen, restaurant interior, chef plating |
-| workshop by craft | woodworking workshop, blacksmith forge, workshop tools |
-| bakery, cafe, florist, salon | the trade's own: bakery bread, bakery counter, baker dough; coffee shop interior, espresso machine; florist shop, flower market; barber shop, hair salon |
+| Trade                               | search words                                                                                                                                             |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| yoga, pilates, spa, wellness        | yoga studio, yoga class, pilates studio, sauna interior                                                                                                  |
+| pottery, ceramics                   | pottery wheel, pottery studio, ceramics workshop                                                                                                         |
+| a studio (art, design, photography) | artist studio, design studio, photography studio                                                                                                         |
+| bike shop or workshop               | bicycle workshop, bicycle repair stand, bicycle mechanic, city bicycle, cargo bicycle                                                                    |
+| hotel, guesthouse, inn              | hotel facade, guesthouse, hotel room, hotel bedroom, inn exterior (the building and the rooms: never the library)                                        |
+| wedding                             | wedding ceremony, wedding table, wedding bouquet, wedding reception, wedding rings                                                                       |
+| restaurant                          | restaurant kitchen, restaurant interior, chef plating                                                                                                    |
+| workshop by craft                   | woodworking workshop, blacksmith forge, workshop tools                                                                                                   |
+| bakery, cafe, florist, salon        | the trade's own: bakery bread, bakery counter, baker dough; coffee shop interior, espresso machine; florist shop, flower market; barber shop, hair salon |
 
 A product searches its own words (`"cargo bicycle"`, `"desk lamp"`, then `"... detail"` and the place it lives); a
 game its setting in plain words (`"flooded coastal town"`, `"desert mining town"`, `"city at night in rain"`); anything

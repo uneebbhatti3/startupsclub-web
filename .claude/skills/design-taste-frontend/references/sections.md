@@ -26,12 +26,12 @@ section 2) and, on tech, the section that holds the effect, the scene or a momen
   (the bench, the street, the room, half the picture or more; the object one thing in it). Write
   each plan line's kind; three object lines at most.
 
-  | Kind | the object whole: hero + 2 | carries the other sections |
-  |---|---|---|
-  | Software | the `app-frame` | UI fragments of its subject on cards, a diagram card, real tool icons, a type moment, a named quote with its face, the effect or scene |
-  | Gaming | the client's key art (none: the setting's photograph under the game's name) | the world (in-engine shots, else photographs of its setting), the crew at work (the client's screenshots), the trailer frame, the screenshot strip, a type moment, the real platform marks |
+  | Kind          | the object whole: hero + 2                                                                  | carries the other sections                                                                                                                                                                                      |
+  | ------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Software      | the `app-frame`                                                                             | UI fragments of its subject on cards, a diagram card, real tool icons, a type moment, a named quote with its face, the effect or scene                                                                          |
+  | Gaming        | the client's key art (none: the setting's photograph under the game's name)                 | the world (in-engine shots, else photographs of its setting), the crew at work (the client's screenshots), the trailer frame, the screenshot strip, a type moment, the real platform marks                      |
   | Tech hardware | the product (photograph, the client's CAD render; a render only when the brief asks for 3D) | its use (the device at a bench or in its place), parts close up, the motion video frame, a diagram card held still, a type moment (one figure set large), a context photograph of the trade (a workshop, a lab) |
-  | Product | the product (photograph; a render only when the brief asks for 3D) | its use (loaded, carried, at home), people with it, close-ups of its parts, a diagram card held still, a type moment, a context photograph of where it lives |
+  | Product       | the product (photograph; a render only when the brief asks for 3D)                          | its use (loaded, carried, at home), people with it, close-ups of its parts, a diagram card held still, a type moment, a context photograph of where it lives                                                    |
 
 - **The client's own assets get designed slots.** When the brief says the client has a trailer,
   key art, in-engine screenshots, CAD renders, an exploded model or a motion video, each gets a slot
@@ -141,6 +141,7 @@ platform icons, prices from), [press lines or a quote the brief gives], [faq], f
 the main action (Add to Steam wishlist, Pre-order). In testing, a game page that never named the game
 and showed an abstract effect for key art lost 3.5 to 5.5 to one with a launch date, a scene of the
 game's world, feature cards and real platform icons. So:
+
 - **The hero names the game:** the h1 is its name and genre ("Northline, a co-op survival game",
   40 characters at most on the `product` stage, 32 on the `photo` hero), or its wordmark (the client's logo file) over an
   h1 naming the genre. The lead or a line under it carries the launch date or status the brief
@@ -159,7 +160,7 @@ game's world, feature cards and real platform icons. So:
   place its world is set in, in plain words (`photos.mjs search "flooded coastal town at dusk"`, a
   harbour at night, a desert mining town, a city in rain), keep three to five frames of one light
   and grade with nothing readable on them, and deal `deal.mjs --type software --kind gaming --has
-  setting`: it prints the `photo` hero, the game's name as the h1 set large in the box (or straight
+setting`: it prints the `photo` hero, the game's name as the h1 set large in the box (or straight
   on a dark, empty part of the frame, `data-box="none"`), the status line under it. The world
   section takes the widest of the frames full bleed in a `media-band` or `dark-band`, the h2 above
   it; the trailer frame's poster and the screenshot strip are client slots holding the other
@@ -169,12 +170,12 @@ game's world, feature cards and real platform icons. So:
   world (`effects-objects.md`, Product renders) only when the brief asks for 3D or a render.
 - **Platforms:** the real Steam, PlayStation and Epic Games marks (`icons.mjs apps --tag gaming`);
   Xbox and Nintendo named in type, never a drawn mark.
-Nav `nav-mega|nav-centre|nav-cards` · footer `footer-dark|footer-statement` · close
-`close-word|close-type` · rhythm `dark-band|media-band|space` · buttons `solid|pill|block`.
-Never: a hero that never names the game; an abstract effect, pattern or `statement` hero in place
-of key art; UI fragments from `assets/ui` (no UI kit on gaming), a dashboard, SaaS widgets on
-panels; a toy object of another kind, a drawn SVG or an empty panel in place of the world; stock
-players at screens.
+  Nav `nav-mega|nav-centre|nav-cards` · footer `footer-dark|footer-statement` · close
+  `close-word|close-type` · rhythm `dark-band|media-band|space` · buttons `solid|pill|block`.
+  Never: a hero that never names the game; an abstract effect, pattern or `statement` hero in place
+  of key art; UI fragments from `assets/ui` (no UI kit on gaming), a dashboard, SaaS widgets on
+  panels; a toy object of another kind, a drawn SVG or an empty panel in place of the world; stock
+  players at screens.
 
 **Product.** nav, hero, the range or line-up within the first three sections, two or three feature
 sections (one benefit each, each its own composition, below), specs (`rows--spec` or
@@ -187,6 +188,7 @@ table or a monthly switch; only prices the brief gives (none given: "Price on re
 be assumed). Photographs first: the client's, else stand-ins (below). A technical
 product (site-kind tech) may take the effect; any other product takes no effect; a render on
 either only when the brief asks for 3D or a render (below).
+
 - **The product is the hero, not every frame.** The bar is Figure and 1X: where the product is
   shown whole it fills the frame at large scale, and its use, parts and place carry the rest. In testing, a rendered product page scored 5.5,
   creativity 4.5 ("a safe grey template"), because every visual was a mid-size product in a grey
@@ -227,7 +229,7 @@ either only when the brief asks for 3D or a render (below).
      never a panel inside a panel.
   5. **The colour choice changes the picture.** The order card's swatches swap the product's
      picture beside it (a render: each swatch, a button or radio, carries `data-product-swatch="#<frame
-     id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` swaps the frame's
+id>"` and `value="<colour id>"` (an id of the spec's `colors`), and `auto.js` swaps the frame's
      still with no page script, `effects-objects.md`, Views; photographs: one per colour, the swatch
      swaps the `src` and `alt`), and every colour offered is shown at least once on the
      page (one colour per section: the hero, the split, the use scene and the order frame each in
@@ -271,13 +273,13 @@ either only when the brief asks for 3D or a render (below).
   calls it a render, model or illustration (house rule 1). Never a drawn SVG, a model of loose
   primitives the helper did not compose, mood stock, a photograph of another maker's product
   passed off as the client's, or an object of another kind.
-Nav `nav-cards|nav-split|nav-mega` · footer `footer-columns|footer-dark` · close
-`close-photo|close-type|close-word` · rhythm `dark-band|brand-band` (one contrasting ground,
-rule 4) · buttons `arrow|solid|block|pill`.
-Never: a photograph of something else; screens of an app the product does not have; logo rows;
-tabs; anything that apologises for what is missing; the product mid-size in a grey panel; the
-product whole in more than three sections; one
-view twice; a promise not shown; a colour offered and never shown; a fact twice.
+  Nav `nav-cards|nav-split|nav-mega` · footer `footer-columns|footer-dark` · close
+  `close-photo|close-type|close-word` · rhythm `dark-band|brand-band` (one contrasting ground,
+  rule 4) · buttons `arrow|solid|block|pill`.
+  Never: a photograph of something else; screens of an app the product does not have; logo rows;
+  tabs; anything that apologises for what is missing; the product mid-size in a grey panel; the
+  product whole in more than three sections; one
+  view twice; a promise not shown; a colour offered and never shown; a fact twice.
 
 **Service** (clinics, firms, agencies, studios, trades). nav, hero, services-list (each with one line
 and a price from when the brief gives one; a peek-list when each service has its own photograph), work (a grid of 3 to 6
@@ -323,7 +325,7 @@ The nav is not a screen; `footer.closing` is one; a 2-screen section counts two.
 - **Short page,** under 8 usable photographs (below): 3 screens, 2,700px at most at 1440,
   `<html data-page-mode="short">`.
 - **No client photographs (the draft path):** `photos.mjs pick --trade <trade> --sections <words>
-  --draft-lead --pictures 12` lifts the 1-in-3 cap, and the page is a whole place page that leads
+--draft-lead --pictures 12` lifts the 1-in-3 cap, and the page is a whole place page that leads
   with photographs when it reaches 8 frames. `pick` deals one frame per word: repeat a word for each
   row or detail (`bar,bar,coffee,coffee,beans,beans`; `rooms,rooms,rooms,breakfast,breakfast`)
   until it returns 8 or more (a cafe 8 to 12, a guesthouse 9). **The hero is always a photograph
@@ -341,6 +343,7 @@ The nav is not a screen; `footer.closing` is one; a 2-screen section counts two.
   not a list); 8 to 12 is the compact page, 12 or more the full page.
 
 These three names mean only these lengths everywhere in the skill.
+
 - **Photographs by section,** all distinct: hero 1; visit 1 (0 with a map); menu or prices 1; rooms
   2 to 6; goods 4; the place 3 (row), 1 (story) or a wall; orders 2 or 3, or booking 1; close 1. Nav
   panel photographs do not count.
@@ -374,22 +377,23 @@ to 4.5 because every section was text beside one picture and nothing answered th
 - **The five compositions** (1200 column, gap 24; grid widths span-3 282, span-4 384, span-5 486,
   span-6 588; square corners, one grade, no words on any photograph):
 
-  | id | at 1440 | at 390 |
-  |---|---|---|
-  | `bleed` | the head row on the `.wrap` (its line at the right), then one photograph across the whole viewport, 1440x560, nothing on it; once a page, never right after the hero | 390x488 (4:5 crop) |
-  | `pair` | two photographs on span-6, the same ratio (4:3 at 588x441 or 4:5 at 588x735 in a 2-screen section), tops level; the head row above | stacked, 342 wide, 24 apart |
-  | `trio` | the offset trio: three photographs on span-5 (4:5, 486x607), span-4 (1:1, 384x384) and span-3 (4:3, 282x212), tops on one line, three sizes of one subject family (the room, its table, a cup) | the first 342 wide, the other two two-up at 165 |
-  | `strip` | the detail strip: four 1:1 details on span-3 (282x282) or six on span-2 (180x180) from line to line, hands, tools and materials of one trade, under the section's text or groups | two-up at 165, four at most |
+  | id           | at 1440                                                                                                                                                                                                  | at 390                                          |
+  | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+  | `bleed`      | the head row on the `.wrap` (its line at the right), then one photograph across the whole viewport, 1440x560, nothing on it; once a page, never right after the hero                                     | 390x488 (4:5 crop)                              |
+  | `pair`       | two photographs on span-6, the same ratio (4:3 at 588x441 or 4:5 at 588x735 in a 2-screen section), tops level; the head row above                                                                       | stacked, 342 wide, 24 apart                     |
+  | `trio`       | the offset trio: three photographs on span-5 (4:5, 486x607), span-4 (1:1, 384x384) and span-3 (4:3, 282x212), tops on one line, three sizes of one subject family (the room, its table, a cup)           | the first 342 wide, the other two two-up at 165 |
+  | `strip`      | the detail strip: four 1:1 details on span-3 (282x282) or six on span-2 (180x180) from line to line, hands, tools and materials of one trade, under the section's text or groups                         | two-up at 165, four at most                     |
   | `tall-small` | a tall 4:5 photograph on span-6 (588x735) at the left line; on span-5 at the right the h2, its lines and link at the top and a 1:1 on span-3 (282x282) at the bottom, its foot level with the tall one's | text, the tall one at 342, the small one at 165 |
 
   The offer deals `pair`, `strip` or `tall-small`: `strip` runs under the menu's groups, `pair`
   and `tall-small` take the photograph slot beside them (the groups narrow to span-6). The place
   deals `bleed`, `trio`, `strip`, `pair`, `wall` or `story` (below). Rooms keep their own grid.
+
 - **One display-type moment** (dealt `address|name`): `address` sets the street and district large (no street in the brief: the
   district alone, never an invented street, `copy.md`) right under the visit section's h2 ("Find us" at the page's h2 size, so the heading scale holds):
   `<p class="type-moment"><a href="<map search>">Mill Street, Leith</a></p>`, page CSS
   `.type-moment { font: var(--display-weight) clamp(48px, 7vw, 104px)/1.02 var(--font-display);
-  letter-spacing: -0.03em }`, one or two lines on the `.wrap`'s left line, the drawn underline on
+letter-spacing: -0.03em }`, one or two lines on the `.wrap`'s left line, the drawn underline on
   hover; `name` makes the
   close `close-word` (the h2 and the button, then the name across the `.wrap`), its photograph
   going to the place's composition. Ink on the ground or on the brand
@@ -501,6 +505,7 @@ to 4.5 because every section was text beside one picture and nothing answered th
 ### Order by trade
 
 Each starts hero, visit; the rest in this order, 4 to 6 screens:
+
 - **Cafe:** menu as text with its composition; the place (its composition or a story row); beans
   or goods only if sold.
 - **Bakery:** what it bakes (goods with prices); orders (one card per kind); the process (its
@@ -525,12 +530,12 @@ Each starts hero, visit; the rest in this order, 4 to 6 screens:
   studio and a bike shop each have their own), away from the last builds, so two cafes never share
   a ground and an accent. Only grounds that fit a place come (light, low saturation: the `--g-main`
   rule in `backgrounds.md`). Take the first, then `start.mjs css --page place --palette <id> --type
-  <pairing>`; the next only when the first clashes with the client's own logo or photographs.
+<pairing>`; the next only when the first clashes with the client's own logo or photographs.
   Plan line 2 names it with one sentence on why it fits the trade, from what the palette answers
   in it ("flour-terracotta: a flour-white ground and the terracotta of a bread oven's tiles"),
   never a fact the brief does not give. The client's own colours (a painted shopfront, a logo, a
   bag label the brief gives) replace the deal: `start.mjs brand --bg "#.." --ink "#.." --accent
-  "#.." --type <pairing>`, the ground from its walls, paper or shopfront (colours quoted: a bare `#`
+"#.." --type <pairing>`, the ground from its walls, paper or shopfront (colours quoted: a bare `#`
   starts a shell comment).
 - **Grounds:** the palette's ground and surface, one full surface band at most; one brand band
   (`backgrounds.md`); no dark section except that band (the nav bar may take the dark ink). Flat
@@ -555,6 +560,7 @@ visit and the offer, footer.closing. With one or two good photographs, the best 
 the other is the section's, in one row with the groups (With its photograph, below). With none, the hero is a statement on `.ground-brand` (`deal.mjs --hero statement`: the
 h1, the sub-line, the inverted button) and the section has no picture on purpose (the one
 exception to "two picture-less sections are never neighbours").
+
 - **The section** is open type on the page ground, never a card or a ground box (across the `.wrap`
   that is a band): the offer as ruled text in groups (a maker's tableware and its classes are two
   groups of rows, prices visible), then the visit block as three `span-4` columns on the grid
@@ -572,7 +578,7 @@ exception to "two picture-less sections are never neighbours").
   245/270px, `row-lines`; shorten it, "Rye cake, 10 slices"). Under 640, `--hm: 2` on the section
   (`style="--h: 1; --hm: 2"`) and the photograph after the groups at 16:9, a
   second page-CSS rule: `@media (max-width: 639px) { #shop .pl-photo > img { aspect-ratio: 16 / 9;
-  } }` (at 1:1 the section runs 119px past its two screens).
+} }` (at 1:1 the section runs 119px past its two screens).
 - **Nav and the main action:** three or four words, one per group, each pointing at an `id` on that
   group (`#tableware`, `#classes`, `#visit`); the main action points at the group that does it
   (section 1, One page). One section has no scroll-marked word: leave `aria-current` off.
@@ -596,18 +602,18 @@ exception to "two picture-less sections are never neighbours").
   FAIL, and `--h: 2` on that stack leaves a `hole` (768) and a `section-air` WARN, 48% (820). So keep
   the three groups and the three visit columns across, one page-CSS rule (use the ids as built):
   `@media (min-width: 640px) and (max-width: 1023px) { #shop .grid { grid-template-columns:
-  repeat(3, minmax(0, 1fr)); } #shop .grid > .span-4 { grid-column: auto; } #shop .visit__cols {
-  grid-template-columns: repeat(3, minmax(0, 1fr)); } }`, which makes the content about 700px, and
+repeat(3, minmax(0, 1fr)); } #shop .grid > .span-4 { grid-column: auto; } #shop .visit__cols {
+grid-template-columns: repeat(3, minmax(0, 1fr)); } }`, which makes the content about 700px, and
   `--hm` under 640. With a photograph in the section, `--h: 2` at the tablet, read as two screens:
   screen 1 the h2 and the photograph full width down to the screen's bottom padding, screen 2 the
   groups across and the three visit columns, `--padt` under its top (no `hole`; content 1,640 of
   2,048 at 768). This rule replaces the one above (with two groups `repeat(2, minmax(0, 1fr))` on
   `#shop .grid`): `@media (min-width: 640px) and (max-width: 1023px) { #shop { --h: 2; } #shop .grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr)); } #shop .grid > :not(.pl-photo) { grid-column:
-  auto; } #shop .grid > .pl-photo { grid-column: 1 / -1; order: -1; } #shop .pl-photo > img {
-  aspect-ratio: auto; height: calc(var(--pl-room) - 1.25 * var(--t-h2) - var(--head-gap));
-  margin-bottom: calc(var(--padt) + var(--padb) + var(--bar) - var(--card-gap)); } #shop .visit__cols
-  { grid-template-columns: repeat(3, minmax(0, 1fr)); } }` (the photograph's height leaves room for
+grid-template-columns: repeat(3, minmax(0, 1fr)); } #shop .grid > :not(.pl-photo) { grid-column:
+auto; } #shop .grid > .pl-photo { grid-column: 1 / -1; order: -1; } #shop .pl-photo > img {
+aspect-ratio: auto; height: calc(var(--pl-room) - 1.25 * var(--t-h2) - var(--head-gap));
+margin-bottom: calc(var(--padt) + var(--padb) + var(--bar) - var(--card-gap)); } #shop .visit__cols
+{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }` (the photograph's height leaves room for
   an h2 of one line: keep the h2 to one line at the tablet). The page is 3
   screens at 1440 and 3 or 4 at the tablet.
 

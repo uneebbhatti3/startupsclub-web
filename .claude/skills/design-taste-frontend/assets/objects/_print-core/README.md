@@ -7,6 +7,7 @@ that render (halftone, engraving, dither or type). It turns slowly, leans toward
 takes one small step on a click (the lamp switches on, the cards fan out).
 
 **Where it goes**
+
 - **A product page without photographs**: the object of the product's own kind is the product's
   picture: the hero (`hero` preset, or `tile` in a hero split) and the statement's picture, as a
   render. A desk lamp for a lamp maker, a cup for a tableware maker, a wheel for a maker of wheels.
@@ -23,13 +24,13 @@ takes one small step on a click (the lamp switches on, the cards fan out).
   sample or a stand-in. The section's heading and text say what the product is. Leave
   `aria-label` alone or name the thing plainly ("A desk lamp, switched on").
 
-| id | the render | prints | click |
-|---|---|---|---|
-| `print-cup` | porcelain cup of coffee on its saucer, the glaze in the accent | halftone, engraving | rings run across the coffee |
-| `print-wheel` | road wheel: tan-wall tyre, alloy rim, 24 spokes, hub in the accent | halftone (spokes as solid lines) | it spins up |
-| `print-lamp` | balanced-arm desk lamp: stepped base, paired rods, chrome springs, a domed shade; base and shade enamelled in the accent | halftone | it switches on |
-| `print-globe` | desk globe, real coastlines, brass meridian, walnut stand | engraving | it spins |
-| `print-cards` | playing cards, the ace of diamonds face up, backs in the accent | halftone | the cards fan out |
+| id            | the render                                                                                                               | prints                           | click                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------- | --------------------------- |
+| `print-cup`   | porcelain cup of coffee on its saucer, the glaze in the accent                                                           | halftone, engraving              | rings run across the coffee |
+| `print-wheel` | road wheel: tan-wall tyre, alloy rim, 24 spokes, hub in the accent                                                       | halftone (spokes as solid lines) | it spins up                 |
+| `print-lamp`  | balanced-arm desk lamp: stepped base, paired rods, chrome springs, a domed shade; base and shade enamelled in the accent | halftone                         | it switches on              |
+| `print-globe` | desk globe, real coastlines, brass meridian, walnut stand                                                                | engraving                        | it spins                    |
+| `print-cards` | playing cards, the ace of diamonds face up, backs in the accent                                                          | halftone                         | the cards fan out           |
 
 `index.json` lists them; each folder's `meta.json` has the object's own notes, and `demo.html` shows
 it full screen with switches for the picture and the paper.
@@ -81,7 +82,7 @@ it full screen with switches for the picture and the paper.
   puts its own round pause button in the panel's bottom-right corner once it has drawn (never on a
   poster): keep that corner clear.
 - **Script**: `import obj from '<assets>/objects/print-cup/object.js'; const ctrl = obj.mount(el,
-  { place: 'card', params: {...}, palette: {...} })`. The controller has `pause()`, `resume()`,
+{ place: 'card', params: {...}, palette: {...} })`. The controller has `pause()`, `resume()`,
   `step(on)`, `set(params)`, `setPalette(p | null)`, `destroy()`. `auto.js` exports `prints`, a Map
   from element to controller; on a theme change call `setPalette(null)` on each.
 

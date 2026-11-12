@@ -8,22 +8,22 @@
 // Under the cursor (a tap on a phone) a loupe: a round lens with a hairline rim and a soft shadow shows
 // the photograph itself, in its own colours, a little magnified. At rest it is still (no frames run).
 // No entry animation: the print is there from its first frame, never half developed.
-import { photoGL } from '../photo-kit/photo.js';
+import { photoGL } from "../photo-kit/photo.js";
 
 const params = {
-  pitch:    { default: 5,    min: 3,   max: 16,  step: 0.5 },  // dot spacing, CSS px (finer in small frames; never under 4 canvas px)
-  angle:    { default: 45,   min: 0,   max: 90,  step: 1 },    // the screen's angle, degrees
-  tint:     { default: 0,    min: 0,   max: 1,   step: 1 },    // the dots' colour: 0 the page's ink, 1 its accent
-  ground:   { default: 1,    min: 0,   max: 1,   step: 1 },    // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
-  clean:    { default: 0.1,  min: 0,   max: 0.4, step: 0.01 }, // ink shares under this print no dot at all: the light parts stay clean paper
-  outline:  { default: 0.4,  min: 0,   max: 1,   step: 0.01 }, // dots along the photograph's edges, so a pale object keeps its outline on a pale wall
-  magnify:  { default: 1.35, min: 1,   max: 3,   step: 0.05 }, // the loupe's magnification of the photograph under it
-  radius:   { default: 120,  min: 60,  max: 260, step: 1 },    // the loupe, CSS px (smaller in small frames)
-  clarity:  { default: 0.3,  min: 0,   max: 1,   step: 0.01 }, // local contrast, so a pale object parts from a pale wall
-  contrast: { default: 0.1,  min: 0,   max: 1,   step: 0.01 },
-  exposure: { default: 0,    min: -1,  max: 1,   step: 0.01 },
-  focusX:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // the subject's place (else the <img>'s object-position)
-  focusY:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 },
+  pitch: { default: 5, min: 3, max: 16, step: 0.5 }, // dot spacing, CSS px (finer in small frames; never under 4 canvas px)
+  angle: { default: 45, min: 0, max: 90, step: 1 }, // the screen's angle, degrees
+  tint: { default: 0, min: 0, max: 1, step: 1 }, // the dots' colour: 0 the page's ink, 1 its accent
+  ground: { default: 1, min: 0, max: 1, step: 1 }, // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
+  clean: { default: 0.1, min: 0, max: 0.4, step: 0.01 }, // ink shares under this print no dot at all: the light parts stay clean paper
+  outline: { default: 0.4, min: 0, max: 1, step: 0.01 }, // dots along the photograph's edges, so a pale object keeps its outline on a pale wall
+  magnify: { default: 1.35, min: 1, max: 3, step: 0.05 }, // the loupe's magnification of the photograph under it
+  radius: { default: 120, min: 60, max: 260, step: 1 }, // the loupe, CSS px (smaller in small frames)
+  clarity: { default: 0.3, min: 0, max: 1, step: 0.01 }, // local contrast, so a pale object parts from a pale wall
+  contrast: { default: 0.1, min: 0, max: 1, step: 0.01 },
+  exposure: { default: 0, min: -1, max: 1, step: 0.01 },
+  focusX: { default: 0.5, min: 0, max: 1, step: 0.01 }, // the subject's place (else the <img>'s object-position)
+  focusY: { default: 0.5, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -101,15 +101,23 @@ void main() {
 `;
 
 export default {
-  id: 'photo-halftone',
-  name: 'Halftone photograph',
-  kind: 'photo',
+  id: "photo-halftone",
+  name: "Halftone photograph",
+  kind: "photo",
   params,
   frag,
   mount(el, { palette, src, params: given, seed } = {}) {
     return photoGL(el, {
-      name: 'photo-halftone', frag, schema: params, params: given, palette, src, seed,
-      entry: 0, maxScale: 2, stats: true,
+      name: "photo-halftone",
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      src,
+      seed,
+      entry: 0,
+      maxScale: 2,
+      stats: true,
     });
   },
 };

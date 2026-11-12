@@ -61,6 +61,8 @@ Use this format:
 - Next: add icons, then `manifest.ts` (D16); add `(app)`/`(auth)` layouts with noindex per D4 when those groups are built; add each new marketing page to `marketingRoutes`.
 - Questions for the owner: D15–D18; restore the lost C/O decision entries.
 - Update (same day): production URL https://startupsclub.vercel.app recorded (D14) and deployment notes updated; a production build with that URL verified locally. The live site still serves the old template until this work reaches `main`.
+- Update (same day): pre-commit hook now (1) checks formatting on staged files and auto-fixes with Prettier, (2) runs ESLint on staged files, which rejects explicit `any`, `as any` and `@ts-ignore` (rules pinned in `eslint.config.mjs`), (3) runs the whole-project typecheck, which rejects implicit `any`. Each step was verified with temporary files; a full `git commit` run was not, because this branch (`integration`) is blocked by the branch rule.
+- Update (same day): whole repository formatted with Prettier, including `.agents/` and `.claude/` (owner request). Exceptions and reasons in `docs/DECISIONS.md` D17. Verified: format:check, lint, typecheck and build pass; all 153 JS files and all JSON in the skill still parse; the skill template markers are intact. Pre-commit hook tested end to end in a throwaway repository: formatting auto-fixed and committed, explicit `any` blocked by ESLint, implicit `any` blocked by the type check. Found: `.claude/settings.json` (the `.env` deny rules that `CLAUDE.md` refers to) does not exist.
 
 ### 2026-11-12 — Claude (feature-based architecture)
 

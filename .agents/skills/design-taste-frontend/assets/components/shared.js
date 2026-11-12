@@ -21,18 +21,18 @@
     a page keeps at most 3 live WebGL contexts (moving effects only); everything pauses off screen
     and in a hidden tab (fx.js does this for every mounted effect).
 */
-import fx from '../effects/fx.js';
+import fx from "../effects/fx.js";
 
 export { fx };
 export const color = fx.color;
 
-const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-const mqHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+const mqHover = window.matchMedia("(hover: hover) and (pointer: fine)");
 export const reduced = () => mqReduce.matches;
 export const hoverable = () => mqHover.matches;
 
-export const palette = el => fx.readPalette(el);
-export const isDark = p => color.isDark(p.bg);
+export const palette = (el) => fx.readPalette(el);
+export const isDark = (p) => color.isDark(p.bg);
 /** a step of ink over the ground, the same mix the CSS does with color-mix(in oklab, ink k, bg) */
 export const tone = (p, k) => color.mix(p.bg, p.ink, k);
 
@@ -95,21 +95,30 @@ let stillChain = Promise.resolve();
 const pendingStills = new Set();
 const markPending = () => {
   const d = document.documentElement.dataset;
-  if (pendingStills.size) d.cxBaking = String(pendingStills.size); else delete d.cxBaking;
+  if (pendingStills.size) d.cxBaking = String(pendingStills.size);
+  else delete d.cxBaking;
 };
-const nextFrame = () => new Promise(r => requestAnimationFrame(() => r()));
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 const STILL_CSS = {
-  position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block', zIndex: '-1',
-  pointerEvents: 'none', borderRadius: 'inherit', objectFit: 'cover',
+  position: "absolute",
+  inset: "0",
+  width: "100%",
+  height: "100%",
+  display: "block",
+  zIndex: "-1",
+  pointerEvents: "none",
+  borderRadius: "inherit",
+  objectFit: "cover",
 };
 
 /* the next frame the runtime draws into this context, copied into a plain 2D canvas placed first in
    host (null if no frame comes within a second and a half, e.g. the tab was hidden) */
 function grab(ctrl, gl, cv, host) {
-  return new Promise(resolve => {
-    let done = false, timer = 0;
+  return new Promise((resolve) => {
+    let done = false,
+      timer = 0;
     let nudge = 0;
-    const finish = shot => {
+    const finish = (shot) => {
       if (done) return;
       done = true;
       clearTimeout(timer);
@@ -123,14 +132,14 @@ function grab(ctrl, gl, cv, host) {
       // read back in the same task as the draw, before the browser presents and clears the buffer.
       // The copy is a plain CPU canvas (willReadFrequently): it owns its pixels at once and holds no GPU
       // memory
-      const c = document.createElement('canvas');
+      const c = document.createElement("canvas");
       c.width = cv.width;
       c.height = cv.height;
-      c.className = 'cx-still';
-      c.setAttribute('aria-hidden', 'true');
-      Object.assign(c.style, STILL_CSS, { imageRendering: cv.style.imageRendering || 'auto' });
+      c.className = "cx-still";
+      c.setAttribute("aria-hidden", "true");
+      Object.assign(c.style, STILL_CSS, { imageRendering: cv.style.imageRendering || "auto" });
       host.insertBefore(c, host.firstChild);
-      const g = c.getContext('2d', { willReadFrequently: true });
+      const g = c.getContext("2d", { willReadFrequently: true });
       g.drawImage(cv, 0, 0);
       finish(c);
     };
@@ -138,7 +147,15 @@ function grab(ctrl, gl, cv, host) {
     ctrl.resume();
     // an effect that holds itself still (a photograph with no drift) draws nothing on resume: set({})
     // asks it for one frame (every effect's controller redraws on set)
-    nudge = setTimeout(() => { if (!done) { try { ctrl.set?.({}); } catch (_) { /* no frame: finish(null) */ } } }, 250);
+    nudge = setTimeout(() => {
+      if (!done) {
+        try {
+          ctrl.set?.({});
+        } catch (_) {
+          /* no frame: finish(null) */
+        }
+      }
+    }, 250);
   });
 }
 
@@ -155,17 +172,41 @@ function grab(ctrl, gl, cv, host) {
 export function still(el, id, { palette: pal, params, seed, fade = true } = {}) {
   // fade: false where the effect hides something of its own that comes back when it is removed (the
   // photograph under duotone-grade), so the picture takes its place at once
-  let destroyed = false, pic = null, extras = [], kept = null, size = null, visible = false, queued = false, timer = 0, tries = 0;
+  let destroyed = false,
+    pic = null,
+    extras = [],
+    kept = null,
+    size = null,
+    visible = false,
+    queued = false,
+    timer = 0,
+    tries = 0;
   let ready;
-  const readyP = new Promise(r => { ready = r; });
+  const readyP = new Promise((r) => {
+    ready = r;
+  });
   const stale = () => {
     if (!size) return true;
-    const w = el.clientWidth, h = el.clientHeight;
-    return Math.abs(w - size[0]) > Math.max(2, size[0] * 0.04) || Math.abs(h - size[1]) > Math.max(2, size[1] * 0.04);
+    const w = el.clientWidth,
+      h = el.clientHeight;
+    return (
+      Math.abs(w - size[0]) > Math.max(2, size[0] * 0.04) ||
+      Math.abs(h - size[1]) > Math.max(2, size[1] * 0.04)
+    );
   };
   const token = {};
   const pend = () => {
-    if (!destroyed && visible && !document.hidden && !pic && !kept && tries <= 3 && el.clientWidth && el.clientHeight) pendingStills.add(token);
+    if (
+      !destroyed &&
+      visible &&
+      !document.hidden &&
+      !pic &&
+      !kept &&
+      tries <= 3 &&
+      el.clientWidth &&
+      el.clientHeight
+    )
+      pendingStills.add(token);
     else pendingStills.delete(token);
     markPending();
   };
@@ -173,30 +214,51 @@ export function still(el, id, { palette: pal, params, seed, fade = true } = {}) 
     pend();
     if (destroyed || queued || kept || !visible || document.hidden || !stale() || tries > 3) return;
     queued = true;
-    stillChain = stillChain.then(render, render).then(() => { queued = false; want(); });
+    stillChain = stillChain.then(render, render).then(() => {
+      queued = false;
+      want();
+    });
   };
-  const keep = ctrl => { kept = ctrl; ready(); pend(); };
+  const keep = (ctrl) => {
+    kept = ctrl;
+    ready();
+    pend();
+  };
 
   async function render() {
     if (destroyed || !visible || document.hidden) return;
-    const w = el.clientWidth, h = el.clientHeight;
+    const w = el.clientWidth,
+      h = el.clientHeight;
     if (!w || !h) return;
     const before = new Set(el.children);
     let ctrl;
-    try { ctrl = await fx.mount(el, id, { palette: pal || palette(el), params, seed }); }
-    catch (err) { console.warn('still:', err); tries = 9; return; }
+    try {
+      ctrl = await fx.mount(el, id, { palette: pal || palette(el), params, seed });
+    } catch (err) {
+      console.warn("still:", err);
+      tries = 9;
+      return;
+    }
     ctrl.pause();
     // the runtime makes its canvas and draws one frame as soon as el is in view
-    let cv = null, seenAt = 0;
+    let cv = null,
+      seenAt = 0;
     for (const t0 = performance.now(); ;) {
-      if (destroyed) { ctrl.destroy(); return; }
-      if (ctrl.info?.fallback) return keep(ctrl);             // the CSS fallback: no context to free
-      const c = [...el.querySelectorAll(':scope > canvas')].find(n => !before.has(n));
-      if (c) {
-        if (!cv) { cv = c; seenAt = performance.now(); }
-        if (cv.style.opacity === '1' || performance.now() - seenAt > 600) break;
+      if (destroyed) {
+        ctrl.destroy();
+        return;
       }
-      if (performance.now() - t0 > 5000) {                     // never drawn (scrolled away): try again later
+      if (ctrl.info?.fallback) return keep(ctrl); // the CSS fallback: no context to free
+      const c = [...el.querySelectorAll(":scope > canvas")].find((n) => !before.has(n));
+      if (c) {
+        if (!cv) {
+          cv = c;
+          seenAt = performance.now();
+        }
+        if (cv.style.opacity === "1" || performance.now() - seenAt > 600) break;
+      }
+      if (performance.now() - t0 > 5000) {
+        // never drawn (scrolled away): try again later
         ctrl.destroy();
         if (visible) tries++;
         return;
@@ -205,20 +267,33 @@ export function still(el, id, { palette: pal, params, seed, fade = true } = {}) 
     }
     // not a context of its own: cv is the canvas fx.mount made above, so this returns the context fx.js already counts in
     // window.__tpGl (its liveGL set: enforceBudget before the mount, released by ctrl.destroy() below); one still at a time
-    const gl = cv.getContext('webgl2') || cv.getContext('webgl');
-    if (!gl) return keep(ctrl);                               // drawn on a 2D canvas: paused, it costs nothing
+    const gl = cv.getContext("webgl2") || cv.getContext("webgl");
+    if (!gl) return keep(ctrl); // drawn on a 2D canvas: paused, it costs nothing
     const shot = await grab(ctrl, gl, cv, el);
-    if (destroyed) { shot?.remove(); ctrl.destroy(); return; }
+    if (destroyed) {
+      shot?.remove();
+      ctrl.destroy();
+      return;
+    }
     // no frame came (hidden tab, scrolled away, a renderer that never calls drawArrays): on screen the
     // paused effect stays as it is; off screen it goes and the picture is tried again later
-    if (!shot) { if (visible && !document.hidden) return keep(ctrl); ctrl.destroy(); return; }
-    const added = [...el.children].filter(n => !before.has(n) && n !== cv && n !== shot);
-    const copies = added.map(n => { const k = n.cloneNode(true); k.setAttribute('data-cx-still', ''); return k; });
+    if (!shot) {
+      if (visible && !document.hidden) return keep(ctrl);
+      ctrl.destroy();
+      return;
+    }
+    const added = [...el.children].filter((n) => !before.has(n) && n !== cv && n !== shot);
+    const copies = added.map((n) => {
+      const k = n.cloneNode(true);
+      k.setAttribute("data-cx-still", "");
+      return k;
+    });
     ctrl.destroy();
     const old = [pic, ...extras];
     shot.after(...copies);
-    old.forEach(n => n?.remove());
-    if (fade && !pic && !reduced()) shot.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
+    old.forEach((n) => n?.remove());
+    if (fade && !pic && !reduced())
+      shot.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: "ease-out" });
     pic = shot;
     extras = copies;
     size = [w, h];
@@ -226,28 +301,41 @@ export function still(el, id, { palette: pal, params, seed, fade = true } = {}) 
   }
 
   // the same margin fx.js makes its contexts at, so the picture is ready as el comes into view
-  const io = new IntersectionObserver(e => { visible = e[e.length - 1].isIntersecting; want(); }, { rootMargin: '12% 0px' });
+  const io = new IntersectionObserver(
+    (e) => {
+      visible = e[e.length - 1].isIntersecting;
+      want();
+    },
+    { rootMargin: "12% 0px" },
+  );
   io.observe(el);
-  const ro = new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(want, size ? 250 : 0); });
+  const ro = new ResizeObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(want, size ? 250 : 0);
+  });
   ro.observe(el);
-  document.addEventListener('visibilitychange', want);
+  document.addEventListener("visibilitychange", want);
   return {
     el,
     still: true,
     ready: readyP,
     pause() {},
     resume() {},
-    get info() { return kept ? kept.info : { still: true, webgl: 0, running: false, size: pic ? [pic.width, pic.height] : null }; },
+    get info() {
+      return kept
+        ? kept.info
+        : { still: true, webgl: 0, running: false, size: pic ? [pic.width, pic.height] : null };
+    },
     destroy() {
       destroyed = true;
       pend();
       io.disconnect();
       ro.disconnect();
       clearTimeout(timer);
-      document.removeEventListener('visibilitychange', want);
+      document.removeEventListener("visibilitychange", want);
       kept?.destroy();
       kept = null;
-      [pic, ...extras].forEach(n => n?.remove());
+      [pic, ...extras].forEach((n) => n?.remove());
       pic = null;
       extras = [];
     },
@@ -272,48 +360,72 @@ export function still(el, id, { palette: pal, params, seed, fade = true } = {}) 
   Before the script runs, and in forced colours, the text keeps its own colour. el needs a parent
   element and no border (its padding is fine).
 */
-const TYPE_PROPS = ['font-family', 'font-size', 'font-weight', 'font-style', 'font-stretch', 'line-height', 'letter-spacing',
-  'word-spacing', 'text-align', 'text-transform', 'text-indent', 'font-feature-settings', 'font-variation-settings',
-  'font-variant-numeric', 'font-kerning', 'text-wrap-mode', 'text-wrap-style', 'white-space-collapse', 'padding'];
+const TYPE_PROPS = [
+  "font-family",
+  "font-size",
+  "font-weight",
+  "font-style",
+  "font-stretch",
+  "line-height",
+  "letter-spacing",
+  "word-spacing",
+  "text-align",
+  "text-transform",
+  "text-indent",
+  "font-feature-settings",
+  "font-variation-settings",
+  "font-variant-numeric",
+  "font-kerning",
+  "text-wrap-mode",
+  "text-wrap-style",
+  "white-space-collapse",
+  "padding",
+];
 function knockOf(el) {
   let copy;
   if (/^(H[1-6]|P)$/.test(el.tagName)) {
-    copy = document.createElement('div');
-    for (const a of el.attributes) if (a.name !== 'id') copy.setAttribute(a.name, a.value);
-    copy.append(...[...el.childNodes].map(n => n.cloneNode(true)));
+    copy = document.createElement("div");
+    for (const a of el.attributes) if (a.name !== "id") copy.setAttribute(a.name, a.value);
+    copy.append(...[...el.childNodes].map((n) => n.cloneNode(true)));
     const cs = getComputedStyle(el);
     for (const p of TYPE_PROPS) copy.style.setProperty(p, cs.getPropertyValue(p));
   } else {
     copy = el.cloneNode(true);
-    copy.removeAttribute('id');
+    copy.removeAttribute("id");
   }
-  copy.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
-  copy.querySelectorAll('.cx-fill').forEach(n => n.remove());
+  copy.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+  copy.querySelectorAll(".cx-fill").forEach((n) => n.remove());
   return copy;
 }
 
-export async function fill(el, id, { seed, params, palette: pal, page, keep = false, still: isStill = false } = {}) {
+export async function fill(
+  el,
+  id,
+  { seed, params, palette: pal, page, keep = false, still: isStill = false } = {},
+) {
   page = page || palette(el);
   const parent = el.parentElement;
   if (!parent) return { el: null, ctrl: null, destroy() {} };
   const dark = isDark(page);
-  const whole = !el.querySelector('[data-fill]');
+  const whole = !el.querySelector("[data-fill]");
   // keep: the glyphs keep their own colour and the effect is laid over them (a passing light)
-  const filled = keep ? ['cx-overlaid'] : whole ? ['cx-filled', 'cx-filled--all'] : ['cx-filled'];
-  const over = document.createElement('div');
-  over.className = `cx-fill ${dark ? 'cx-fill--screen' : 'cx-fill--multiply'}`;
-  over.setAttribute('aria-hidden', 'true');
-  over.setAttribute('data-nosnippet', '');
+  const filled = keep ? ["cx-overlaid"] : whole ? ["cx-filled", "cx-filled--all"] : ["cx-filled"];
+  const over = document.createElement("div");
+  over.className = `cx-fill ${dark ? "cx-fill--screen" : "cx-fill--multiply"}`;
+  over.setAttribute("aria-hidden", "true");
+  over.setAttribute("data-nosnippet", "");
   over.inert = true;
   const knock = knockOf(el);
-  knock.classList.add('cx-knock');
-  if (whole) knock.classList.add('cx-knock--all');
+  knock.classList.add("cx-knock");
+  if (whole) knock.classList.add("cx-knock--all");
   over.append(knock);
-  const movedParent = getComputedStyle(parent).position === 'static';
-  if (movedParent) parent.style.position = 'relative';
+  const movedParent = getComputedStyle(parent).position === "static";
+  if (movedParent) parent.style.position = "relative";
   // the overlay covers el's border box, measured from the parent's padding box
   const place = () => {
-    const pr = parent.getBoundingClientRect(), r = el.getBoundingClientRect(), s = over.style;
+    const pr = parent.getBoundingClientRect(),
+      r = el.getBoundingClientRect(),
+      s = over.style;
     s.left = `${(r.left - pr.left - parent.clientLeft + parent.scrollLeft).toFixed(2)}px`;
     s.top = `${(r.top - pr.top - parent.clientTop + parent.scrollTop).toFixed(2)}px`;
     s.width = `${r.width.toFixed(2)}px`;
@@ -326,14 +438,14 @@ export async function fill(el, id, { seed, params, palette: pal, page, keep = fa
   const ro = new ResizeObserver(place);
   ro.observe(el);
   ro.observe(parent);
-  addEventListener('resize', place);
+  addEventListener("resize", place);
   document.fonts?.ready.then(place);
   const undo = () => {
     ro.disconnect();
-    removeEventListener('resize', place);
+    removeEventListener("resize", place);
     over.remove();
     el.classList.remove(...filled);
-    if (movedParent) parent.style.position = '';
+    if (movedParent) parent.style.position = "";
   };
   let ctrl = null;
   try {
@@ -342,7 +454,7 @@ export async function fill(el, id, { seed, params, palette: pal, page, keep = fa
       ? still(over, id, { palette: pal || inkPalette(page), params, seed })
       : await fx.mount(over, id, { palette: pal || inkPalette(page), params, seed });
   } catch (err) {
-    console.warn('fill:', err);
+    console.warn("fill:", err);
     undo();
     return { el: over, ctrl: null, destroy() {} };
   }
@@ -361,11 +473,13 @@ export async function fill(el, id, { seed, params, palette: pal, page, keep = fa
 
 /* ------------------------------------------------------------------ windows */
 
-const svgURL = svg => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+const svgURL = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 /** a rounded rectangle as a mask image, w x h CSS px */
 export function roundRect(w, h, r) {
   r = Math.max(0, Math.min(r, w / 2, h / 2));
-  return svgURL(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`);
+  return svgURL(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`,
+  );
 }
 
 /**
@@ -375,7 +489,9 @@ export function roundRect(w, h, r) {
 export function roundRectFade(w, h, r, { cx = 1, cy = 0, reach = 0.7, peak = 1 } = {}) {
   r = Math.max(0, Math.min(r, w / 2, h / 2));
   const d = Math.hypot(w, h) * reach;
-  return svgURL(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><radialGradient id="f" gradientUnits="userSpaceOnUse" cx="${(cx * w).toFixed(1)}" cy="${(cy * h).toFixed(1)}" r="${d.toFixed(1)}"><stop offset="0" stop-color="#fff" stop-opacity="${peak}"/><stop offset=".55" stop-color="#fff" stop-opacity="${(peak * 0.45).toFixed(3)}"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="${w}" height="${h}" rx="${r}" ry="${r}" fill="url(#f)"/></svg>`);
+  return svgURL(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><radialGradient id="f" gradientUnits="userSpaceOnUse" cx="${(cx * w).toFixed(1)}" cy="${(cy * h).toFixed(1)}" r="${d.toFixed(1)}"><stop offset="0" stop-color="#fff" stop-opacity="${peak}"/><stop offset=".55" stop-color="#fff" stop-opacity="${(peak * 0.45).toFixed(3)}"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="${w}" height="${h}" rx="${r}" ry="${r}" fill="url(#f)"/></svg>`,
+  );
 }
 
 /**
@@ -390,88 +506,115 @@ export function windows(host, targets, { extra = () => [], radius, shape = round
   const update = () => {
     raf = 0;
     const hr = host.getBoundingClientRect();
-    const layers = [], sizes = [], pos = [], comp = [];
+    const layers = [],
+      sizes = [],
+      pos = [],
+      comp = [];
     for (const extraLayer of extra()) {
       layers.push(extraLayer.image);
-      sizes.push(extraLayer.size || '100% 100%');
-      pos.push(extraLayer.position || '0 0');
-      comp.push('intersect');
+      sizes.push(extraLayer.size || "100% 100%");
+      pos.push(extraLayer.position || "0 0");
+      comp.push("intersect");
     }
-    const list = typeof targets === 'function' ? targets() : targets;
-    list.forEach(t => {
+    const list = typeof targets === "function" ? targets() : targets;
+    list.forEach((t) => {
       const r = t.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const w = Math.round(r.width * 100) / 100, h = Math.round(r.height * 100) / 100;
-      const rad = radius != null ? radius : parseFloat(getComputedStyle(t).borderTopLeftRadius) || 0;
+      const w = Math.round(r.width * 100) / 100,
+        h = Math.round(r.height * 100) / 100;
+      const rad =
+        radius != null ? radius : parseFloat(getComputedStyle(t).borderTopLeftRadius) || 0;
       layers.push(shape(w, h, rad));
       sizes.push(`${w}px ${h}px`);
       pos.push(`${(r.left - hr.left).toFixed(2)}px ${(r.top - hr.top).toFixed(2)}px`);
-      comp.push('add');
+      comp.push("add");
     });
     const s = host.style;
-    s.maskImage = s.webkitMaskImage = layers.join(', ') || 'none';
-    s.maskSize = s.webkitMaskSize = sizes.join(', ');
-    s.maskPosition = s.webkitMaskPosition = pos.join(', ');
-    s.maskRepeat = s.webkitMaskRepeat = 'no-repeat';
-    s.maskComposite = comp.join(', ');
+    s.maskImage = s.webkitMaskImage = layers.join(", ") || "none";
+    s.maskSize = s.webkitMaskSize = sizes.join(", ");
+    s.maskPosition = s.webkitMaskPosition = pos.join(", ");
+    s.maskRepeat = s.webkitMaskRepeat = "no-repeat";
+    s.maskComposite = comp.join(", ");
   };
-  const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const queue = () => {
+    if (!raf) raf = requestAnimationFrame(update);
+  };
   const ro = new ResizeObserver(queue);
   ro.observe(host);
-  (typeof targets === 'function' ? targets() : targets).forEach(t => ro.observe(t));
+  (typeof targets === "function" ? targets() : targets).forEach((t) => ro.observe(t));
   update();
-  return { update: queue, now: update, destroy() { ro.disconnect(); cancelAnimationFrame(raf); } };
+  return {
+    update: queue,
+    now: update,
+    destroy() {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    },
+  };
 }
 
 /* ------------------------------------------------------------------ small things */
 
 /** run fn on the next frames while the condition holds (pointer smoothing and the like) */
 export function smoother(step) {
-  let raf = 0, last = 0;
-  const tick = ts => {
+  let raf = 0,
+    last = 0;
+  const tick = (ts) => {
     const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016;
     last = ts;
     raf = step(dt) ? requestAnimationFrame(tick) : 0;
     if (!raf) last = 0;
   };
   return {
-    kick() { if (!raf) raf = requestAnimationFrame(tick); },
-    stop() { cancelAnimationFrame(raf); raf = 0; last = 0; },
+    kick() {
+      if (!raf) raf = requestAnimationFrame(tick);
+    },
+    stop() {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      last = 0;
+    },
   };
 }
 
 /** true while el sits inside a part whose pause button is pressed */
-export const held = el => !!el.closest('.cx-paused');
+export const held = (el) => !!el.closest(".cx-paused");
 
 /** a timer that only runs while el is on screen, the tab is visible, motion is allowed and no pause button holds it */
 export function whileVisible(el, { every, run, still }) {
-  let timer = 0, onScreen = false;
+  let timer = 0,
+    onScreen = false;
   const go = () => {
     clearInterval(timer);
     timer = 0;
     if (onScreen && !document.hidden && !reduced() && !held(el)) timer = setInterval(run, every);
     else if (reduced() && still) still();
   };
-  const io = new IntersectionObserver(e => { onScreen = e[e.length - 1].isIntersecting; go(); });
+  const io = new IntersectionObserver((e) => {
+    onScreen = e[e.length - 1].isIntersecting;
+    go();
+  });
   io.observe(el);
-  document.addEventListener('visibilitychange', go);
-  document.addEventListener('cx-pause', go);
-  mqReduce.addEventListener?.('change', go);
+  document.addEventListener("visibilitychange", go);
+  document.addEventListener("cx-pause", go);
+  mqReduce.addEventListener?.("change", go);
   return {
     destroy() {
       clearInterval(timer);
       io.disconnect();
-      document.removeEventListener('visibilitychange', go);
-      document.removeEventListener('cx-pause', go);
-      mqReduce.removeEventListener?.('change', go);
+      document.removeEventListener("visibilitychange", go);
+      document.removeEventListener("cx-pause", go);
+      mqReduce.removeEventListener?.("change", go);
     },
   };
 }
 
 /* ------------------------------------------------------------------ pause */
 
-const PAUSE_ICON = '<svg class="cx-pause__off" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>';
-const PLAY_ICON = '<svg class="cx-pause__on" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.2v9.6a.8.8 0 0 0 1.2.7l7.6-4.8a.8.8 0 0 0 0-1.4L6.2 2.5A.8.8 0 0 0 5 3.2Z"/></svg>';
+const PAUSE_ICON =
+  '<svg class="cx-pause__off" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="4" y="3" width="2.6" height="10" rx="1"/><rect x="9.4" y="3" width="2.6" height="10" rx="1"/></svg>';
+const PLAY_ICON =
+  '<svg class="cx-pause__on" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.2v9.6a.8.8 0 0 0 1.2.7l7.6-4.8a.8.8 0 0 0 0-1.4L6.2 2.5A.8.8 0 0 0 5 3.2Z"/></svg>';
 
 /**
   pauser(host, opts): a round pause button for a looping visual, as every loop that runs on its own
@@ -482,47 +625,58 @@ const PLAY_ICON = '<svg class="cx-pause__on" viewBox="0 0 16 16" width="14" heig
   components with their own frame loop check held(el). Under reduced motion the loops already hold
   one state, so the button is not shown. Returns { el, add(ctrl | promise), paused(), destroy() }.
 */
-export function pauser(host, { label = 'animation', corner = 'br', at = host, into = null } = {}) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = into ? 'cx-pause cx-pause--inline' : `cx-pause cx-pause--${corner}`;
+export function pauser(host, { label = "animation", corner = "br", at = host, into = null } = {}) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = into ? "cx-pause cx-pause--inline" : `cx-pause cx-pause--${corner}`;
   btn.innerHTML = PAUSE_ICON + PLAY_ICON;
   const ctrls = new Set();
   let paused = false;
-  const set = v => {
+  const set = (v) => {
     paused = v;
-    host.classList.toggle('cx-paused', v);
-    btn.classList.toggle('is-paused', v);
-    btn.setAttribute('aria-label', `${v ? 'Play' : 'Pause'} ${label}`);
-    btn.title = `${v ? 'Play' : 'Pause'} ${label}`;
-    ctrls.forEach(c => { try { v ? c.pause?.() : c.resume?.(); } catch (_) {} });
+    host.classList.toggle("cx-paused", v);
+    btn.classList.toggle("is-paused", v);
+    btn.setAttribute("aria-label", `${v ? "Play" : "Pause"} ${label}`);
+    btn.title = `${v ? "Play" : "Pause"} ${label}`;
+    ctrls.forEach((c) => {
+      try {
+        v ? c.pause?.() : c.resume?.();
+      } catch (_) {}
+    });
     // a CSS transition in flight (a pointer gliding) stops where it is, then carries on
-    if (typeof CSSTransition === 'function') {
-      for (const a of host.getAnimations?.({ subtree: true }) || []) if (a instanceof CSSTransition) v ? a.pause() : a.play();
+    if (typeof CSSTransition === "function") {
+      for (const a of host.getAnimations?.({ subtree: true }) || [])
+        if (a instanceof CSSTransition) v ? a.pause() : a.play();
     }
-    host.dispatchEvent(new CustomEvent('cx-pause', { bubbles: true, detail: { paused: v } }));
+    host.dispatchEvent(new CustomEvent("cx-pause", { bubbles: true, detail: { paused: v } }));
   };
   set(false);
   const click = () => set(!paused);
-  btn.addEventListener('click', click);
-  const movedAt = !into && getComputedStyle(at).position === 'static';
-  if (movedAt) at.style.position = 'relative';
+  btn.addEventListener("click", click);
+  const movedAt = !into && getComputedStyle(at).position === "static";
+  if (movedAt) at.style.position = "relative";
   (into || at).append(btn);
   const api = {
     el: btn,
     add(c) {
       if (!c) return c;
-      if (typeof c.then === 'function') { c.then(v => api.add(v), () => {}); return c; }
+      if (typeof c.then === "function") {
+        c.then(
+          (v) => api.add(v),
+          () => {},
+        );
+        return c;
+      }
       ctrls.add(c);
       if (paused) c.pause?.();
       return c;
     },
     paused: () => paused,
     destroy() {
-      btn.removeEventListener('click', click);
+      btn.removeEventListener("click", click);
       btn.remove();
-      host.classList.remove('cx-paused');
-      if (movedAt) at.style.position = '';
+      host.classList.remove("cx-paused");
+      if (movedAt) at.style.position = "";
       ctrls.clear();
     },
   };
@@ -533,21 +687,31 @@ export function pauser(host, { label = 'animation', corner = 'br', at = host, in
 export function bag() {
   const fns = [];
   let done = false;
-  const kill = x => (typeof x === 'function' ? x() : x?.destroy?.());
+  const kill = (x) => (typeof x === "function" ? x() : x?.destroy?.());
   const api = {
     /** a destroy function, an object with destroy(), or a promise of either */
     add(x) {
       if (!x) return x;
-      if (typeof x.then === 'function') {
-        x.then(v => (done ? kill(v) : api.add(v)), () => {});
+      if (typeof x.then === "function") {
+        x.then(
+          (v) => (done ? kill(v) : api.add(v)),
+          () => {},
+        );
         return x;
       }
-      if (done) kill(x); else fns.push(() => kill(x));
+      if (done) kill(x);
+      else fns.push(() => kill(x));
       return x;
     },
     destroy() {
       done = true;
-      while (fns.length) { try { fns.pop()(); } catch (e) { console.warn(e); } }
+      while (fns.length) {
+        try {
+          fns.pop()();
+        } catch (e) {
+          console.warn(e);
+        }
+      }
     },
   };
   return api;
@@ -559,11 +723,41 @@ export function bag() {
   to another (contour-lines' opacity and calm left dot-terrain almost blank on the map). An effect with
   no entry gets `base` only, so its own defaults hold.
 */
-export function tuned(table, id, base = { calm: 0 }) { return { ...(table[id] || base) }; }
+export function tuned(table, id, base = { calm: 0 }) {
+  return { ...(table[id] || base) };
+}
 
 /** data-cx-params='{"speed":0.2}' on an element, parsed */
 export function paramsOf(el) {
-  try { return el.dataset.cxParams ? JSON.parse(el.dataset.cxParams) : undefined; } catch (_) { return undefined; }
+  try {
+    return el.dataset.cxParams ? JSON.parse(el.dataset.cxParams) : undefined;
+  } catch (_) {
+    return undefined;
+  }
 }
 
-export default { fx, color, reduced, hoverable, palette, isDark, tone, safe, inkPalette, accentPalette, mount, still, fill, windows, tuned, roundRect, roundRectFade, smoother, whileVisible, held, pauser, bag, paramsOf };
+export default {
+  fx,
+  color,
+  reduced,
+  hoverable,
+  palette,
+  isDark,
+  tone,
+  safe,
+  inkPalette,
+  accentPalette,
+  mount,
+  still,
+  fill,
+  windows,
+  tuned,
+  roundRect,
+  roundRectFade,
+  smoother,
+  whileVisible,
+  held,
+  pauser,
+  bag,
+  paramsOf,
+};

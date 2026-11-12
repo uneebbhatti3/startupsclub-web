@@ -17,7 +17,7 @@ Give an element a size and a `data-fx` id, then mount every one on the page:
 <div class="panel" data-fx="caustics" data-fx-seed="21"></div>
 
 <script type="module">
-  import fx from './assets/effects/fx.js';
+  import fx from "./assets/effects/fx.js";
   fx.mountAll(document);
 </script>
 ```
@@ -69,9 +69,13 @@ node scripts/effects.mjs pick --palette dark --slots hero:dotted-globe,card,band
 In the browser, the same code:
 
 ```js
-import { pick } from './assets/effects/pick.js';
-const index = await fetch('./assets/effects/index.json').then(r => r.json());
-const { picks } = pick(index.effects, { palette: fx.paletteKind(palette), slots: ['hero', 'card', 'card'], history });
+import { pick } from "./assets/effects/pick.js";
+const index = await fetch("./assets/effects/index.json").then((r) => r.json());
+const { picks } = pick(index.effects, {
+  palette: fx.paletteKind(palette),
+  slots: ["hero", "card", "card"],
+  history,
+});
 // picks: [{ slot: 'hero', id: 'god-rays' }, ...]; history: the ids of earlier picks, oldest first
 // a named slot: slots: ['hero:dotted-globe', 'card'] (or { slot: 'hero', id: 'dotted-globe' })
 ```
@@ -80,33 +84,33 @@ const { picks } = pick(index.effects, { palette: fx.paletteKind(palette), slots:
 
 ## The list
 
-| id | Name | Family | Slots | Palettes | Ground | Motion |
-|---|---|---|---|---|---|---|
-| `film-light-leak` | Film light leak | Grain | hero, card, band | dark, colour | focal | slow |
-| `grain-gradient` | Grain gradient | Grain | hero, card, band, footer | light, dark, colour | quiet | slow |
-| `ascii-shade` | ASCII shade | Dither | hero, card, footer | light, dark, colour | focal | slow |
-| `bayer-dither` | Bayer dither | Dither | hero, card, band, footer | light, dark, colour | quiet | slow |
-| `halftone-screen` | Halftone screen | Dither | hero, band | light, dark, colour | quiet | slow |
-| `line-engraving` | Line engraving | Dither | hero, card, band | light, dark, colour | quiet | still |
-| `aurora-curtains` | Aurora curtains | Mesh | hero, band, footer | dark, colour | focal | slow |
-| `gradient-mesh` | Gradient mesh | Mesh | hero, card, band | light, dark, colour | quiet | slow |
-| `painterly-landscape` | Painterly landscape | Mesh | hero, card | light, dark, colour | quiet | slow |
-| `god-rays` | God rays | Light | hero, band | dark, colour | focal | slow |
-| `orb-sphere` | Light orb | Light | hero, card, band | light, dark, colour | focal | slow |
-| `prism-dispersion` | Prism light | Light | hero, card, band | dark | focal | slow |
-| `soft-light-bars` | Soft light bars | Light | hero, card, band, footer | light, dark, colour | focal | slow |
-| `spotlight-cone` | Stage spotlight | Light | hero, card | dark, colour | focal | slow |
-| `caustics` | Water caustics | Light | hero, card, band | light, dark, colour | focal | slow |
-| `edge-glow` | Edge glow (named only) | Light | card | light, dark, colour | border | slow |
-| `dot-terrain` | Dot terrain | Pattern | hero, card, band | light, dark, colour | quiet | slow |
-| `grid-pulse` | Grid pulse | Pattern | hero, card, band | light, dark, colour | quiet | slow |
-| `ruled-grounds` | Ruled dot ground | Pattern | card, band | light, dark, colour | quiet | slow |
-| `contour-lines` | Topographic contours | Pattern | hero, card, band, footer | light, dark, colour | quiet | slow |
-| `dotted-globe` | Dotted globe (named only) | Pattern | hero, card, band | light, dark, colour | focal | slow |
-| `ridgeline` | Ridgeline (named only) | Pattern | band | light, dark, colour | focal | slow |
-| `fluted-glass` | Fluted glass | Material | hero, card, band | light, dark, colour | quiet | slow |
-| `silk-folds` | Silk folds | Material | hero, card, band | light, dark, colour | quiet | slow |
-| `duotone-grade` | Duotone grade (named only) | Photo | hero, card, band | light, dark, colour | quiet | still |
+| id                    | Name                       | Family   | Slots                    | Palettes            | Ground | Motion |
+| --------------------- | -------------------------- | -------- | ------------------------ | ------------------- | ------ | ------ |
+| `film-light-leak`     | Film light leak            | Grain    | hero, card, band         | dark, colour        | focal  | slow   |
+| `grain-gradient`      | Grain gradient             | Grain    | hero, card, band, footer | light, dark, colour | quiet  | slow   |
+| `ascii-shade`         | ASCII shade                | Dither   | hero, card, footer       | light, dark, colour | focal  | slow   |
+| `bayer-dither`        | Bayer dither               | Dither   | hero, card, band, footer | light, dark, colour | quiet  | slow   |
+| `halftone-screen`     | Halftone screen            | Dither   | hero, band               | light, dark, colour | quiet  | slow   |
+| `line-engraving`      | Line engraving             | Dither   | hero, card, band         | light, dark, colour | quiet  | still  |
+| `aurora-curtains`     | Aurora curtains            | Mesh     | hero, band, footer       | dark, colour        | focal  | slow   |
+| `gradient-mesh`       | Gradient mesh              | Mesh     | hero, card, band         | light, dark, colour | quiet  | slow   |
+| `painterly-landscape` | Painterly landscape        | Mesh     | hero, card               | light, dark, colour | quiet  | slow   |
+| `god-rays`            | God rays                   | Light    | hero, band               | dark, colour        | focal  | slow   |
+| `orb-sphere`          | Light orb                  | Light    | hero, card, band         | light, dark, colour | focal  | slow   |
+| `prism-dispersion`    | Prism light                | Light    | hero, card, band         | dark                | focal  | slow   |
+| `soft-light-bars`     | Soft light bars            | Light    | hero, card, band, footer | light, dark, colour | focal  | slow   |
+| `spotlight-cone`      | Stage spotlight            | Light    | hero, card               | dark, colour        | focal  | slow   |
+| `caustics`            | Water caustics             | Light    | hero, card, band         | light, dark, colour | focal  | slow   |
+| `edge-glow`           | Edge glow (named only)     | Light    | card                     | light, dark, colour | border | slow   |
+| `dot-terrain`         | Dot terrain                | Pattern  | hero, card, band         | light, dark, colour | quiet  | slow   |
+| `grid-pulse`          | Grid pulse                 | Pattern  | hero, card, band         | light, dark, colour | quiet  | slow   |
+| `ruled-grounds`       | Ruled dot ground           | Pattern  | card, band               | light, dark, colour | quiet  | slow   |
+| `contour-lines`       | Topographic contours       | Pattern  | hero, card, band, footer | light, dark, colour | quiet  | slow   |
+| `dotted-globe`        | Dotted globe (named only)  | Pattern  | hero, card, band         | light, dark, colour | focal  | slow   |
+| `ridgeline`           | Ridgeline (named only)     | Pattern  | band                     | light, dark, colour | focal  | slow   |
+| `fluted-glass`        | Fluted glass               | Material | hero, card, band         | light, dark, colour | quiet  | slow   |
+| `silk-folds`          | Silk folds                 | Material | hero, card, band         | light, dark, colour | quiet  | slow   |
+| `duotone-grade`       | Duotone grade (named only) | Photo    | hero, card, band         | light, dark, colour | quiet  | still  |
 
 Each effect's one-line description is the `look` field in `index.json`. `node scripts/effects.mjs list`
 prints this table, and you can filter it with `--family`, `--on`, `--palette`, `--motion` and

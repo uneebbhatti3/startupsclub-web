@@ -37,29 +37,37 @@
   products: a Map from element to controller (setColor(id), setView(v), setScene(s), pause(), resume(),
   step(on), set(params), setPalette(p | null), destroy()); after a theme switch call setPalette(null) on each.
 */
-import { loadProduct } from './build.js';
+import { loadProduct } from "./build.js";
 
 export const products = new Map();
 const claimed = new WeakSet();
-const json = s => { try { return s ? JSON.parse(s) : {}; } catch (_) { console.warn('product-render: bad JSON', s); return {}; } };
+const json = (s) => {
+  try {
+    return s ? JSON.parse(s) : {};
+  } catch (_) {
+    console.warn("product-render: bad JSON", s);
+    return {};
+  }
+};
 function placeOf(el) {
   const p = el.dataset.productPlace;
   if (p) return p;
-  const box = el.closest('.frame, .panel, .panel__screen');
-  if (!box || box === el) return el.matches('.frame') ? 'hero' : 'none';
-  if (box.matches('.panel--top, .frame--square, .frame--portrait')) return 'tile';
-  if (box.matches('.panel, .panel__screen')) return 'card';
-  return 'hero';
+  const box = el.closest(".frame, .panel, .panel__screen");
+  if (!box || box === el) return el.matches(".frame") ? "hero" : "none";
+  if (box.matches(".panel--top, .frame--square, .frame--portrait")) return "tile";
+  if (box.matches(".panel, .panel__screen")) return "card";
+  return "hero";
 }
 const cache = new Map();
-const productOf = el => {
+const productOf = (el) => {
   const url = new URL(el.dataset.product, document.baseURI).href;
   if (!cache.has(url)) cache.set(url, loadProduct(url));
   return cache.get(url);
 };
 // the frame's own attributes, as mount options
 function optsOf(el) {
-  const d = el.dataset, o = { place: placeOf(el), params: json(d.productParams) };
+  const d = el.dataset,
+    o = { place: placeOf(el), params: json(d.productParams) };
   if (d.productView) o.view = d.productView;
   if (d.productScene) o.scene = d.productScene;
   if (d.productColor) o.color = d.productColor;
@@ -69,65 +77,96 @@ function optsOf(el) {
   return o;
 }
 // a changed attribute shows that variant on the mounted frame
-const ATTRS = ['data-product-color', 'data-product-view', 'data-product-scene'];
-const watcher = typeof MutationObserver === 'undefined' ? null : new MutationObserver(list => {
-  for (const m of list) {
-    const ctrl = products.get(m.target), v = m.target.getAttribute(m.attributeName);
-    if (!ctrl || v == null) continue;
-    if (m.attributeName === 'data-product-color' && v !== ctrl.color) ctrl.setColor(v);
-    else if (m.attributeName === 'data-product-view' && v !== ctrl.view) ctrl.setView(v || 'three-quarter');
-    else if (m.attributeName === 'data-product-scene' && v !== (ctrl.scene || '')) ctrl.setScene(v || null);
-  }
-});
+const ATTRS = ["data-product-color", "data-product-view", "data-product-scene"];
+const watcher =
+  typeof MutationObserver === "undefined"
+    ? null
+    : new MutationObserver((list) => {
+        for (const m of list) {
+          const ctrl = products.get(m.target),
+            v = m.target.getAttribute(m.attributeName);
+          if (!ctrl || v == null) continue;
+          if (m.attributeName === "data-product-color" && v !== ctrl.color) ctrl.setColor(v);
+          else if (m.attributeName === "data-product-view" && v !== ctrl.view)
+            ctrl.setView(v || "three-quarter");
+          else if (m.attributeName === "data-product-scene" && v !== (ctrl.scene || ""))
+            ctrl.setScene(v || null);
+        }
+      });
 function apply(el, d = {}) {
-  if (d.color != null) el.setAttribute('data-product-color', d.color);
-  if (d.view != null) el.setAttribute('data-product-view', d.view);
-  if (d.scene != null) el.setAttribute('data-product-scene', d.scene);
+  if (d.color != null) el.setAttribute("data-product-color", d.color);
+  if (d.view != null) el.setAttribute("data-product-view", d.view);
+  if (d.scene != null) el.setAttribute("data-product-scene", d.scene);
 }
 export async function mountAll(root = document) {
-  const els = [...root.querySelectorAll('[data-product]')].filter(el => !claimed.has(el));
-  els.forEach(el => claimed.add(el));
-  await Promise.all(els.map(async el => {
-    try {
-      const product = await productOf(el);
-      products.set(el, product.mount(el, optsOf(el)));
-      watcher?.observe(el, { attributes: true, attributeFilter: ATTRS });
-      el.addEventListener('product:set', e => { if (e.detail) apply(el, e.detail); });
-    } catch (e) { console.error('product-render:', el.dataset.product, e); el.dataset.productError = String(e.message || e).split('\n')[0]; }
-  }));
+  const els = [...root.querySelectorAll("[data-product]")].filter((el) => !claimed.has(el));
+  els.forEach((el) => claimed.add(el));
+  await Promise.all(
+    els.map(async (el) => {
+      try {
+        const product = await productOf(el);
+        products.set(el, product.mount(el, optsOf(el)));
+        watcher?.observe(el, { attributes: true, attributeFilter: ATTRS });
+        el.addEventListener("product:set", (e) => {
+          if (e.detail) apply(el, e.detail);
+        });
+      } catch (e) {
+        console.error("product-render:", el.dataset.product, e);
+        el.dataset.productError = String(e.message || e).split("\n")[0];
+      }
+    }),
+  );
   return products;
 }
 
 // swatches: an order card's colour inputs or buttons drive the frames they name
 function swatch(e) {
-  const s = e.target.closest?.('[data-product-swatch]');
+  const s = e.target.closest?.("[data-product-swatch]");
   if (!s) return;
-  if (e.type === 'click' && s.matches('input, select')) return;   // an input reports on change
-  if (s.matches('input[type=radio], input[type=checkbox]') && !s.checked) return;
+  if (e.type === "click" && s.matches("input, select")) return; // an input reports on change
+  if (s.matches("input[type=radio], input[type=checkbox]") && !s.checked) return;
   const color = s.dataset.productSwatchValue || s.value;
   if (!color) return;
-  targets(s.dataset.productSwatch, color).forEach(el => apply(el, { color }));
-  if (s.matches('button, [role=button]')) {
+  targets(s.dataset.productSwatch, color).forEach((el) => apply(el, { color }));
+  if (s.matches("button, [role=button]")) {
     // one pressed swatch in its group
-    const group = s.closest('[role=radiogroup], fieldset, [data-product-swatches]') || s.parentElement;
-    group?.querySelectorAll('[data-product-swatch]').forEach(b => { if (b.matches('button, [role=button]')) b.setAttribute('aria-pressed', String(b === s)); });
+    const group =
+      s.closest("[role=radiogroup], fieldset, [data-product-swatches]") || s.parentElement;
+    group?.querySelectorAll("[data-product-swatch]").forEach((b) => {
+      if (b.matches("button, [role=button]")) b.setAttribute("aria-pressed", String(b === s));
+    });
   }
 }
 function targets(sel, color) {
-  if (sel) { try { return [...document.querySelectorAll(sel)].filter(el => el.hasAttribute('data-product')); } catch (_) { return []; } }
-  return [...products.entries()].filter(([, c]) => c.colors?.some(x => x.id === color)).map(([el]) => el);
+  if (sel) {
+    try {
+      return [...document.querySelectorAll(sel)].filter((el) => el.hasAttribute("data-product"));
+    } catch (_) {
+      return [];
+    }
+  }
+  return [...products.entries()]
+    .filter(([, c]) => c.colors?.some((x) => x.id === color))
+    .map(([el]) => el);
 }
-if (typeof document !== 'undefined') {
-  document.addEventListener('change', swatch);
-  document.addEventListener('click', swatch);
-  document.addEventListener('product:set', e => {
+if (typeof document !== "undefined") {
+  document.addEventListener("change", swatch);
+  document.addEventListener("click", swatch);
+  document.addEventListener("product:set", (e) => {
     if (e.target !== document || !e.detail) return;
     const { target, ...d } = e.detail;
-    (target ? targets(target) : d.color ? targets('', d.color) : [...products.keys()]).forEach(el => apply(el, d));
+    (target ? targets(target) : d.color ? targets("", d.color) : [...products.keys()]).forEach(
+      (el) => apply(el, d),
+    );
   });
 }
 /** resolves with products once the page's first mount is done */
-export const ready = typeof document === 'undefined' ? Promise.resolve(products)
-  : document.readyState === 'loading' ? new Promise(r => document.addEventListener('DOMContentLoaded', () => r(mountAll()), { once: true }))
-  : mountAll();
+export const ready =
+  typeof document === "undefined"
+    ? Promise.resolve(products)
+    : document.readyState === "loading"
+      ? new Promise((r) =>
+          document.addEventListener("DOMContentLoaded", () => r(mountAll()), { once: true }),
+        )
+      : mountAll();
 export default { mountAll, products, ready };

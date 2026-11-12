@@ -5,8 +5,9 @@
   The icons a diagram names are the files scripts/icons.mjs wrote (icons.mjs scan index.html --out assets/icons),
   read from assets/icons/ or from data-icon-base. See references/diagrams.md.
 */
-import dg from './diagram.js';
+import dg from "./diagram.js";
 
 const go = () => dg.auto(document);
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true });
+if (document.readyState === "loading")
+  document.addEventListener("DOMContentLoaded", go, { once: true });
 else go();

@@ -9,12 +9,12 @@ nothing fetches, tints or judges an icon at runtime, and no page calls a CDN for
 
 ## Where they come from
 
-| set | source (pinned) | holds | drawings licence |
-|---|---|---|---|
-| `logos` | `cdn.jsdelivr.net/gh/gilbarbara/logos` at commit `d6960edc1b73` (26 Oct 2026; the repository has no tags) | about 1,500 brands in full colour: the first choice | CC0 (LICENSE.txt at the commit) |
-| `si` | `simple-icons` 16.30.0 | one-colour marks painted in the brand hex: the fallback, only where no colour mark exists | CC0 |
-| `file` | `@iconify-json/vscode-icons` 1.2.30 | file types in colour (pdf, markdown, zip, Word, Excel, PowerPoint): a document type, never a brand | MIT |
-| `ui` | `@iconify-json/lucide` 1.2.100 | interface glyphs, one line set | ISC |
+| set     | source (pinned)                                                                                           | holds                                                                                              | drawings licence                |
+| ------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `logos` | `cdn.jsdelivr.net/gh/gilbarbara/logos` at commit `d6960edc1b73` (26 Oct 2026; the repository has no tags) | about 1,500 brands in full colour: the first choice                                                | CC0 (LICENSE.txt at the commit) |
+| `si`    | `simple-icons` 16.30.0                                                                                    | one-colour marks painted in the brand hex: the fallback, only where no colour mark exists          | CC0                             |
+| `file`  | `@iconify-json/vscode-icons` 1.2.30                                                                       | file types in colour (pdf, markdown, zip, Word, Excel, PowerPoint): a document type, never a brand | MIT                             |
+| `ui`    | `@iconify-json/lucide` 1.2.100                                                                            | interface glyphs, one line set                                                                     | ISC                             |
 
 `si` is used for Google Docs, Sheets, Slides, Forms, Chat and Tasks, Calendly, Evernote, QuickBooks, Revolut and the
 console and game-store marks (PlayStation, Epic Games, Riot, Battle.net, itch.io, Roblox, EA, Ubisoft, Rockstar, Valve,

@@ -6,23 +6,23 @@
 // quick stroke's fading trail, the photograph develops through the grain with a grainy rim. At rest it is
 // still (no frames run) and there is no entry: the print is finished from its first frame. colour 0
 // dithers in the page's ink and accent.
-import { photoGL, blueNoise, photoPalette } from '../photo-kit/photo.js';
+import { photoGL, blueNoise, photoPalette } from "../photo-kit/photo.js";
 
 const params = {
-  colour:   { default: 1,    min: 0,   max: 1,   step: 1 },    // 1 the photograph's deepest and most colourful colours, 0 the page's ink and accent
-  ground:   { default: 1,    min: 0,   max: 1,   step: 1 },    // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
-  clean:    { default: 0.1,  min: 0,   max: 0.3, step: 0.01 }, // the lightest share of tones prints as bare paper (no stray dots in a white wall)
-  tones:    { default: 3,    min: 2,   max: 3,   step: 1 },    // 3: ink, a colour and paper; 2: ink and paper
-  cell:     { default: 2,    min: 1,   max: 10,  step: 1 },    // dither cell, CSS px: 1 a fine grain; 3 and up coarse and retro
-  pattern:  { default: 1,    min: 0,   max: 1,   step: 1 },    // 1 blue noise (an even grain), 0 Bayer 8 x 8 (a retro cross-hatch)
-  radius:   { default: 150,  min: 60,  max: 420, step: 1 },    // the turned-over area, CSS px at a 560 px frame (scales with the frame)
-  breathe:  { default: 0,    min: 0,   max: 1,   step: 0.01 }, // the threshold's slow breathing at rest (0: still, no frames at rest)
-  speed:    { default: 1,    min: 0,   max: 2,   step: 0.01 },
-  clarity:  { default: 0.15, min: 0,   max: 1,   step: 0.01 }, // local contrast in the grain
-  contrast: { default: 0.1,  min: 0,   max: 1,   step: 0.01 },
-  exposure: { default: 0,    min: -1,  max: 1,   step: 0.01 },
-  focusX:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 }, // the part of the photograph kept in frame
-  focusY:   { default: 0.5,  min: 0,   max: 1,   step: 0.01 },
+  colour: { default: 1, min: 0, max: 1, step: 1 }, // 1 the photograph's deepest and most colourful colours, 0 the page's ink and accent
+  ground: { default: 1, min: 0, max: 1, step: 1 }, // the paper: 1 the page's surface (the frame reads as a print on its own sheet), 0 the page itself
+  clean: { default: 0.1, min: 0, max: 0.3, step: 0.01 }, // the lightest share of tones prints as bare paper (no stray dots in a white wall)
+  tones: { default: 3, min: 2, max: 3, step: 1 }, // 3: ink, a colour and paper; 2: ink and paper
+  cell: { default: 2, min: 1, max: 10, step: 1 }, // dither cell, CSS px: 1 a fine grain; 3 and up coarse and retro
+  pattern: { default: 1, min: 0, max: 1, step: 1 }, // 1 blue noise (an even grain), 0 Bayer 8 x 8 (a retro cross-hatch)
+  radius: { default: 150, min: 60, max: 420, step: 1 }, // the turned-over area, CSS px at a 560 px frame (scales with the frame)
+  breathe: { default: 0, min: 0, max: 1, step: 0.01 }, // the threshold's slow breathing at rest (0: still, no frames at rest)
+  speed: { default: 1, min: 0, max: 2, step: 0.01 },
+  clarity: { default: 0.15, min: 0, max: 1, step: 0.01 }, // local contrast in the grain
+  contrast: { default: 0.1, min: 0, max: 1, step: 0.01 },
+  exposure: { default: 0, min: -1, max: 1, step: 0.01 },
+  focusX: { default: 0.5, min: 0, max: 1, step: 0.01 }, // the part of the photograph kept in frame
+  focusY: { default: 0.5, min: 0, max: 1, step: 0.01 },
 };
 
 const frag = /* glsl */ `
@@ -83,39 +83,63 @@ void main() {
 }
 `;
 
-const FLAT = { data: new Uint8Array([128, 128, 128, 255]), width: 1, height: 1, filter: 'nearest', wrap: 'repeat', key: 'flat' };
+const FLAT = {
+  data: new Uint8Array([128, 128, 128, 255]),
+  width: 1,
+  height: 1,
+  filter: "nearest",
+  wrap: "repeat",
+  key: "flat",
+};
 // the print's ink and middle colour (sRGB 0..1): from the photograph's palette, or the page's ink and
 // accent (colour 0, or a photograph that cannot be read). The ink is the picture's deepest colour (its
 // lightest on dark paper), held well apart from the paper; the middle is its most colourful one, held
 // between ink and paper in lightness, so the scale stays in order
 function inks(image, P, p, color) {
-  const paper = color.lab(p.ground > 0.5 ? P.surface : P.bg), light = color.lab(P.bg)[0] >= color.lab(P.ink)[0];
+  const paper = color.lab(p.ground > 0.5 ? P.surface : P.bg),
+    light = color.lab(P.bg)[0] >= color.lab(P.ink)[0];
   const pal = p.colour > 0.5 && image ? photoPalette(image, 8) : null;
-  let ink = color.lab(P.ink), mid = color.lab(P.accent);
+  let ink = color.lab(P.ink),
+    mid = color.lab(P.accent);
   if (pal) {
     ink = (light ? pal[0] : pal[pal.length - 1]).slice();
-    const chroma = c => Math.hypot(c[1], c[2]);
+    const chroma = (c) => Math.hypot(c[1], c[2]);
     const inner = pal.slice(1, -1).sort((a, b) => chroma(b) - chroma(a));
-    mid = inner[0] && chroma(inner[0]) > 0.035 ? inner[0].slice() : [(ink[0] + paper[0]) / 2, (ink[1] + paper[1]) / 2, (ink[2] + paper[2]) / 2];
+    mid =
+      inner[0] && chroma(inner[0]) > 0.035
+        ? inner[0].slice()
+        : [(ink[0] + paper[0]) / 2, (ink[1] + paper[1]) / 2, (ink[2] + paper[2]) / 2];
   }
   // the ink at least 0.55 from the paper in lightness; the middle between, a quarter of the way in from each
   ink[0] = light ? Math.min(ink[0], paper[0] - 0.55) : Math.max(ink[0], paper[0] + 0.55);
-  const lo = Math.min(ink[0], paper[0]), hi = Math.max(ink[0], paper[0]);
+  const lo = Math.min(ink[0], paper[0]),
+    hi = Math.max(ink[0], paper[0]);
   mid[0] = Math.min(hi - 0.25 * (hi - lo), Math.max(lo + 0.25 * (hi - lo), mid[0]));
-  return { u_inkC: color.rgb(color.fromLab ? color.fromLab(ink) : ink), u_midC: color.rgb(color.fromLab ? color.fromLab(mid) : mid) };
+  return {
+    u_inkC: color.rgb(color.fromLab ? color.fromLab(ink) : ink),
+    u_midC: color.rgb(color.fromLab ? color.fromLab(mid) : mid),
+  };
 }
 
 export default {
-  id: 'photo-dither',
-  name: 'Dithered photograph',
-  kind: 'photo',
+  id: "photo-dither",
+  name: "Dithered photograph",
+  kind: "photo",
   params,
   frag,
   mount(el, { palette, src, params: given, seed } = {}) {
     return photoGL(el, {
-      name: 'photo-dither', frag, schema: params, params: given, palette, src, seed,
-      crisp: true, trail: 8, entry: 0,
-      restMotion: p => p.breathe > 0 && p.speed > 0,
+      name: "photo-dither",
+      frag,
+      schema: params,
+      params: given,
+      palette,
+      src,
+      seed,
+      crisp: true,
+      trail: 8,
+      entry: 0,
+      restMotion: (p) => p.breathe > 0 && p.speed > 0,
       uniforms: ({ image, palette: P, params: p, color }) => inks(image, P, p, color),
       textures: ({ params: p }) => ({ u_noise: p.pattern > 0.5 ? blueNoise() : FLAT }),
     });
