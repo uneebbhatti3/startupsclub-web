@@ -8,7 +8,9 @@ on:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded pull request runs are cancelled; runs on integration and main never are, so a
+  # deployment is not cut off halfway by the next merge.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -76,3 +78,41 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Deploys only after a merge: pushes to integration and main come only from merged pull
+  # requests (repository ruleset), and this job also waits for every check on the merged commit.
+  # Vercel's own Git deployments are off (vercel.json), so this job is the only way code deploys.
+  # The build runs on Vercel with that environment's variables; nothing is built here.
+  deploy:
+    name: Deploy to Vercel
+    needs: [quality, build, e2e]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    # A deployment in progress is never cancelled; a newer push waits for it to finish.
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install Vercel CLI
+        run: npm install --global vercel@65.5.0
+      - name: Deploy (main = production, integration = preview)
+        id: deploy
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            url="$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")"
+          else
+            url="$(vercel deploy --yes --token="$VERCEL_TOKEN")"
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url" >> "$GITHUB_STEP_SUMMARY"
