@@ -14,6 +14,9 @@ permissions:
   contents: read
 
 env:
+  # Git hooks are a local-only check; CI runs the same commands as explicit steps below.
+  # HUSKY=0 makes the `prepare` script (husky) a no-op during `npm ci`.
+  HUSKY: 0
   NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/api/v1
   NEXT_PUBLIC_AUTH_BASE_URL: http://localhost:4000
   NEXT_PUBLIC_SITE_URL: http://localhost:3000
