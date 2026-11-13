@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { env } from "@/config/env";
 import { siteConfig } from "@/config/site";
 import { shareImage } from "@/lib/seo";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 
 /**
  * Root layout: fonts, global styles, and the site-wide default metadata and viewport.
@@ -92,7 +93,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
       )}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

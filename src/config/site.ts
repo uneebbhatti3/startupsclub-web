@@ -51,6 +51,13 @@ export const siteConfig = {
 } as const;
 
 /**
+ * Temporary switch (owner, 13 Nov 2026): the backend for waitlist entries is not ready, so every
+ * "Join waitlist" button is hidden and /waitlist is left out of the sitemap and llms.txt. The page
+ * itself still exists. Set to `true` to bring all of it back.
+ */
+export const waitlistVisible = false;
+
+/**
  * Public, indexable routes that exist in `src/app/(marketing)`. Add a route here only once its
  * page is built.
  */
@@ -62,7 +69,33 @@ export const marketingRoutes = [
     lastModified: "2026-11-12",
     absoluteTitle: true,
   },
+  {
+    path: "/features",
+    title: "Features",
+    description:
+      "Daily standups, ship logs, clubs and six-week seasons, a post composer for StartupsClub and LinkedIn, and private AI coaching on Pro.",
+    lastModified: "2026-11-12",
+  },
+  {
+    path: "/pricing",
+    title: "Pricing: Free and Pro Plans",
+    description:
+      "Start free with daily standups, ship logs, clubs and seasons. Pro adds post scheduling, a higher AI post quota and private AI coaching.",
+    lastModified: "2026-11-12",
+  },
+  {
+    path: "/waitlist",
+    title: "Join the Waitlist",
+    description:
+      "Join the StartupsClub waitlist for early access: post a daily standup, log what you ship and stay accountable in a small club of builders.",
+    lastModified: "2026-11-12",
+  },
 ] as const satisfies readonly MarketingRoute[];
+
+/** Marketing routes that are listed publicly (sitemap, llms.txt) right now. */
+export const listedMarketingRoutes: readonly MarketingRoute[] = marketingRoutes.filter(
+  (route) => waitlistVisible || route.path !== "/waitlist",
+);
 
 export type MarketingPath = (typeof marketingRoutes)[number]["path"];
 

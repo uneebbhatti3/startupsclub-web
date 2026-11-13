@@ -55,10 +55,10 @@ if ever needed, are tints of the blue and neutrals (ask first).
 
 ## 3. Typography
 
-| Use                   | Font                                                | Notes                                                                                                          |
-| --------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| App and all body text | **Inter** (Google Fonts through `next/font/google`) | Variable font, `display: "swap"`, CSS variable `--font-sans`.                                                  |
-| Marketing headings    | A different **sans-serif** — **OPEN**               | Not Inter. Exposed as `--font-heading`, used only inside `(marketing)`. Owner must choose; the agent must not. |
+| Use                   | Font                                                | Notes                                                                                                                                                                                                                                                                  |
+| --------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App and all body text | **Inter** (Google Fonts through `next/font/google`) | Variable font, `display: "swap"`, CSS variable `--font-sans`.                                                                                                                                                                                                          |
+| Marketing headings    | **Grifter** Bold (owner's choice, 13 Nov 2026; D29) | Local file `src/app/fonts/grifterbold.otf` through `next/font/local`, loaded in `app/(marketing)/layout.tsx` only as `--font-heading-family`. The `font-heading` token falls back to Inter elsewhere. Heading tracking is `0` in the marketing area (`marketing.css`). |
 
 Scale (Tailwind classes; adjust only with approval):
 
@@ -145,7 +145,7 @@ Do not use these in `(app)`.
 
 ## 8. Theming
 
-- `next-themes` with the `class` attribute on `<html>`; default `system` (**TO CONFIRM**), toggle
+- `next-themes` with the `class` attribute on `<html>`; default `system` (confirmed 12 Nov 2026, `docs/DECISIONS.md` D20), toggle
   with Light, Dark, System. Use the shadcn dark-mode setup and its mode-toggle component.
 - No flash of wrong theme: `suppressHydrationWarning` on `<html>` and theme script from `next-themes`.
 - Test every page in both themes.

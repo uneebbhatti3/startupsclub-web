@@ -1,4 +1,4 @@
-import { marketingRoutes, siteConfig, type MarketingRoute } from "@/config/site";
+import { listedMarketingRoutes, siteConfig, type MarketingRoute } from "@/config/site";
 import { absoluteUrl } from "@/lib/seo";
 
 /**
@@ -16,8 +16,8 @@ function toListItem(route: MarketingRoute): string {
 }
 
 function buildLlmsTxt(): string {
-  const primary = marketingRoutes.filter((route: MarketingRoute) => !route.optional);
-  const optional = marketingRoutes.filter((route: MarketingRoute) => route.optional);
+  const primary = listedMarketingRoutes.filter((route: MarketingRoute) => !route.optional);
+  const optional = listedMarketingRoutes.filter((route: MarketingRoute) => route.optional);
 
   const sections = [
     `# ${siteConfig.name}`,
