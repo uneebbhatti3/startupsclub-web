@@ -1,0 +1,359 @@
+/*
+ * Marketing-only effects: hero wash, dotted grid and the expressive buttons
+ * (docs/DESIGN_SYSTEM.md section 7.3). Imported by app/(marketing)/layout.tsx only,
+ * so none of this reaches the app area. Colours come from the design tokens.
+ */
+
+/* ---------- page transitions ---------- */
+/*
+ * Used by app/(marketing)/template.tsx through React's <ViewTransition>. Only opacity and
+ * translate are animated, so the browser composites the snapshots on the GPU with no layout or
+ * paint work. No filters (blur forces a repaint every frame). The old page leaves quickly; the new
+ * one starts only when the old one is gone (delay = exit duration), so the two never overlap.
+ */
+::view-transition-old(.page-exit) {
+  animation: 150ms cubic-bezier(0.4, 0, 1, 1) both mk-page-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: 220ms cubic-bezier(0, 0, 0.2, 1) 150ms both mk-page-in;
+}
+
+@keyframes mk-page-out {
+  to {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+}
+
+@keyframes mk-page-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+/* Everything outside the page (body background, footer area) swaps instantly. */
+::view-transition-group(root) {
+  animation: none;
+}
+
+/* The header is the fixed reference point: it never fades or moves (named in site-header.tsx). */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Clicks pass through to the live page while the short animation runs. */
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ---------- heading font ---------- */
+/*
+ * Grifter (app/(marketing)/layout.tsx) is a wide display face: the tight negative tracking the
+ * headings had for Inter makes its letters touch. Unlayered, so it wins over the tracking-*
+ * utilities on every heading without editing each one.
+ */
+.font-heading {
+  letter-spacing: 0;
+}
+
+/* ---------- backgrounds ---------- */
+.mk-wash {
+  background:
+    radial-gradient(
+      60% 55% at 50% -5%,
+      color-mix(in srgb, var(--primary) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38% 42% at 88% 18%,
+      color-mix(in srgb, var(--primary-text) 18%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      34% 40% at 8% 26%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 72%
+    );
+}
+
+.dark .mk-wash {
+  background:
+    radial-gradient(
+      60% 55% at 50% -5%,
+      color-mix(in srgb, var(--primary) 26%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38% 42% at 88% 18%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      34% 40% at 8% 26%,
+      color-mix(in srgb, var(--primary) 9%, transparent),
+      transparent 72%
+    );
+}
+
+.mk-dots {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--foreground) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+}
+
+.mk-fade-bottom {
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+}
+
+.mk-card-shadow {
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--foreground) 5%, transparent),
+    0 18px 40px -18px color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+
+.dark .mk-card-shadow {
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent) inset,
+    0 24px 48px -20px rgb(0 0 0 / 0.9);
+}
+
+/* ---------- pricing cards ---------- */
+/* Depth from a faint surface gradient, a top-edge highlight and a layered shadow; lifts on hover. */
+.mk-plan {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--foreground) 3%, var(--background)),
+    var(--background) 55%
+  );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent) inset,
+    0 1px 2px color-mix(in srgb, var(--foreground) 6%, transparent),
+    0 22px 44px -24px color-mix(in srgb, var(--foreground) 22%, transparent);
+  /* translate (not transform) so it never fights GSAP's reveal, which animates transform. */
+  transition:
+    translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease;
+}
+
+.mk-plan:hover {
+  translate: 0 -4px;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent) inset,
+    0 2px 4px color-mix(in srgb, var(--foreground) 6%, transparent),
+    0 32px 56px -24px color-mix(in srgb, var(--foreground) 28%, transparent);
+}
+
+/* Featured plan: blue wash from the top, blue outline and a blue halo. */
+.mk-plan-featured {
+  background:
+    radial-gradient(
+      120% 70% at 50% 0%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 70%
+    ),
+    var(--background);
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent) inset,
+    0 24px 56px -22px color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.mk-plan-featured:hover {
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent) inset,
+    0 34px 70px -22px color-mix(in srgb, var(--primary) 65%, transparent);
+}
+
+/* On #0A0A0A a dark shadow is invisible, so dark mode relies on the top highlight and border. */
+.dark .mk-plan {
+  background: linear-gradient(180deg, var(--card), var(--background) 60%);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--foreground) 8%, transparent) inset;
+}
+
+.dark .mk-plan:hover {
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--foreground) 10%, transparent) inset,
+    0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+.dark .mk-plan-featured {
+  background:
+    radial-gradient(
+      120% 70% at 50% 0%,
+      color-mix(in srgb, var(--primary) 24%, transparent),
+      transparent 70%
+    ),
+    var(--background);
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 1px 0 color-mix(in srgb, var(--foreground) 10%, transparent) inset,
+    0 24px 64px -24px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.dark .mk-plan-featured:hover {
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 1px 0 color-mix(in srgb, var(--foreground) 12%, transparent) inset,
+    0 34px 80px -24px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+/* ---------- buttons ---------- */
+.mk-btn {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.mk-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* glow: solid blue with a soft halo that grows on hover */
+.mk-glow {
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.25) inset,
+    0 8px 24px -8px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+.mk-glow:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.25) inset,
+    0 14px 34px -8px color-mix(in srgb, var(--primary) 85%, transparent);
+}
+
+/* shine: a light sweep that crosses the button on hover */
+.mk-shine {
+  overflow: hidden;
+}
+
+.mk-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.38) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mk-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* gradient-border: animated blue border around a quiet surface */
+.mk-gradient-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    conic-gradient(
+        from var(--mk-angle, 0deg),
+        var(--border),
+        var(--primary) 20%,
+        var(--primary-text) 30%,
+        var(--border) 45%,
+        var(--border)
+      )
+      border-box;
+  animation: mk-spin 5s linear infinite;
+}
+
+.mk-gradient-border:hover {
+  background:
+    linear-gradient(var(--accent), var(--accent)) padding-box,
+    conic-gradient(from var(--mk-angle, 0deg), var(--primary), var(--primary-text), var(--primary))
+      border-box;
+}
+
+@property --mk-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes mk-spin {
+  to {
+    --mk-angle: 360deg;
+  }
+}
+
+/* arrow-slide: the arrow travels and the label shifts on hover */
+.mk-arrow .mk-arrow-icon {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mk-arrow:hover .mk-arrow-icon {
+  transform: translateX(4px);
+}
+
+/* ghost-underline: text link with an underline that draws in */
+.mk-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  transition:
+    background-size 0.3s ease,
+    color 0.2s ease;
+}
+
+.mk-underline:hover {
+  background-size: 100% 1.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-plan,
+  .mk-btn,
+  .mk-shine::after,
+  .mk-arrow .mk-arrow-icon,
+  .mk-underline {
+    transition: none;
+  }
+
+  .mk-gradient-border {
+    animation: none;
+  }
+
+  .mk-glow:hover {
+    transform: none;
+  }
+
+  .mk-plan:hover {
+    translate: none;
+  }
+}
