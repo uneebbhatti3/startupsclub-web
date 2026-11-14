@@ -1,7 +1,7 @@
 import { getMarketingRoute } from "@/config/site";
 import { PageHero } from "@/features/marketing/components/page-hero";
-import { WaitlistForm } from "@/features/marketing/components/waitlist-form";
-import { waitlistPage } from "@/features/marketing/lib/content/waitlist";
+import { WaitlistForm } from "@/features/waitlist/components/waitlist-form";
+import { waitlistPage } from "@/features/waitlist/lib/waitlist-content";
 import { createPageMetadata } from "@/lib/seo";
 
 /**
