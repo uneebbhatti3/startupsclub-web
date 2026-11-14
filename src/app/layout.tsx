@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { env } from "@/config/env";
 import { siteConfig } from "@/config/site";
 import { shareImage } from "@/lib/seo";
+import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 /**
@@ -100,7 +101,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>
     </html>

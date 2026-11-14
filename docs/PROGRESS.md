@@ -53,11 +53,44 @@ Use this format:
 - Questions for the owner:
 ```
 
+### 2026-11-15 — Claude — Custom domain www.startupsclub.one
+
+- Did: recorded the new production URL `https://www.startupsclub.one` in `docs/DECISIONS.md` (D14 updated, D18 narrowed to the API hostname and cookie domain) and `docs/DEPLOYMENT.md`. No code change: the site URL comes only from `NEXT_PUBLIC_SITE_URL` (D1), so canonical URLs, Open Graph, JSON-LD, sitemap.xml, robots.txt and llms.txt follow it.
+- Verified: searched the repository; the old URL appears only in docs (and in the dated history below, left as it was).
+- Not verified / known issues: Vercel's Production `NEXT_PUBLIC_SITE_URL` must be changed to `https://www.startupsclub.one` and the site redeployed; the domain set-up in Vercel (apex redirect to www) and Google Search Console were not checked.
+- Next: the backend's CORS origin list needs `https://www.startupsclub.one`.
+- Questions for the owner: the API hostname (D18).
+
+### 2026-11-14 — Claude — Waitlist form connected to the API
+
+- Installed `axios` and `@tanstack/react-query` (owner's request). Added `services/api-client.ts`, `lib/api-error.ts`, `types/api-types.ts`, `lib/query-client.ts` and `QueryProvider` (root layout) (D31).
+- New feature `features/waitlist`: `types/waitlist-types.ts`, `services/waitlist-service.ts` (`joinWaitlist`, POST /waitlist), `hooks/use-join-waitlist.ts` (useMutation, onSuccess/onError), `hooks/use-waitlist-form.ts` (`useFormHandler<WaitlistFormData>`), `components/waitlist-form.tsx` and `lib/waitlist-content.ts` (moved from `features/marketing`). Field renamed `otherRole` -> `roleOther` to match the API DTO. Inputs carry the API's length limits.
+- `.env.example` and CI: API port 4000 -> 8000. D27 closed.
+- e2e: 6 new form tests mock the API in the browser (success and request body, Other, 409, 400 field error, network failure, pending state). Checks: lint, typecheck, build, e2e 23/23 (last full run 21 + the 2 fixed tests rerun). Looked at success and error states at 1440 and 390, light and dark.
+- **Not verified against the real backend**: it has no CORS yet (owner is adding it), so a browser on :3000 cannot call :8000 until then.
+
+### 2026-11-14 — Claude — Generic form hook
+
+- Did: completed `useFormHandler<T>` in `src/hooks/use-form-handler.tsx` (returns `formData`, `setFormData`, `onChange`, `onFileChange`). Recorded D30; updated the forms line in `docs/FRONTEND_GUIDELINES.md`. Its types (`FieldElement`, `UseFormHandlerResult`) live in `src/types/form-types.ts` (owner request).
+- Verified: lint and typecheck pass; the new file passes Prettier.
+- Not verified / known issues: `format:check` reports 56 other files that were already unformatted before this change. Not used by any form yet, so not checked in a browser.
+- Next: switch the waitlist form to the hook if wanted; decide on validation.
+
 ### 2026-11-13 — Claude — Theme-aware logo
 
 - `Logo` shows `logo-black.png` in light mode and `logo-white.png` in dark mode. The new `compactOnMobile` prop (used only by the site header, as the owner chose) shows `logo-icon-black.png` / `logo-icon-white.png` below `sm` (640px). The switching is done in CSS, so the server render is correct and nothing flashes. Also fixed the wrong 120×120 intrinsic size (the real files are 1099×154 and 2048×2048).
 - Checks: format, lint, typecheck, build. On the production build I checked the header and footer at 1440 and 390 in light and dark: the expected image showed in each case and the console had no warnings.
 - Known issue: the running dev server had not picked up the new Tailwind classes, so restart `npm run dev` if the logo looks wrong locally.
+
+### 2026-11-14 — Claude — Waitlist role field
+
+- Added shadcn Select (`src/components/ui/select.tsx`, via the shadcn CLI). The waitlist form now has a required Role select (Founder, Developer, Other); choosing Other shows a required "Your role" text field, which is removed again for any other choice. Submitted as `role` and `otherRole`; still not stored or sent (D27). Copy in `content/waitlist.ts` (labels and the "e.g. Designer" placeholder drafted by Claude).
+- e2e: role required, Other reveals the field and hides it again; the URL test now picks a role so the submit really goes through. Looked at /waitlist at 1440 (light) and 390 (dark), mouse and keyboard; no console errors.
+
+### 2026-11-14 — Claude — Waitlist buttons shown again
+
+- Owner request: `waitlistVisible` in `src/config/site.ts` set back to `true`. Every "Join waitlist" button is back (header, mobile menu, home hero, Features hero, Seasons, both plan cards, final CTA, footer), and /waitlist is listed in the sitemap and llms.txt again. Entries are still not stored (D27).
+- e2e restored to expect the header button, plus a check that the sitemap lists /waitlist.
 
 ### 2026-11-13 — Claude — Grifter for marketing headings
 

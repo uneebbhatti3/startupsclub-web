@@ -14,9 +14,9 @@ is merged into `integration` or `main` and every CI check passes on the merged c
 repository's Environments page.
 
 Domains: the frontend and the API must share a parent domain so the session cookie works
-(for example `app.<domain>` and `api.<domain>`). The site is currently live at
-`https://startupsclub.vercel.app` (`docs/DECISIONS.md` D14). `vercel.app` cannot share cookies
-with another host, so a custom domain is still needed before login works (D18).
+(for example `app.<domain>` and `api.<domain>`). The site is live at
+`https://www.startupsclub.one` (`docs/DECISIONS.md` D14), so the API can go on a subdomain of
+`startupsclub.one` (for example `api.startupsclub.one`) and share the session cookie (D18).
 
 ## 2. Vercel setup
 
@@ -26,7 +26,7 @@ with another host, so a custom domain is still needed before login works (D18).
 4. Environment variables (Project Settings): `NEXT_PUBLIC_API_BASE_URL`,
    `NEXT_PUBLIC_AUTH_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, per environment. No secrets.
    `NEXT_PUBLIC_SITE_URL` is **required in every environment** (the build fails without it):
-   Production `https://startupsclub.vercel.app`; Preview can use the same value, because
+   Production `https://www.startupsclub.one`; Preview can use the same value, because
    previews are always `noindex` and blocked in robots.txt (`VERCEL_ENV` is not `production`).
    Optional: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (Production only).
 5. **Deployments come from GitHub Actions, not from Vercel's Git integration.** `vercel.json`

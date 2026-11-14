@@ -79,7 +79,7 @@ a default (`page.tsx`, `layout.tsx`, `error.tsx`, `not-found.tsx`).
 - Server data: TanStack Query hooks in the feature's `hooks/`, calling its `services/`. Never `useEffect` + `fetch` for data.
 - UI state: `useState`/`useReducer`; share with context only when two distant components need
   the same state. URL state (search params) for filters and tabs that should be shareable.
-- Forms: react-hook-form with zod schemas (TO CONFIRM). Validate on the client for UX, but the
+- Forms: the shared `useFormHandler<T>` hook in `src/hooks/use-form-handler.tsx` (`docs/DECISIONS.md` D30). Validate on the client for UX, but the
   server is the authority.
 - No Zustand, no Redux, no global singletons.
 - Rules and examples: `docs/STATE_AND_DATA.md`.
