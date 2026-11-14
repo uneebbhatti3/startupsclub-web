@@ -51,11 +51,11 @@ export const siteConfig = {
 } as const;
 
 /**
- * Temporary switch (owner, 13 Nov 2026): the backend for waitlist entries is not ready, so every
- * "Join waitlist" button is hidden and /waitlist is left out of the sitemap and llms.txt. The page
- * itself still exists. Set to `true` to bring all of it back.
+ * Shows every "Join waitlist" button and lists /waitlist in the sitemap and llms.txt. Set to
+ * `false` to hide them all again (owner hid them on 13 Nov 2026 and restored them on 14 Nov 2026);
+ * the page itself always exists.
  */
-export const waitlistVisible = false;
+export const waitlistVisible = true;
 
 /**
  * Public, indexable routes that exist in `src/app/(marketing)`. Add a route here only once its

@@ -1,16 +1,24 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { waitlistPage } from "@/features/marketing/lib/content/waitlist";
 
 /**
- * Waitlist form (name and email), built only from shadcn components. The fields are open and the
- * browser validates them (both required, email format).
+ * Waitlist form (name, email and role), built only from shadcn components (Field, Input, Select,
+ * Button). Every field is required and validated by the browser. Choosing "Other" reveals a
+ * required free-text role field; it is removed again (and its value dropped) for any other role.
  *
  * Where entries are stored is not decided yet (docs/DECISIONS.md D27), so `handleSubmit` does not
  * send them anywhere. It still prevents the default submit, which would otherwise put the name and
@@ -21,7 +29,8 @@ import { waitlistPage } from "@/features/marketing/lib/content/waitlist";
  */
 
 export function WaitlistForm() {
-  const { fields } = waitlistPage;
+  const { fields, roles } = waitlistPage;
+  const [role, setRole] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,6 +64,36 @@ export function WaitlistForm() {
                   required
                 />
               </Field>
+              <Field>
+                <FieldLabel htmlFor="waitlist-role">{fields.role}</FieldLabel>
+                {/* `items` lets the trigger show the label ("Founder") instead of the value. */}
+                <Select name="role" required items={roles} value={role} onValueChange={setRole}>
+                  {/* text-base below md matches Input, so mobile browsers do not zoom on focus. */}
+                  <SelectTrigger id="waitlist-role" className="w-full text-base md:text-sm">
+                    <SelectValue placeholder={fields.rolePlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              {role === "other" ? (
+                <Field>
+                  <FieldLabel htmlFor="waitlist-other-role">{fields.otherRole}</FieldLabel>
+                  <Input
+                    id="waitlist-other-role"
+                    name="otherRole"
+                    type="text"
+                    autoComplete="organization-title"
+                    placeholder={fields.otherRolePlaceholder}
+                    required
+                  />
+                </Field>
+              ) : null}
               <Field>
                 <Button type="submit" size="lg" className="w-full">
                   {waitlistPage.submit}

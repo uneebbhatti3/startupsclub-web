@@ -59,6 +59,16 @@ Use this format:
 - Checks: format, lint, typecheck, build. On the production build I checked the header and footer at 1440 and 390 in light and dark: the expected image showed in each case and the console had no warnings.
 - Known issue: the running dev server had not picked up the new Tailwind classes, so restart `npm run dev` if the logo looks wrong locally.
 
+### 2026-11-14 — Claude — Waitlist role field
+
+- Added shadcn Select (`src/components/ui/select.tsx`, via the shadcn CLI). The waitlist form now has a required Role select (Founder, Developer, Other); choosing Other shows a required "Your role" text field, which is removed again for any other choice. Submitted as `role` and `otherRole`; still not stored or sent (D27). Copy in `content/waitlist.ts` (labels and the "e.g. Designer" placeholder drafted by Claude).
+- e2e: role required, Other reveals the field and hides it again; the URL test now picks a role so the submit really goes through. Looked at /waitlist at 1440 (light) and 390 (dark), mouse and keyboard; no console errors.
+
+### 2026-11-14 — Claude — Waitlist buttons shown again
+
+- Owner request: `waitlistVisible` in `src/config/site.ts` set back to `true`. Every "Join waitlist" button is back (header, mobile menu, home hero, Features hero, Seasons, both plan cards, final CTA, footer), and /waitlist is listed in the sitemap and llms.txt again. Entries are still not stored (D27).
+- e2e restored to expect the header button, plus a check that the sitemap lists /waitlist.
+
 ### 2026-11-13 — Claude — Grifter for marketing headings
 
 - Grifter Bold (`src/app/fonts/grifterbold.otf`, added by the owner) loaded with `next/font/local` in the marketing layout only; `font-heading` reads it there and falls back to Inter everywhere else (D29).

@@ -31,7 +31,7 @@ export const waitlistLink = {
   href: "/waitlist",
 } as const satisfies NavLink;
 
-/** Whether the "Join waitlist" buttons render. Temporarily off; see `waitlistVisible`. */
+/** Whether the "Join waitlist" buttons render. Controlled by `waitlistVisible`. */
 export const showWaitlist = waitlistVisible;
 
 export const hero = {
