@@ -45,6 +45,21 @@ export const waitlistPage = {
 } as const;
 
 /** Plain messages for error codes the API returns, replacing its technical wording. */
+/**
+ * The avatar row above the form. The pictures are the shadcn Avatar example's default images
+ * (owner's choice); they are decoration, not people on the waitlist, so they are hidden from
+ * screen readers.
+ */
+export const waitlistCount = {
+  avatars: [
+    { src: "https://github.com/shadcn.png", fallback: "CN" },
+    { src: "https://github.com/maxleiter.png", fallback: "LR" },
+    { src: "https://github.com/evilrabbit.png", fallback: "ER" },
+  ],
+  /** Shown after the number, as in "123+ people waiting". */
+  suffix: "+ people waiting",
+} as const;
+
 export const waitlistErrorMessages: Record<string, string> = {
   WAITLIST_EMAIL_EXISTS: "This email is already on the waitlist.",
   TOO_MANY_REQUESTS: "Too many attempts. Please wait a minute and try again.",

@@ -1,5 +1,6 @@
 import { getMarketingRoute } from "@/config/site";
 import { PageHero } from "@/features/marketing/components/page-hero";
+import { WaitlistCount } from "@/features/waitlist/components/waitlist-count";
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form";
 import { waitlistPage } from "@/features/waitlist/lib/waitlist-content";
 import { createPageMetadata } from "@/lib/seo";
@@ -22,6 +23,7 @@ export default function WaitlistPage() {
         description={waitlistPage.description}
       />
       <section aria-label="Waitlist form" className="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
+        <WaitlistCount />
         <WaitlistForm />
       </section>
     </>

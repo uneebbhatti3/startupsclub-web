@@ -53,6 +53,14 @@ Use this format:
 - Questions for the owner:
 ```
 
+### 2026-11-15 — Claude — Waitlist count on /waitlist
+
+- Did: installed the shadcn Avatar component; added `getWaitlistCount` (service), `useWaitlistCount` (query hook), `WaitlistCount` (AvatarGroup + "N+ people waiting", number formatted as 1,234) above the form; a successful signup refetches the count (D32). Three e2e tests added.
+- Verified: lint, typecheck, Prettier on changed files; waitlist e2e 16/16 with a mocked API; looked at /waitlist with a mocked count in light 1440 and dark 390 (no console warnings, no horizontal scroll).
+- Not verified / known issues: not run against the real backend (needs CORS and `NEXT_PUBLIC_API_BASE_URL`). The avatar images load from github.com.
+- Next: replace the example avatars when real images exist.
+- Questions for the owner: none.
+
 ### 2026-11-15 — Claude — Custom domain www.startupsclub.one
 
 - Did: recorded the new production URL `https://www.startupsclub.one` in `docs/DECISIONS.md` (D14 updated, D18 narrowed to the API hostname and cookie domain) and `docs/DEPLOYMENT.md`. No code change: the site URL comes only from `NEXT_PUBLIC_SITE_URL` (D1), so canonical URLs, Open Graph, JSON-LD, sitemap.xml, robots.txt and llms.txt follow it.
@@ -160,7 +168,7 @@ Use this format:
 - Not verified / known issues: link previews on LinkedIn, WhatsApp and X (needs a deployed site); Google Rich Results test; the local `.env` lacks `NEXT_PUBLIC_SITE_URL`, so builds fail until it is added. `globals.css` still has shadcn's default neutral tokens, not `docs/DESIGN_SYSTEM.md` (the 404 button renders near-black, not `#0076DE`). Repository-wide `format:check` and `lint` fail on pre-existing files (D17). The Geist fonts in the root layout trigger unused-preload console warnings. The home page body is still the Create Next App template, with broken `/next.svg` and `/vercel.svg` images.
 - Next: add icons, then `manifest.ts` (D16); add `(app)`/`(auth)` layouts with noindex per D4 when those groups are built; add each new marketing page to `marketingRoutes`.
 - Questions for the owner: D15–D18; restore the lost C/O decision entries.
-- Update (same day): production URL https://startupsclub.vercel.app recorded (D14) and deployment notes updated; a production build with that URL verified locally. The live site still serves the old template until this work reaches `main`.
+- Update (same day): production URL https://www.startupsclub.one recorded (D14) and deployment notes updated; a production build with that URL verified locally. The live site still serves the old template until this work reaches `main`.
 - Update (same day): pre-commit hook now (1) checks formatting on staged files and auto-fixes with Prettier, (2) runs ESLint on staged files, which rejects explicit `any`, `as any` and `@ts-ignore` (rules pinned in `eslint.config.mjs`), (3) runs the whole-project typecheck, which rejects implicit `any`. Each step was verified with temporary files; a full `git commit` run was not, because this branch (`integration`) is blocked by the branch rule.
 - Update (same day): whole repository formatted with Prettier, including `.agents/` and `.claude/` (owner request). Exceptions and reasons in `docs/DECISIONS.md` D17. Verified: format:check, lint, typecheck and build pass; all 153 JS files and all JSON in the skill still parse; the skill template markers are intact. Pre-commit hook tested end to end in a throwaway repository: formatting auto-fixed and committed, explicit `any` blocked by ESLint, implicit `any` blocked by the type check. Found: `.claude/settings.json` (the `.env` deny rules that `CLAUDE.md` refers to) does not exist.
 

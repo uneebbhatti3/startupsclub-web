@@ -1,6 +1,7 @@
 /**
  * Types for the waitlist feature. The request and response shapes mirror the API's
- * `CreateWaitlistEntryDto` and `WaitlistEntryResponseDto` (`POST /api/v1/waitlist`).
+ * `CreateWaitlistEntryDto` and `WaitlistEntryResponseDto` (`POST /api/v1/waitlist`) and
+ * `WaitlistCountResponseDto` (`GET /api/v1/waitlist/count`).
  *
  * @packageDocumentation
  */
@@ -36,6 +37,11 @@ export type WaitlistEntry = {
   roleOther: string | null;
   /** ISO 8601 date-time (UTC). */
   createdAt: string;
+};
+
+/** The waitlist total, as returned in the success envelope's `data`. */
+export type WaitlistCount = {
+  count: number;
 };
 
 /** Form fields that can show a server-side validation message. */
