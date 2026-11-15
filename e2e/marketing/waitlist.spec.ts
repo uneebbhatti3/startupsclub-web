@@ -4,7 +4,9 @@ import { expect, test, type Page, type Route } from "@playwright/test";
  * Waitlist (/waitlist) and the pre-launch calls to action. The form tests mock
  * `POST <NEXT_PUBLIC_API_BASE_URL>/waitlist` in the browser, so they need no running backend:
  * success shows a confirmation, the request body matches the API's DTO (`roleOther` only for
- * "Other"), API errors show a message and mark fields, and nothing reaches the page URL.
+ * "Other"), API errors show a message and mark fields, and nothing reaches the page URL. The
+ * count (`GET /waitlist/count`) shows "N+ people waiting" only for a count above 0, and refreshes
+ * after a signup.
  * Also: the header offers "Join waitlist", the sitemap lists /waitlist, and no page links to
  * /login or /signup.
  *
@@ -48,6 +50,40 @@ async function mockWaitlistApi(page: Page, response: MockResponse, delayMs = 0) 
     },
   );
   return sent;
+}
+
+/** Mocks `GET /waitlist/count`; each request returns the next count (the last one repeats). */
+async function mockWaitlistCount(page: Page, counts: number[] | "error") {
+  let calls = 0;
+  await page.route(
+    (url) => url.pathname.endsWith("/api/v1/waitlist/count"),
+    async (route: Route) => {
+      // A simple GET needs no preflight, only the CORS headers on the response.
+      const headers = {
+        "Access-Control-Allow-Origin": new URL(page.url()).origin,
+        "Access-Control-Allow-Credentials": "true",
+      };
+      if (counts === "error") {
+        await route.fulfill({
+          status: 500,
+          headers,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: { code: "INTERNAL_ERROR", message: "Internal error", details: [] },
+          }),
+        });
+        return;
+      }
+      const count = counts[Math.min(calls, counts.length - 1)];
+      calls += 1;
+      await route.fulfill({
+        status: 200,
+        headers,
+        contentType: "application/json",
+        body: JSON.stringify({ data: { count } }),
+      });
+    },
+  );
 }
 
 const savedEntry = {
@@ -181,6 +217,37 @@ test.describe("/waitlist", () => {
     await expect(
       page.getByRole("alert").filter({ hasText: "We could not reach the server." }),
     ).toBeVisible();
+  });
+
+  test("shows the waitlist count with avatars", async ({ page }) => {
+    await mockWaitlistCount(page, [1234]);
+    await page.goto("/waitlist");
+    await expect(page.getByText("1,234+ people waiting")).toBeVisible();
+    await expect(page.locator('[data-slot="avatar-group"] [data-slot="avatar"]')).toHaveCount(3);
+  });
+
+  test("hides the count when it is 0 or the request fails", async ({ page }) => {
+    await mockWaitlistCount(page, [0]);
+    await page.goto("/waitlist");
+    await expect(page.getByRole("button", { name: "Join waitlist" })).toBeVisible();
+    await expect(page.getByText("people waiting")).toHaveCount(0);
+
+    await page.unrouteAll();
+    await mockWaitlistCount(page, "error");
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Join waitlist" })).toBeVisible();
+    await expect(page.getByText("people waiting")).toHaveCount(0);
+  });
+
+  test("the count refreshes after joining", async ({ page }) => {
+    await mockWaitlistCount(page, [41, 42]);
+    await page.goto("/waitlist");
+    await expect(page.getByText("41+ people waiting")).toBeVisible();
+    await mockWaitlistApi(page, { status: 201, body: savedEntry });
+    await fillForm(page, "Developer");
+    await page.getByRole("button", { name: "Join waitlist" }).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.getByText("42+ people waiting")).toBeVisible();
   });
 });
 
