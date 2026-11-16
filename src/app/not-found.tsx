@@ -39,7 +39,7 @@ export default function NotFound() {
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(color-mix(in_srgb,var(--foreground)_14%,transparent)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_65%_55%_at_50%_40%,white_20%,transparent_75%)] bg-size-[22px_22px]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(color-mix(in_srgb,var(--foreground)_14%,transparent)_1px,transparent_1px)] mask-[radial-gradient(ellipse_65%_55%_at_50%_40%,white_20%,transparent_75%)] bg-size-[22px_22px]"
       />
 
       <header className="mx-auto w-full max-w-6xl px-6 pt-6">
