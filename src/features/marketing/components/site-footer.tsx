@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { footerGroups } from "@/features/marketing/lib/content/home";
+import Image from "next/image";
 
 /**
  * Footer of the marketing site: logo, one-line description, link groups and the theme toggle,
@@ -50,7 +51,12 @@ export function SiteFooter() {
           <p className="text-sm text-muted-foreground">
             © {COPYRIGHT_YEAR} StartupsClub. All rights reserved.
           </p>
-          <ThemeToggle />
+          <div className="flex items-center justify-between gap-2">
+            <ThemeToggle />
+            <Link href={"https://www.instagram.com/startupsclub.one/"} target="_blank">
+              <Image src={"/instagram.png"} alt="Instagram" width={30} height={30} />
+            </Link>
+          </div>
         </div>
       </div>
 
