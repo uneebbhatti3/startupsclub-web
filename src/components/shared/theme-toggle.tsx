@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 /**
  * Icon button that switches between light and dark mode.
@@ -20,9 +21,11 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <button
-      type="button"
+    <Button
       aria-label="Switch between light and dark mode"
+      data-slot="Switch between light and dark mode"
+      variant="ghost"
+      // size="icon-sm"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className={cn(
         "relative inline-flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
@@ -37,6 +40,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         aria-hidden="true"
         className="absolute size-4 scale-0 rotate-90 transition-transform dark:scale-100 dark:rotate-0"
       />
-    </button>
+    </Button>
   );
 }

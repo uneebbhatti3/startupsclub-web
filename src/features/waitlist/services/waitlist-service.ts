@@ -19,8 +19,15 @@ export async function joinWaitlist(payload: JoinWaitlistRequest): Promise<Waitli
   return response.data.data;
 }
 
+type RequestOptions = {
+  /** Milliseconds before the request is abandoned. Unset means no limit (Axios default). */
+  timeout?: number;
+};
+
 /** `GET /waitlist/count`: returns how many people are on the waitlist. */
-export async function getWaitlistCount(): Promise<WaitlistCount> {
-  const response = await apiClient.get<ApiSuccess<WaitlistCount>>("/waitlist/count");
+export async function getWaitlistCount(options: RequestOptions = {}): Promise<WaitlistCount> {
+  const response = await apiClient.get<ApiSuccess<WaitlistCount>>("/waitlist/count", {
+    timeout: options.timeout,
+  });
   return response.data.data;
 }

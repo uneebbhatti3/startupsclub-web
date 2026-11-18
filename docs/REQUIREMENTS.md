@@ -7,15 +7,15 @@ IDs are stable; reference them in pull requests. Priority: M = must, S = should,
 
 ### Authentication and onboarding
 
-| ID        | Requirement                                                                                     | P   |
-| --------- | ----------------------------------------------------------------------------------------------- | --- |
-| FR-AUTH-1 | Sign up with email and password; show email-verification pending state.                         | M   |
-| FR-AUTH-2 | Sign in with email and password, and with GitHub.                                               | M   |
-| FR-AUTH-3 | Forgot and reset password. The UI never reveals whether an email exists.                        | M   |
-| FR-AUTH-4 | Unverified users can sign in but see a banner and cannot post.                                  | M   |
-| FR-AUTH-5 | Sign out; account deletion with confirmation.                                                   | M   |
-| FR-ONB-1  | Redirect to onboarding until the user is onboarded; steps are resumable.                        | M   |
-| FR-ONB-2  | Steps: profile basics, project, connect GitHub (optional), reminder time and timezone, consent. | M   |
+| ID        | Requirement                                                                                                                                                   | P   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| FR-AUTH-1 | Sign up with email and password; show email-verification pending state.                                                                                       | M   |
+| FR-AUTH-2 | Sign in with email and password, and with GitHub.                                                                                                             | M   |
+| FR-AUTH-3 | Forgot and reset password. The UI never reveals whether an email exists.                                                                                      | M   |
+| FR-AUTH-4 | Unverified users can sign in but see a banner and cannot post.                                                                                                | M   |
+| FR-AUTH-5 | Sign out; account deletion with confirmation.                                                                                                                 | M   |
+| FR-ONB-1  | Redirect to onboarding until the user is onboarded; steps are resumable.                                                                                      | M   |
+| FR-ONB-2  | Steps: profile basics, project, connect GitHub (optional), reminder time and timezone, consent. Built with extra situation, focus and first-task steps (D37). | M   |
 
 ### Accountability core
 

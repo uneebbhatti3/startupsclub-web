@@ -53,6 +53,116 @@ Use this format:
 - Questions for the owner:
 ```
 
+### 2026-11-19 — Claude — Lint error in `use-mobile.ts`
+
+- Cause: the shadcn `useIsMobile` hook called `setState` directly inside an effect (`react-hooks/set-state-in-effect`), which failed `npm run lint` and the pre-commit hook.
+- Did: rewrote it with `useSyncExternalStore` subscribed to the `(max-width: 767px)` media query. Server snapshot is `false`, matching the old first render. Same export, so `sidebar.tsx` is unchanged.
+- Verified: `npm run lint` and `npm run typecheck` pass; Prettier clean on the file.
+- Not verified: no visual pass (behaviour unchanged: the sidebar switches to its sheet below 768px).
+- Next: none.
+
+### 2026-11-18 — Claude — Waitlist count reverts on reload (bug fix)
+
+- Cause: `/waitlist` reads the count from a 5-minute server cache that is also prerendered at build (D35). A signup refreshed the count only in the browser, so a reload showed the old cached number.
+- Did (D44): `cacheTag("waitlist-count")` in `waitlist-count-cache.ts`; new Server Action `expireWaitlistCount` (`updateTag`) in `waitlist-count-actions.ts`, called by `useJoinWaitlist` after a successful signup.
+- Verified: typecheck, ESLint, build. Against a local mock API (count 4, +1 per POST): load 4 → submit 5 → reload 5 (server HTML has 5) → submit 6 → reload 6. e2e `waitlist.spec.ts` 12/12 and `cta.spec.ts` pass when the API is unreachable at build time.
+- Not verified / known issues: not tested against the Render API (needs a deploy). With an API reachable at build time (for example the local backend on :8000), the three count e2e tests fail because the real count is baked in and the browser mocks are not used (known since D35, not caused by this fix). Signups made outside this site show within 5 minutes.
+- Next: none.
+
+### 2026-11-18 — Claude — Join waitlist back in the header; /waitlist public
+
+- Did (D43): header (desktop and mobile menu) shows "Join waitlist" → `/waitlist` for signed-out visitors, "Dashboard" when signed in; `/waitlist` page restored with the server-cached count, redirect removed, route listed in the sitemap and llms.txt; `waitlist.spec.ts` restored and `cta.spec.ts` updated.
+- Verified: typecheck; ESLint clean on changed files; e2e `cta.spec.ts`, `waitlist.spec.ts`, `seo.spec.ts` 22/22 (production build on :3100). Looked at the header at 1440 (light), `/waitlist` at 1440 (light, 200) and the mobile menu at 390 (dark). Console: only the refused count request (local API not running; the count stays hidden as designed).
+- Not verified / known issues: the waitlist count against the real API (needs a deploy). The home page and plans still say "Get started" → `/signup` (owner's choice: header only).
+- Next: none from this task.
+
+### 2026-11-18 — Claude — Dashboard: start standup, activity graph, Suspense skeletons
+
+- Did (D42): standup card has History, inline "Start standup" form and "Add item" row; weekly score replaced by a full-width 26-week activity graph; per-card `<Suspense>` with skeleton fallbacks (`useSuspenseQuery` + `select`) and a `catchError` boundary with Retry; standup card height follows its content; month labels skip months with under 3 week columns so they never overlap.
+- Verified: typecheck; `npm run build` passes; ESLint and Prettier clean on `features/dashboard`. Production server on :3100 with a faked `get-session`: skeletons render for all five cards, then data; empty submit shows "Add at least one item."; posting 2 items + blocker shows "0 of 2 done"; adding an item gives "0 of 3"; ticking gives "1 of 3" and today's square/active-day count updates; History links to `/standup/history`; graph fills the card (1048 of 1096 px) at 1440 and fits at 390 with no horizontal scroll; light and dark checked. Console: only 404s from prefetching unbuilt routes.
+- Not verified / known issues: the error boundary and Retry were not triggered in the browser (fixture never fails). Posted standups and added items are lost on refresh until the API exists. At desktop width the area under a short standup card is empty (the right column is taller). Sentry reporting in the boundary waits for `@sentry/nextjs`. Restart `npm run dev` if `/dashboard` 500s (stale module).
+- Next: `/standup` and `/standup/history` pages; confirm the dashboard and standup bodies with the backend.
+
+### 2026-11-18 — Claude — Dashboard page
+
+- Did (D41): `/dashboard` moved into `src/app/(app)/` with a sign-in guard; new `features/dashboard` (types, `FIXTURE:` service, `useDashboard`, `useToggleStandupItem`, cards, skeleton, error with retry). Standup card ticks items and has "Plan with Coach" (Pro) → `/pricing`. Header shows the section name. Added shadcn `progress`; deleted unused block demos.
+- Verified: typecheck, `npm run build` (passes, `/dashboard` built), ESLint/Prettier clean on new and changed files. Production server on :3100 with a faked `get-session`: light and dark at 1440, dark at 390 (no horizontal scroll); ticking changes "2 of 4 done" to "3 of 4"; "Plan with Coach" links to `/pricing`; signed-out session redirects to `/login`. Console: only 404s from prefetching unbuilt sidebar routes.
+- Not verified / known issues: empty states (no standup, no club, no notifications) and the load-error state were not seen in the browser (fixture always returns data). Ticks are lost on refresh until the API exists. The already-running dev server on :3000 served a stale `config/navigation.ts` (500, `appNavTitle is not a function`); restart `npm run dev`. Repo-wide lint still fails on `hooks/use-mobile.ts` (shadcn). The standup card leaves empty space under its content at desktop width (it spans two rows).
+- Next: `/standup` page; confirm the `GET /me/dashboard` body with the backend.
+
+### 2026-11-18 — Claude — App sidebar links
+
+- Did (D40): replaced the demo sidebar links with Dashboard, Standups, Clubs, Ship logs, Forum and Coach (`/coach`), plus Settings, from new `src/config/navigation.ts` (Next `Link`, active item from the URL). Other screens will be tabs inside these pages (owner to group them). Removed Quick Create, Inbox, Documents, Get Help, Search. User menu reads the session through new `src/app/dashboard/dashboard-sidebar.tsx` (placeholder while loading, retry on error, "Log in" when signed out), menu links to `/settings`, `/billing`, `/notifications`, working Log out.
+- Verified: typecheck passes; ESLint and Prettier clean on the changed files. With a faked `get-session`, `/dashboard` at 1440 (light and dark) and 390 (dark, sheet open): every link's `href` checked, Dashboard marked active, user menu items checked. Fixed a hydration error from `SidebarMenuSkeleton`'s random width. Re-checked the trimmed list at 1440.
+- Not verified / known issues: not tried with a real session or a real log out. Repo-wide `npm run lint` still fails on 2 errors in shadcn block files not touched here (`chart-area-interactive.tsx`, `hooks/use-mobile.ts`), and `format:check` flags other uncommitted block files (e.g. `dashboard/page.tsx`). `/dashboard` is outside an `(app)` group and has no auth guard. Header title still says "Documents" (block demo).
+- Next: owner groups the remaining screens as tabs (update `docs/APP_FLOW.md` route map and section 4); auth guard for the app area.
+
+### 2026-11-18 — Claude — Dashboard button for signed-in visitors
+
+- Did (D39): `SiteHeader` takes `isSignedIn` and shows "Dashboard" (`dashboardLink` in `home.ts`, → `/dashboard`) instead of "Log in"/"Sign up" on desktop and in the mobile menu; new `src/app/(marketing)/marketing-header.tsx` reads `useSession` and is used by the marketing layout. New e2e test in `cta.spec.ts` (fakes `get-session`).
+- Verified: lint, typecheck, build; e2e `cta.spec.ts` 7/7 (dev server on :3000). With a faked session: `/pricing` header at 1440 shows only "Dashboard"; mobile menu at 390 shows "Dashboard" and no Log in/Sign up. 0 console errors.
+- Not verified / known issues: not tried with a real signed-in session. `/dashboard` 404s until it is built (owner's choice). Signed-in visitors briefly see "Log in"/"Sign up" before the session check finishes, and every marketing page load calls `get-session` (slow when the Render API is asleep, but it never blocks the page).
+- Next: build `(app)/dashboard`.
+- Questions for the owner: none.
+
+### 2026-11-18 — Claude — Log in / Sign up replace the waitlist buttons
+
+- Did (D38): header shows "Log in" (text link) and "Sign up" (shine button), also in the mobile menu; hero, Features hero, Seasons, both plan cards, final CTA and footer say "Get started" → `/signup` (footer adds "Log in"); `home.ts` has `getStartedLink`, `logInLink`, `signUpLink` instead of `waitlistLink`/`showWaitlist`; `PageHero` prop renamed `withGetStarted`; `/waitlist` page deleted and redirected 308 to `/signup`; removed from `site.ts` (and `waitlistVisible`); `lastModified` of `/`, `/features`, `/pricing` set to 2026-11-18. New e2e `cta.spec.ts` replaces `waitlist.spec.ts`.
+- Verified: Prettier on changed files, lint, typecheck, build (no `/waitlist` route). e2e `e2e/marketing` 16/16 (run against the dev server on :3000): header links, "Get started" → `/signup` and no waitlist links on `/`, `/features`, `/pricing`, `/waitlist` redirect, sitemap. Looked at `/` light 1440 (header, hero) and dark 390 with the mobile menu open; no horizontal scroll; 0 console warnings.
+- Not verified / known issues: the rest of the e2e suite was not run. `features/waitlist` is now dead code (kept on purpose). Prettier also converted some untouched marketing files from CRLF to LF on disk (git normalises line endings, so they show no diff).
+- Next: decide whether to delete `features/waitlist` and the backend waitlist endpoints.
+- Questions for the owner: none.
+
+### 2026-11-18 — Claude — Onboarding (/onboarding)
+
+- Did (D37): `features/onboarding` (types, content, `FIXTURE:` service, hooks: wizard state, live handle check, actions; components: wizard shell with Back/dots/Skip, seven steps, finish screen, skeleton, load error); `/onboarding` page (noindex) and `onboarding-screen.tsx` composing it with `auth`. Auth: `signOut` service, `useSignOut`, `useRequireSession`, `SwitchAccountButton`; verification and new GitHub accounts now land on `/onboarding`. Added shadcn textarea, checkbox, radio-group, toggle, skeleton (no new dependencies). `GitHubMark` moved to `components/shared/`.
+- Verified: Prettier on changed files, lint, typecheck, build (`/onboarding` static). Playwright on the dev server: signed out → redirected to `/login` (real `get-session`); with a faked session (route mock in the test browser only) walked every step at 1440 light: handle prefilled and available, URL fills "Launch Pilot", GitHub connect, situation + skills, focus seeds 3 tasks, own task added, untick updates "Lock in 3 tasks", Finish disabled until consent, "Day 1" screen; focus moves to each step heading. 390 dark: taken-handle error, focus step; no horizontal scroll; 0 console errors.
+- Not verified / known issues: not tried with a real new account (verification email, GitHub `newUserCallbackURL`). Nothing is saved: all onboarding data is fixture-only and lost on refresh. Returning users are not yet redirected to `/onboarding` when incomplete (needs `GET /onboarding/status`). No e2e specs. `npm run format:check` still fails on older CRLF files not touched here.
+- Next: backend onboarding endpoints and profile fields; then replace the `FIXTURE:` services and add the onboarding redirect rule (FR-ONB-1).
+- Questions for the owner: confirm the TO CONFIRM items in D37 (handle rules, limits, consent wording).
+
+### 2026-11-17 — Claude — Auth connected to better-auth (/login, /signup, /verify-email)
+
+- Did (D36): `authClient` in `src/services/api-client.ts` (better-auth `{ code, message }` errors become `ApiError`); `features/auth` types, `auth-service.ts`, hooks (`useSession`, `useSignIn`, `useSignUp`, `useGithubSignIn`, `useResendVerification`, `useRedirectIfSignedIn`), `lib/auth-config.ts` and `lib/pending-verification.ts` (`sessionStorage`); login and signup forms now submit (useFormHandler, pending states, error alerts, 8–128 character passwords), shared `GithubSignInButton`, `GithubErrorAlert` for `/login?error=…`; new noindex `/verify-email` page with resend. Updated `API_CONTRACT.md` and `STATE_AND_DATA.md`.
+- Verified: format (changed files), lint, typecheck, build (`/login`, `/signup`, `/verify-email` static). Playwright on the dev server at :3000: /login wrong-password flow shows an error alert; /login?error=access_denied shows the GitHub message; /verify-email without and with a saved address (light 1440, dark 390); /signup dark 390; no horizontal scroll; 0 console warnings or errors. A direct browser call to the local API (:8000) returned 401 `{ message, code }` with CORS working.
+- Not verified / known issues: from the app, the sign-in request never reached the API ("could not reach the server"), because `NEXT_PUBLIC_AUTH_BASE_URL` was not defined when `next dev` started (confirmed in the browser bundle: the API URL is inlined, the auth URL is not; `.env.local` not read, by rule). Follow-up: a fault before sending (such as a missing base URL) is now `CLIENT_ERROR` and logged to the console in development, instead of the misleading "could not reach the server". So real sign-up, sign-in, verification link and GitHub round trip are untested. Production cookies across `startupsclub.one` and the API host are still open (D18, backend AUTH.md section 6). No e2e specs added.
+- Next: set `NEXT_PUBLIC_AUTH_BASE_URL=http://localhost:8000`, restart `next dev` and test the full flows; sign-out, password reset and the `(app)` route guard when the app area is built.
+- Questions for the owner: none.
+
+### 2026-11-17 — Claude — Waitlist count shows on load (bug fix)
+
+- Cause: the API is on Render, which sleeps when idle; on the live site the count request took 8–38 s, and `WaitlistCount` renders nothing while loading. By the time someone submitted, the API was awake, so the count only seemed to appear after a submit. It also refetched on window focus and after 30 s.
+- Did (D35): new `waitlist-count-cache.ts` (`"use cache"`, 5 min on success, 1 min on failure, 20 s timeout); `getWaitlistCount` takes an optional `timeout`; `/waitlist` page passes `initialCount` to `WaitlistCount`; `useWaitlistCount` is disabled when a server count exists and never refetches by itself; `useJoinWaitlist` refreshes the count with `fetchQuery` after a signup. `STATE_AND_DATA.md` notes the exception.
+- Verified: lint, typecheck, build (with a local mock API on :8000: `/waitlist` revalidate 5m; with the API down: 1m and the build still passes). Against the mock: the count (42) is in the server HTML; no count request on load; submitting sent one POST and one GET and the count became 43; a focus event caused no refetch; 0 console warnings. e2e `waitlist.spec.ts` + `seo.spec.ts` 20/20 with the API down (browser fallback path).
+- Not verified / known issues: not tested against the real Render API (a production deploy is needed). The e2e tests cover only the browser fallback, because Playwright cannot mock the server-side fetch; a build made while the API is reachable bakes in a real count. Right after a deploy, the first count may be missing for up to a minute if Render was asleep during the build (then the browser fetch shows it once the API answers).
+- Next: consider keeping the Render service awake (paid instance or a scheduled ping) so the cache refresh is fast too.
+- Questions for the owner: none.
+
+### 2026-11-17 — Claude — SEO metadata for /login and /signup
+
+- Did: owner-approved titles and descriptions (D34) in a new `authRoutes` list in `src/config/site.ts` with `getAuthRoute()`; both pages use `createPageMetadata(getAuthRoute(...))` (canonical, Open Graph, Twitter, share image). New `listedPublicRoutes` feeds `sitemap.ts` and `llms.txt/route.ts`, so both pages are listed (llms.txt under "## Optional").
+- Verified: lint, typecheck, build; e2e `seo.spec.ts` and `waitlist.spec.ts` 20/20 (the SEO spec now covers /login and /signup through the sitemap: one h1, title ≤ 60, description 120–160, unique, canonical, og:image alt); checked the rendered sitemap, llms.txt, title, description, canonical, og and twitter tags on both pages.
+- Not verified / known issues: listed in the sitemap while both forms still do nothing (owner's choice).
+- Next: none for SEO.
+- Questions for the owner: none.
+
+### 2026-11-17 — Claude — Sign-up screen (/signup)
+
+- Did: `auth-page.tsx` became the shared `auth-shell.tsx` (title, description, form and a link to the other auth page as props); the GitHub mark moved to `github-mark.tsx`; new `signup-form.tsx` (name, email, password with `autoComplete="new-password"`, "Create account") and `src/app/(auth)/signup/page.tsx` (title "Sign up", canonical `/signup`). `/login` and `/signup` now link to each other (D33).
+- Verified: lint, typecheck, build (`/login` and `/signup` static), Prettier on changed files; production server: /signup at light 1440 and dark 390, /login at dark 390; Enter and the button keep the URL clean; the cross-links navigate; one h1; no horizontal scroll; 0 console errors.
+- Not verified / known issues: e2e suite not run; no e2e specs for /login or /signup. Same preload warnings as /login (Grifter font, a CSS chunk).
+- Next: connect both forms to `features/auth` hooks and services once `/api/auth/*` is confirmed; `/verify-email` and `/reset-password` (noindex per D4).
+- Questions for the owner: none.
+
+### 2026-11-17 — Claude — Log-in screen (/login), pre-launch
+
+- Did: `src/features/auth/components/auth-page.tsx` (adapted 21st.dev auth-page, D33) and `src/app/(auth)/login/page.tsx` (metadata "Log in", canonical `/login`). Server component, no new dependencies, `button.tsx`/`input.tsx` untouched.
+- Verified: lint, typecheck, build (`/login` static); Prettier on the new files; production server at 1440 and 390 in light and dark: no horizontal scroll, 0 console errors.
+- Not verified / known issues: `npm run format:check` reports 52 files that already failed before this change (likely CRLF line endings from `core.autocrlf=true`). Two console warnings on /login: the marketing-only Grifter font and a CSS chunk are preloaded but unused. e2e suite not run; no e2e spec for /login yet. No `(auth)` `error.tsx` yet (MONITORING.md).
+- Next: wire to `features/auth` hooks and services once the `/api/auth/*` routes are confirmed; `/signup`, `/verify-email`, `/reset-password` (noindex per D4).
+- Questions for the owner: none.
+- Update (owner): removed the "Log-in opens at launch" notice and the disabled state. The form moved to `login-form.tsx` (client) and blocks submit; verified that Enter and the button keep the URL clean, 0 console errors, light 1440 and dark 390.
+
 ### 2026-11-15 — Claude — Waitlist count on /waitlist
 
 - Did: installed the shadcn Avatar component; added `getWaitlistCount` (service), `useWaitlistCount` (query hook), `WaitlistCount` (AvatarGroup + "N+ people waiting", number formatted as 1,234) above the form; a successful signup refetches the count (D32). Three e2e tests added.
