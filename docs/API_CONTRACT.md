@@ -9,8 +9,10 @@ that module is built; do not guess them.
 
 - **Base URL:** `NEXT_PUBLIC_API_BASE_URL` (for example `https://api.<domain>/api/v1`).
 - **Auth routes:** better-auth is served by NestJS at `NEXT_PUBLIC_AUTH_BASE_URL` + `/api/auth/*`
-  (outside `/api/v1`). The frontend calls them with Axios; it does not use the better-auth client.
-  **Exact auth route names and payloads: TO CONFIRM with the backend.**
+  (outside `/api/v1`). The frontend calls them with Axios (`authClient`); it does not use the
+  better-auth client. These routes do **not** use the envelope below: success bodies are
+  better-auth's own and errors are `{ "code": "...", "message": "..." }`. Routes and payloads are
+  confirmed from the backend's `docs/AUTH.md` (17 Nov 2026).
 - **Session:** httpOnly cookie, `withCredentials: true`. No bearer tokens.
 - **Success:** `{ "data": <payload>, "meta": { ... } }`
 - **Error:** `{ "error": { "code": "STRING_CODE", "message": "Human readable", "details": { } } }`
@@ -43,12 +45,24 @@ Phase column follows `docs/ROADMAP.md`. "WS" = WebSocket.
 
 ### 1. Authentication and accounts (Phase 1)
 
-| Method and path   | Notes                                                                                                                  |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/*`     | better-auth routes: sign-up, sign-in (email, GitHub), sign-out, verify email, reset password, session. **TO CONFIRM.** |
-| `GET /me`         | Current user.                                                                                                          |
-| `PATCH /account`  | Update account.                                                                                                        |
-| `DELETE /account` | Delete account.                                                                                                        |
+| Method and path   | Notes                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| `/api/auth/*`     | better-auth routes (see the table below). Password reset is not built on either side yet. |
+| `GET /me`         | Current user.                                                                             |
+| `PATCH /account`  | Update account.                                                                           |
+| `DELETE /account` | Delete account.                                                                           |
+
+better-auth routes used by the frontend (`src/features/auth/services/auth-service.ts`):
+
+| Method and path                          | Body                                                    | Result                                                                     |
+| ---------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `POST /api/auth/sign-up/email`           | `{ name, email, password, callbackURL }`                | 200 `{ token: null, user }`; verification email sent, no session.          |
+| `POST /api/auth/sign-in/email`           | `{ email, password, callbackURL }`                      | 200 `{ token, user }` + cookie; 403 `EMAIL_NOT_VERIFIED`; 401 wrong login. |
+| `POST /api/auth/send-verification-email` | `{ email, callbackURL }`                                | Sends a new link.                                                          |
+| `POST /api/auth/sign-in/social`          | `{ provider: "github", callbackURL, errorCallbackURL }` | 200 `{ url, redirect: true }`; the browser goes to `url`.                  |
+| `GET /api/auth/get-session`              | (cookie)                                                | 200 `{ session, user }`, or `null` when signed out.                        |
+
+Passwords are 8 to 128 characters. Every `callbackURL` must be on a backend trusted origin.
 
 ### 2. Roles and access
 
@@ -62,7 +76,11 @@ Phase column follows `docs/ROADMAP.md`. "WS" = WebSocket.
 | Method and path             | Notes                      |
 | --------------------------- | -------------------------- |
 | `GET /onboarding/status`    | Used by the redirect rule. |
-| `POST /onboarding/complete` |                            |
+| `POST /onboarding/complete` | Body TO CONFIRM.           |
+
+The onboarding UI (D37) also needs, all TO CONFIRM and faked with `FIXTURE:` services until then:
+handle availability, photo upload, landing page lookup, first task suggestions per focus, and
+GitHub account linking (better-auth `link-social`).
 
 ### 4. Profiles and project pages
 

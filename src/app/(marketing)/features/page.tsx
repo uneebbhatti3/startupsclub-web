@@ -23,7 +23,7 @@ export default function FeaturesPage() {
         eyebrow="Features"
         title="Everything you need to stay consistent"
         description="Built around one habit, the daily standup, with the tools that make it stick."
-        withWaitlist
+        withGetStarted
       />
 
       <FeatureGroupNav groups={featureGroups} />

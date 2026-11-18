@@ -23,6 +23,10 @@ Theme is handled by `next-themes`. Session information is server data (`useSessi
 Each feature has `hooks/` and `services/`. Components call hooks; hooks call services; only
 services touch Axios or hard-coded data. Components never import a service, a fixture or Axios.
 
+Exception (D35): a server `page.tsx` may call a `"use cache"` service function to put public,
+non-personal data (for example the waitlist count) into the HTML, and pass it to a client
+component as a prop. The client hook still owns any later fetching.
+
 `features/standup/services/standup-service.ts`
 
 ```ts
@@ -138,10 +142,12 @@ Invalidate with the narrowest key that is correct.
 ## 9. Auth and session
 
 - Session is an httpOnly cookie set by the backend. The frontend never reads or stores a token.
-- `features/auth/hooks/` exposes `useSession`, `useSignIn`, `useSignUp`, `useSignOut`; the calls to
-  `/api/auth/*` live in `features/auth/services/`.
-- Until the backend exists, the auth service returns a fixed signed-in user; mark it `FIXTURE:` and
-  keep one switch in one place so the login flow can still be previewed.
+- `features/auth/hooks/` exposes `useSession`, `useSignIn`, `useSignUp`, `useGithubSignIn`,
+  `useResendVerification` and `useRedirectIfSignedIn` (`useSignOut` comes with the app area); the
+  calls to `/api/auth/*` live in `features/auth/services/` and use `authClient` (D36). There is no
+  auth fixture: these hooks always call the real backend.
+- The session cookie belongs to the API origin, so session checks run in the browser
+  (`get-session`), not in this site's server or proxy.
 
 ## 10. Do not
 

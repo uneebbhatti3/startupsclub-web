@@ -4,7 +4,7 @@ import { Reveal } from "@/features/marketing/components/animations/reveal";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
 import { SectionHeading } from "@/features/marketing/components/section-heading";
 import { aiQuotaFootnote } from "@/features/marketing/lib/content/features";
-import { plans, showWaitlist } from "@/features/marketing/lib/content/home";
+import { plans } from "@/features/marketing/lib/content/home";
 import { cn } from "@/lib/utils";
 
 /**
@@ -87,16 +87,14 @@ export function PricingTeaser({
                   </li>
                 ))}
               </ul>
-              {showWaitlist ? (
-                <MarketingButton
-                  href={plan.cta.href}
-                  variant={plan.featured ? "shine" : "arrow-slide"}
-                  withArrow={!plan.featured}
-                  className="mt-auto w-full"
-                >
-                  {plan.cta.label}
-                </MarketingButton>
-              ) : null}
+              <MarketingButton
+                href={plan.cta.href}
+                variant={plan.featured ? "shine" : "arrow-slide"}
+                withArrow={!plan.featured}
+                className="mt-auto w-full"
+              >
+                {plan.cta.label}
+              </MarketingButton>
             </article>
           ))}
         </Reveal>

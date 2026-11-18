@@ -71,7 +71,7 @@ docs/                     project documents
 public/                   static assets
 ```
 
-Feature folder names mirror the system design: `auth`, `onboarding`, `profile`, `standup`,
+Feature folder names mirror the system design: `auth`, `onboarding`, `dashboard` (D41), `profile`, `standup`,
 `ship-logs`, `clubs`, `seasons`, `progress`, `forum`, `rooms`, `network`, `events`,
 `collaborators`, `messages`, `composer`, `tutors`, `notifications`, `billing`, `admin`,
 `ai-coach`, `ai-matching`, `ai-assistant`.

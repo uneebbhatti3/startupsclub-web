@@ -1,5 +1,3 @@
-import { waitlistVisible } from "@/config/site";
-
 /**
  * Static copy for the marketing home page. Facts come from docs/PRD.md.
  * No prices, user numbers, testimonials or customer logos: none exist yet, so none are invented.
@@ -22,17 +20,32 @@ export const navLinks: NavLink[] = [
   { label: "FAQ", href: "/#faq" },
 ];
 
-/**
- * The only call to action while StartupsClub is pre-launch. Sign-up and log-in links are removed
- * until those pages exist (docs/DECISIONS.md D26).
- */
+/** The main call to action across the site (D38): "Get started" opens sign-up. */
+export const getStartedLink = {
+  label: "Get started",
+  href: "/signup",
+} as const satisfies NavLink;
+
+/** "Log in", listed in the footer (D38). */
+export const logInLink = {
+  label: "Log in",
+  href: "/login",
+} as const satisfies NavLink;
+
+/** The header's call to action for signed-out visitors (D43). */
 export const waitlistLink = {
   label: "Join waitlist",
   href: "/waitlist",
 } as const satisfies NavLink;
 
-/** Whether the "Join waitlist" buttons render. Controlled by `waitlistVisible`. */
-export const showWaitlist = waitlistVisible;
+/**
+ * Replaces "Join waitlist" in the header for signed-in visitors (D39). `/dashboard` is not
+ * built yet, so it 404s until the app area exists (owner's choice).
+ */
+export const dashboardLink = {
+  label: "Dashboard",
+  href: "/dashboard",
+} as const satisfies NavLink;
 
 export const hero = {
   eyebrow: "Accountability for founders and developers",
@@ -117,7 +130,7 @@ export const plans: Plan[] = [
     name: "Free",
     tagline: "Everything you need to build the daily habit.",
     priceNote: null,
-    cta: waitlistLink,
+    cta: getStartedLink,
     featured: false,
     features: [
       "Daily standups, history and streaks",
@@ -132,7 +145,7 @@ export const plans: Plan[] = [
     name: "Pro",
     tagline: "AI that coaches you, and tools to grow your audience.",
     priceNote: "Pricing announced soon",
-    cta: waitlistLink,
+    cta: getStartedLink,
     featured: true,
     features: [
       "Everything in Free",
@@ -197,6 +210,6 @@ export const footerGroups: { title: string; links: NavLink[] }[] = [
   },
   {
     title: "Get started",
-    links: [...(showWaitlist ? [waitlistLink] : []), { label: "FAQ", href: "/#faq" }],
+    links: [getStartedLink, logInLink, { label: "FAQ", href: "/#faq" }],
   },
 ];

@@ -1,8 +1,8 @@
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
+import { MarketingHeader } from "@/app/(marketing)/marketing-header";
 import { SiteFooter } from "@/features/marketing/components/site-footer";
-import { SiteHeader } from "@/features/marketing/components/site-header";
 import { SmoothScrollProvider } from "@/features/marketing/components/smooth-scroll-provider";
 import { buildSiteJsonLd, serializeJsonLd } from "@/lib/seo";
 
@@ -45,7 +45,7 @@ export default function MarketingLayout({ children }: MarketingLayoutProps) {
         >
           Skip to content
         </Link>
-        <SiteHeader />
+        <MarketingHeader />
         <main id="main">{children}</main>
         <SiteFooter />
       </div>

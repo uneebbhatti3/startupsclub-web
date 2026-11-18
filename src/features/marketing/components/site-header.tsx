@@ -7,17 +7,24 @@ import { useEffect, useState } from "react";
 import { Logo } from "@/components/shared/logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
-import { navLinks, showWaitlist, waitlistLink } from "@/features/marketing/lib/content/home";
+import { dashboardLink, navLinks, waitlistLink } from "@/features/marketing/lib/content/home";
 import { cn } from "@/lib/utils";
 
 /**
- * Sticky header of the marketing site: logo, section links, theme toggle and the waitlist action.
- * It gains a blurred surface after the page scrolls, and collapses into a menu on small screens.
+ * Sticky header of the marketing site: logo, section links, theme toggle, then the "Join waitlist"
+ * button (D43), or a single "Dashboard" button when the visitor is signed in (D39). The session check lives in the auth feature, so the route passes
+ * `isSignedIn` in. It gains a blurred surface after the page scrolls, and collapses into a menu
+ * on small screens.
  *
  * @packageDocumentation
  */
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  /** Shows "Dashboard" instead of "Join waitlist". */
+  isSignedIn?: boolean;
+};
+
+export function SiteHeader({ isSignedIn = false }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -57,7 +64,15 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {showWaitlist ? (
+          {isSignedIn ? (
+            <MarketingButton
+              href={dashboardLink.href}
+              variant="shine"
+              className="hidden sm:inline-flex"
+            >
+              {dashboardLink.label}
+            </MarketingButton>
+          ) : (
             <MarketingButton
               href={waitlistLink.href}
               variant="shine"
@@ -65,7 +80,7 @@ export function SiteHeader() {
             >
               {waitlistLink.label}
             </MarketingButton>
-          ) : null}
+          )}
           <button
             type="button"
             aria-expanded={open}
@@ -105,8 +120,17 @@ export function SiteHeader() {
             {link.label}
           </Link>
         ))}
-        {showWaitlist ? (
-          <div className="mt-1 border-t border-border pt-3">
+        <div className="mt-1 flex flex-col gap-1 border-t border-border pt-3">
+          {isSignedIn ? (
+            <MarketingButton
+              href={dashboardLink.href}
+              variant="glow"
+              className="w-full"
+              onClick={() => setOpen(false)}
+            >
+              {dashboardLink.label}
+            </MarketingButton>
+          ) : (
             <MarketingButton
               href={waitlistLink.href}
               variant="glow"
@@ -115,8 +139,8 @@ export function SiteHeader() {
             >
               {waitlistLink.label}
             </MarketingButton>
-          </div>
-        ) : null}
+          )}
+        </div>
       </nav>
     </header>
   );

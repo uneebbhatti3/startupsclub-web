@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { shareImage } from "@/lib/seo";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 /**
  * Root layout: fonts, global styles, and the site-wide default metadata and viewport.
@@ -101,7 +102,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

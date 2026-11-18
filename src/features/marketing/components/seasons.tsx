@@ -4,7 +4,7 @@ import { Reveal } from "@/features/marketing/components/animations/reveal";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
 import { SeasonGridMock } from "@/features/marketing/components/product-mockups";
 import { SectionHeading } from "@/features/marketing/components/section-heading";
-import { showWaitlist, waitlistLink } from "@/features/marketing/lib/content/home";
+import { getStartedLink } from "@/features/marketing/lib/content/home";
 
 /**
  * Seasons section: explains six-week seasons, streaks and the club leaderboard beside a season grid.
@@ -59,11 +59,9 @@ export function Seasons() {
               </li>
             ))}
           </ul>
-          {showWaitlist ? (
-            <MarketingButton href={waitlistLink.href} variant="arrow-slide" className="mt-10">
-              {waitlistLink.label}
-            </MarketingButton>
-          ) : null}
+          <MarketingButton href={getStartedLink.href} variant="arrow-slide" className="mt-10">
+            {getStartedLink.label}
+          </MarketingButton>
         </Reveal>
 
         <Reveal delay={0.1} className="rounded-3xl border border-border bg-muted/50 p-5 sm:p-8">

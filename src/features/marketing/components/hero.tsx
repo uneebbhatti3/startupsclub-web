@@ -3,7 +3,7 @@ import { Check, Flame } from "lucide-react";
 import { Reveal } from "@/features/marketing/components/animations/reveal";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
 import { HeroVideo } from "@/features/marketing/components/hero-video";
-import { hero, showWaitlist, waitlistLink } from "@/features/marketing/lib/content/home";
+import { getStartedLink, hero } from "@/features/marketing/lib/content/home";
 
 /**
  * Home page hero: headline, supporting sentence, two calls to action and the product video.
@@ -33,11 +33,9 @@ export function Hero() {
             {hero.description}
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            {showWaitlist ? (
-              <MarketingButton href={waitlistLink.href} variant="glow" size="lg" withArrow>
-                {waitlistLink.label}
-              </MarketingButton>
-            ) : null}
+            <MarketingButton href={getStartedLink.href} variant="glow" size="lg" withArrow>
+              {getStartedLink.label}
+            </MarketingButton>
             <MarketingButton href="/#how-it-works" variant="gradient-border" size="lg">
               See how it works
             </MarketingButton>

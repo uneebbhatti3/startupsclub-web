@@ -51,22 +51,15 @@ export const siteConfig = {
 } as const;
 
 /**
- * Shows every "Join waitlist" button and lists /waitlist in the sitemap and llms.txt. Set to
- * `false` to hide them all again (owner hid them on 13 Nov 2026 and restored them on 14 Nov 2026);
- * the page itself always exists.
- */
-export const waitlistVisible = true;
-
-/**
  * Public, indexable routes that exist in `src/app/(marketing)`. Add a route here only once its
- * page is built.
+ * page is built. `/waitlist` is public again (D43).
  */
 export const marketingRoutes = [
   {
     path: "/",
     title: siteConfig.defaultTitle,
     description: siteConfig.description,
-    lastModified: "2026-11-12",
+    lastModified: "2026-11-18",
     absoluteTitle: true,
   },
   {
@@ -74,28 +67,26 @@ export const marketingRoutes = [
     title: "Features",
     description:
       "Daily standups, ship logs, clubs and six-week seasons, a post composer for StartupsClub and LinkedIn, and private AI coaching on Pro.",
-    lastModified: "2026-11-12",
+    lastModified: "2026-11-18",
   },
   {
     path: "/pricing",
     title: "Pricing: Free and Pro Plans",
     description:
       "Start free with daily standups, ship logs, clubs and seasons. Pro adds post scheduling, a higher AI post quota and private AI coaching.",
-    lastModified: "2026-11-12",
+    lastModified: "2026-11-18",
   },
   {
     path: "/waitlist",
     title: "Join the Waitlist",
     description:
       "Join the StartupsClub waitlist for early access: post a daily standup, log what you ship and stay accountable in a small club of builders.",
-    lastModified: "2026-11-12",
+    lastModified: "2026-11-18",
   },
 ] as const satisfies readonly MarketingRoute[];
 
-/** Marketing routes that are listed publicly (sitemap, llms.txt) right now. */
-export const listedMarketingRoutes: readonly MarketingRoute[] = marketingRoutes.filter(
-  (route) => waitlistVisible || route.path !== "/waitlist",
-);
+/** Marketing routes that are listed publicly (sitemap, llms.txt). */
+export const listedMarketingRoutes: readonly MarketingRoute[] = marketingRoutes;
 
 export type MarketingPath = (typeof marketingRoutes)[number]["path"];
 
@@ -107,3 +98,43 @@ export function getMarketingRoute(path: MarketingPath): MarketingRoute {
   }
   return route;
 }
+
+/**
+ * Indexable routes in `src/app/(auth)` (D4). Every other auth route is noindex and must not be
+ * added here. Marked `optional` so llms.txt lists them after the marketing pages.
+ */
+export const authRoutes = [
+  {
+    path: "/login",
+    title: "Log In to Your Account",
+    description:
+      "Log in to StartupsClub to post your daily standup, log what you shipped and check in with your accountability club. Sign in with GitHub or email.",
+    lastModified: "2026-11-17",
+    optional: true,
+  },
+  {
+    path: "/signup",
+    title: "Sign Up Free: Join an Accountability Club",
+    description:
+      "Create your free StartupsClub account. Post a daily standup, log what you ship and stay accountable in a small club of founders and developers.",
+    lastModified: "2026-11-17",
+    optional: true,
+  },
+] as const satisfies readonly MarketingRoute[];
+
+export type AuthPath = (typeof authRoutes)[number]["path"];
+
+/** Looks up an indexable auth route by path; typed so only existing routes can be requested. */
+export function getAuthRoute(path: AuthPath): MarketingRoute {
+  const route = authRoutes.find((entry) => entry.path === path);
+  if (!route) {
+    throw new Error(`Unknown auth route: ${path}`);
+  }
+  return route;
+}
+
+/** Every route listed in the sitemap and llms.txt: listed marketing pages, then auth pages. */
+export const listedPublicRoutes: readonly MarketingRoute[] = [
+  ...listedMarketingRoutes,
+  ...authRoutes,
+];

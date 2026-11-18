@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 
 import { Reveal } from "@/features/marketing/components/animations/reveal";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
-import { showWaitlist, waitlistLink } from "@/features/marketing/lib/content/home";
+import { getStartedLink } from "@/features/marketing/lib/content/home";
 
 /**
- * Hero for the inner marketing pages (Features, Pricing, Waitlist): eyebrow, the page's only h1,
- * one supporting sentence and an optional "Join waitlist" action, on the same wash and dotted
+ * Hero for the inner marketing pages (Features, Pricing): eyebrow, the page's only h1,
+ * one supporting sentence and an optional "Get started" action, on the same wash and dotted
  * grid as the home hero. Text is server-rendered; the reveal animation only enhances it.
  *
  * @packageDocumentation
@@ -16,11 +16,11 @@ type PageHeroProps = {
   eyebrow: string;
   title: ReactNode;
   description: string;
-  /** Shows the primary "Join waitlist" button to /waitlist. */
-  withWaitlist?: boolean;
+  /** Shows the primary "Get started" button to /signup. */
+  withGetStarted?: boolean;
 };
 
-export function PageHero({ eyebrow, title, description, withWaitlist = false }: PageHeroProps) {
+export function PageHero({ eyebrow, title, description, withGetStarted = false }: PageHeroProps) {
   return (
     <section className="relative -mt-[68px] overflow-hidden pt-[68px]">
       <div aria-hidden="true" className="mk-wash absolute inset-0" />
@@ -37,10 +37,10 @@ export function PageHero({ eyebrow, title, description, withWaitlist = false }: 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg">
             {description}
           </p>
-          {withWaitlist && showWaitlist ? (
+          {withGetStarted ? (
             <div className="mt-9 flex justify-center">
-              <MarketingButton href={waitlistLink.href} variant="glow" size="lg" withArrow>
-                {waitlistLink.label}
+              <MarketingButton href={getStartedLink.href} variant="glow" size="lg" withArrow>
+                {getStartedLink.label}
               </MarketingButton>
             </div>
           ) : null}

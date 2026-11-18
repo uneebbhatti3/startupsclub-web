@@ -1,7 +1,7 @@
 import { Magnetic } from "@/features/marketing/components/animations/magnetic";
 import { Reveal } from "@/features/marketing/components/animations/reveal";
 import { MarketingButton } from "@/features/marketing/components/marketing-button";
-import { finalCta, showWaitlist, waitlistLink } from "@/features/marketing/lib/content/home";
+import { finalCta, getStartedLink } from "@/features/marketing/lib/content/home";
 
 /**
  * Closing call to action: a soft blue panel with one headline and the magnetic sign-up button.
@@ -23,13 +23,11 @@ export function FinalCta() {
             {finalCta.description}
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:flex-row">
-            {showWaitlist ? (
-              <Magnetic>
-                <MarketingButton href={waitlistLink.href} variant="shine" size="lg" withArrow>
-                  {waitlistLink.label}
-                </MarketingButton>
-              </Magnetic>
-            ) : null}
+            <Magnetic>
+              <MarketingButton href={getStartedLink.href} variant="shine" size="lg" withArrow>
+                {getStartedLink.label}
+              </MarketingButton>
+            </Magnetic>
             <MarketingButton href="/#features" variant="ghost-underline">
               Explore the features
             </MarketingButton>

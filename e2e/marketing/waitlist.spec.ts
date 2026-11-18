@@ -7,8 +7,8 @@ import { expect, test, type Page, type Route } from "@playwright/test";
  * "Other"), API errors show a message and mark fields, and nothing reaches the page URL. The
  * count (`GET /waitlist/count`) shows "N+ people waiting" only for a count above 0, and refreshes
  * after a signup.
- * Also: the header offers "Join waitlist", the sitemap lists /waitlist, and no page links to
- * /login or /signup.
+ * Also: the header offers "Join waitlist" instead of "Log in" (D43) and the sitemap lists
+ * /waitlist.
  *
  * @packageDocumentation
  */
@@ -265,10 +265,3 @@ test("sitemap.xml lists /waitlist", async ({ request }) => {
   const body = await (await request.get("/sitemap.xml")).text();
   expect(body).toContain("/waitlist</loc>");
 });
-
-for (const path of ["/", "/features", "/pricing", "/waitlist"]) {
-  test(`${path} has no links to /login or /signup`, async ({ page }) => {
-    await page.goto(path);
-    await expect(page.locator('a[href^="/login"], a[href^="/signup"]')).toHaveCount(0);
-  });
-}
